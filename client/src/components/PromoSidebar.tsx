@@ -34,18 +34,10 @@ export function PromoSidebar() {
                 <h2 className="text-2xl font-bold text-white mb-3 font-serif leading-tight">
                   선물은 웰닉스
                 </h2>
-                <p className="text-white/80 text-sm leading-relaxed mb-6">
+                <p className="text-white/80 text-sm leading-relaxed">
                   부모님의 건강을 생각하는 당신을 위한<br />
                   프리미엄 건강식품 선물세트
                 </p>
-                
-                <button 
-                  className="w-full bg-white text-[#006861] font-bold py-4 rounded flex items-center justify-center gap-2 hover:bg-gray-100 transition-all shadow-lg hover:shadow-xl"
-                  data-testid="sidebar-cta"
-                >
-                  지금 구매하기
-                  <ArrowRight className="w-5 h-5" />
-                </button>
               </div>
             </div>
           </div>
