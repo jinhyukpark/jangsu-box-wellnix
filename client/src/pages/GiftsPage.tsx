@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Filter, ChevronDown, ArrowLeft } from "lucide-react";
+import { Filter, ChevronDown, ArrowLeft, ShoppingCart } from "lucide-react";
 import { useLocation } from "wouter";
 import { AppLayout } from "@/components/AppLayout";
 import giftBoxImage from "@assets/generated_images/premium_korean_health_gift_box.png";
@@ -65,18 +65,23 @@ export default function GiftsPage() {
   return (
     <AppLayout>
       <header className="sticky top-0 z-50 bg-white border-b border-gray-100">
-        <div className="p-4 flex items-center gap-3">
-          <button 
-            onClick={() => setLocation("/")}
-            className="p-1 hover:bg-gray-100 rounded-full"
-            data-testid="back-btn"
-          >
-            <ArrowLeft className="w-5 h-5 text-gray-600" />
-          </button>
-          <div>
+        <div className="p-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => setLocation("/")}
+              className="p-1 hover:bg-gray-100 rounded-full"
+              data-testid="back-btn"
+            >
+              <ArrowLeft className="w-5 h-5 text-gray-600" />
+            </button>
             <h1 className="text-xl font-bold text-gray-900">선물관</h1>
-            <p className="text-sm text-gray-500">소중한 분께 건강을 선물하세요</p>
           </div>
+          <button className="relative p-2" data-testid="cart-btn">
+            <ShoppingCart className="w-6 h-6 text-gray-600" />
+            <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-primary text-white text-xs font-bold rounded-full flex items-center justify-center">
+              3
+            </span>
+          </button>
         </div>
         
         <div 
