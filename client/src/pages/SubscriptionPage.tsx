@@ -112,7 +112,7 @@ export default function SubscriptionPage() {
             {[
               { icon: Calendar, label: "매월 정기배송", desc: "15일 자동발송" },
               { icon: Heart, label: "맞춤 구성", desc: "건강상태 맞춤" },
-              { icon: Users, label: "손편지 동봉", desc: "마음을 전해요" },
+              { icon: Users, label: "추억상자", desc: "사진·편지 보관" },
             ].map((item) => (
               <div key={item.label} className="bg-gray-50 rounded-lg p-3 text-center">
                 <item.icon className="w-6 h-6 text-primary mx-auto mb-2" />
