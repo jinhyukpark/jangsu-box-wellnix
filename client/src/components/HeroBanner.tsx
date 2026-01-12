@@ -9,7 +9,6 @@ const banners = [
     subtitle: "장수 박스로 부모님께\n건강을 선물하세요",
     badge: "최대 40% 할인",
     image: giftSetImage,
-    bgColor: "bg-[#006861]",
   },
   {
     id: 2,
@@ -17,7 +16,6 @@ const banners = [
     subtitle: "웰닉스 구독자\n특별 할인의 날",
     badge: "구독 혜택",
     image: giftSetImage,
-    bgColor: "bg-gradient-to-br from-amber-500 to-orange-600",
   },
   {
     id: 3,
@@ -25,7 +23,6 @@ const banners = [
     subtitle: "첫 구독 시\n30% 할인 + 무료배송",
     badge: "신규 회원",
     image: giftSetImage,
-    bgColor: "bg-gradient-to-br from-purple-600 to-indigo-700",
   },
 ];
 
@@ -45,30 +42,29 @@ export function HeroBanner() {
   return (
     <div className="relative overflow-hidden">
       <div 
-        className={`${banner.bgColor} transition-all duration-500 relative`}
+        className="relative min-h-[220px] transition-all duration-500"
         data-testid="hero-banner"
       >
-        <div className="flex">
-          <div className="flex-1 px-4 py-5 space-y-2">
-            <span className="inline-block bg-white/20 backdrop-blur-sm text-white text-xs font-semibold px-3 py-1 rounded-full">
-              {banner.badge}
-            </span>
-            <p className="text-white/80 text-sm font-medium">{banner.title}</p>
-            <h2 className="text-white text-xl font-bold leading-tight whitespace-pre-line">
-              {banner.subtitle}
-            </h2>
-          </div>
-          <div className="w-44 relative flex-shrink-0">
-            <img 
-              src={banner.image} 
-              alt="프로모션 이미지"
-              className="w-full h-full object-cover"
-            />
-            <span className="absolute bottom-3 right-3 bg-black/40 backdrop-blur-sm text-white text-xs font-medium px-2.5 py-1 rounded z-10">
-              {currentIndex + 1} / {banners.length}
-            </span>
-          </div>
+        <img 
+          src={banner.image} 
+          alt="프로모션 이미지"
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/50 to-transparent" />
+        
+        <div className="relative z-10 px-5 py-6 flex flex-col justify-center min-h-[220px]">
+          <span className="inline-block w-fit bg-white/90 text-[#006861] text-xs font-semibold px-3 py-1 rounded-full mb-2">
+            {banner.badge}
+          </span>
+          <p className="text-white/90 text-sm font-medium mb-1">{banner.title}</p>
+          <h2 className="text-white text-2xl font-bold leading-tight whitespace-pre-line drop-shadow-lg">
+            {banner.subtitle}
+          </h2>
         </div>
+        
+        <span className="absolute bottom-3 right-3 bg-black/40 backdrop-blur-sm text-white text-xs font-medium px-2.5 py-1 rounded z-10">
+          {currentIndex + 1} / {banners.length}
+        </span>
       </div>
       
       <button 
