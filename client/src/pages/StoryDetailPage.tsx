@@ -18,7 +18,7 @@ const storiesData: Record<string, {
   sections: { title: string; content: string; image?: string }[];
   memoryBox: { title: string; story: string; item: string; image: string };
   products: { name: string; benefit: string; desc: string; image: string }[];
-  healthTips: { title: string; tips: string[] };
+  healthTips: { title: string; tips: { tip: string; detail: string }[] };
   suppliers: { name: string; location: string; specialty: string }[];
 }> = {
   "1": {
@@ -59,10 +59,10 @@ const storiesData: Record<string, {
     healthTips: {
       title: "1월 건강 지킴 수칙",
       tips: [
-        "아침 공복에 따뜻한 물 한 잔으로 하루를 시작하세요",
-        "실내 습도 50-60%를 유지해 호흡기 건강을 지키세요",
-        "하루 30분 이상 햇빛을 쬐어 비타민D를 보충하세요",
-        "홍삼은 아침 식후에 드시면 흡수율이 높아집니다"
+        { tip: "아침 공복에 따뜻한 물 한 잔으로 하루를 시작하세요", detail: "자는 동안 탈수된 몸에 수분을 공급하고, 장 운동을 활성화해 아침 배변을 도와줍니다. 체온과 비슷한 40도 정도의 물이 가장 좋아요." },
+        { tip: "실내 습도 50-60%를 유지해 호흡기 건강을 지키세요", detail: "겨울철 난방으로 건조해진 실내는 바이러스가 번식하기 좋은 환경입니다. 가습기를 사용하거나 젖은 수건을 걸어 적정 습도를 유지해주세요." },
+        { tip: "하루 30분 이상 햇빛을 쬐어 비타민D를 보충하세요", detail: "비타민D는 뼈 건강과 면역력에 필수적입니다. 오전 10시~오후 2시 사이 햇빛이 가장 좋으며, 유리창을 통한 햇빛은 효과가 떨어집니다." },
+        { tip: "홍삼은 아침 식후에 드시면 흡수율이 높아집니다", detail: "공복에 드시면 위장에 부담을 줄 수 있어요. 아침 식사 후 30분 뒤 따뜻한 물과 함께 드시면 사포닌 성분의 흡수율이 최대로 높아집니다." }
       ]
     },
     suppliers: [
@@ -109,10 +109,10 @@ const storiesData: Record<string, {
     healthTips: {
       title: "2월 건강 지킴 수칙",
       tips: [
-        "명절 과식 후에는 식혜나 수정과로 소화를 도우세요",
-        "기름진 음식 섭취 후 따뜻한 녹차가 좋습니다",
-        "가족과 함께 가벼운 산책으로 소화를 촉진하세요",
-        "고기는 쌈채소와 함께 드시면 영양 균형이 좋아요"
+        { tip: "명절 과식 후에는 식혜나 수정과로 소화를 도우세요", detail: "식혜에 함유된 엿기름의 아밀라아제 효소가 탄수화물 소화를 돕고, 수정과의 생강 성분이 위장 운동을 활발하게 해줍니다." },
+        { tip: "기름진 음식 섭취 후 따뜻한 녹차가 좋습니다", detail: "녹차의 카테킨 성분이 지방 분해를 돕고, 따뜻한 온도가 소화액 분비를 촉진합니다. 단, 식사 직후보다 30분 후에 드세요." },
+        { tip: "가족과 함께 가벼운 산책으로 소화를 촉진하세요", detail: "식후 15-20분 정도의 가벼운 산책은 혈당 조절과 소화에 도움이 됩니다. 격렬한 운동보다 천천히 걷는 것이 더 효과적이에요." },
+        { tip: "고기는 쌈채소와 함께 드시면 영양 균형이 좋아요", detail: "상추, 깻잎 등 쌈채소의 식이섬유가 고기의 지방 흡수를 줄이고, 비타민C가 철분 흡수를 높여줍니다. 고기 3 : 채소 7 비율이 이상적입니다." }
       ]
     },
     suppliers: [
@@ -159,10 +159,10 @@ const storiesData: Record<string, {
     healthTips: {
       title: "3월 건강 지킴 수칙",
       tips: [
-        "환절기 면역력을 위해 아침마다 꿀물을 드세요",
-        "미세먼지가 심한 날은 외출을 자제하세요",
-        "봄나물로 겨우내 부족한 비타민을 보충하세요",
-        "견과류는 하루 한 줌(30g)이 적당합니다"
+        { tip: "환절기 면역력을 위해 아침마다 꿀물을 드세요", detail: "꿀의 천연 항균 성분이 목 건강을 지켜주고, 포도당이 아침 에너지원이 됩니다. 40도 이하 미지근한 물에 타야 영양소가 파괴되지 않아요." },
+        { tip: "미세먼지가 심한 날은 외출을 자제하세요", detail: "미세먼지 '나쁨' 이상인 날은 외출을 줄이고, 외출 시 KF94 마스크를 착용하세요. 귀가 후에는 손과 얼굴을 깨끗이 씻어주세요." },
+        { tip: "봄나물로 겨우내 부족한 비타민을 보충하세요", detail: "냉이, 달래, 씀바귀 등 봄나물은 비타민A, C, 철분이 풍부합니다. 데쳐서 나물로 먹거나 된장국에 넣어 드시면 좋아요." },
+        { tip: "견과류는 하루 한 줌(30g)이 적당합니다", detail: "견과류는 건강에 좋지만 칼로리가 높아 과식하면 체중 증가의 원인이 됩니다. 호두 3-4개, 아몬드 7-8개가 하루 적정량이에요." }
       ]
     },
     suppliers: [
@@ -273,16 +273,19 @@ export default function StoryDetailPage() {
               <CheckCircle className="w-5 h-5 text-primary" />
               {story.healthTips.title}
             </h3>
-            <ul className="space-y-2">
-              {story.healthTips.tips.map((tip, idx) => (
-                <li key={idx} className="flex items-start gap-2 text-sm text-gray-600">
-                  <span className="w-5 h-5 bg-primary/10 text-primary text-xs font-bold rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                    {idx + 1}
-                  </span>
-                  {tip}
-                </li>
+            <div className="space-y-4">
+              {story.healthTips.tips.map((item, idx) => (
+                <div key={idx} className="border-b border-primary/10 pb-4 last:border-0 last:pb-0">
+                  <div className="flex items-start gap-2 mb-2">
+                    <span className="w-6 h-6 bg-primary text-white text-xs font-bold rounded-full flex items-center justify-center flex-shrink-0">
+                      {idx + 1}
+                    </span>
+                    <p className="font-medium text-gray-800 text-sm">{item.tip}</p>
+                  </div>
+                  <p className="text-xs text-gray-500 leading-relaxed ml-8">{item.detail}</p>
+                </div>
               ))}
-            </ul>
+            </div>
           </div>
 
           <div className="border border-gray-100 rounded-lg p-4 mb-6">
