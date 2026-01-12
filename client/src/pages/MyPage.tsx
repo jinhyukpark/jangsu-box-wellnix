@@ -52,7 +52,7 @@ export default function MyPage() {
                 { icon: Star, label: "리뷰", value: "8" },
                 { icon: Gift, label: "쿠폰", value: "3" },
               ].map((item) => (
-                <button key={item.label} className="bg-white/10 backdrop-blur rounded-xl p-3 text-center hover:bg-white/20 transition-colors">
+                <button key={item.label} className="bg-white/10 backdrop-blur rounded-lg p-3 text-center hover:bg-white/20 transition-colors">
                   <item.icon className="w-5 h-5 text-white/80 mx-auto mb-1" />
                   <p className="text-lg font-bold text-white">{item.value}</p>
                   <p className="text-xs text-white/60">{item.label}</p>
@@ -63,7 +63,7 @@ export default function MyPage() {
         </div>
 
         <div className="p-4">
-          <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl p-4 border border-amber-100 mb-4">
+          <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg p-4 border border-amber-100 mb-4">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 bg-amber-400 rounded-lg flex items-center justify-center">
@@ -77,11 +77,11 @@ export default function MyPage() {
               <span className="px-2 py-1 bg-amber-400 text-white text-xs font-bold rounded">D-3</span>
             </div>
             <div className="flex items-center gap-3">
-              <div className="flex-1 bg-white rounded-xl p-3">
+              <div className="flex-1 bg-white rounded-lg p-3">
                 <p className="text-xs text-gray-500 mb-1">적립 마일리지</p>
                 <p className="text-lg font-bold text-primary">12,500P</p>
               </div>
-              <div className="flex-1 bg-white rounded-xl p-3">
+              <div className="flex-1 bg-white rounded-lg p-3">
                 <p className="text-xs text-gray-500 mb-1">이번달 혜택</p>
                 <p className="text-lg font-bold text-amber-600">15% 할인</p>
               </div>
@@ -97,8 +97,8 @@ export default function MyPage() {
           
           <div className="space-y-3">
             {recentOrders.map((order, i) => (
-              <div key={i} className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
-                <div className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0">
+              <div key={i} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
                   <img src={order.image} alt={order.name} className="w-full h-full object-cover" />
                 </div>
                 <div className="flex-1 min-w-0">
@@ -119,7 +119,7 @@ export default function MyPage() {
           </div>
         </div>
 
-        <div className="mx-4 mb-6 relative rounded-2xl overflow-hidden">
+        <div className="mx-4 mb-6 relative rounded-lg overflow-hidden">
           <img src={happySeniorsImage} alt="친구 추천" className="w-full h-28 object-cover" />
           <div className="absolute inset-0 bg-gradient-to-r from-black/70 to-transparent" />
           <div className="absolute inset-0 p-4 flex items-center">
@@ -138,7 +138,7 @@ export default function MyPage() {
           ].map((section) => (
             <div key={section.title}>
               <h3 className="text-sm text-gray-500 mb-2">{section.title}</h3>
-              <div className="bg-white rounded-xl border border-gray-100 overflow-hidden divide-y divide-gray-100">
+              <div className="bg-white rounded-lg border border-gray-100 overflow-hidden divide-y divide-gray-100">
                 {section.items.map((item) => (
                   <button key={item} className="w-full flex items-center justify-between p-4 hover:bg-gray-50">
                     <span className="font-medium text-gray-800">{item}</span>

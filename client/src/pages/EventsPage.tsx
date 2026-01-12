@@ -105,7 +105,7 @@ export default function EventsPage() {
             {upcomingEvents.map((event) => (
               <div 
                 key={event.id}
-                className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                className="bg-white rounded-lg border border-gray-100 overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer"
                 data-testid={`event-${event.id}`}
               >
                 <div className="relative h-40 overflow-hidden">
@@ -146,7 +146,7 @@ export default function EventsPage() {
                       />
                     </div>
                     <button 
-                      className="flex-shrink-0 bg-primary text-white text-sm font-semibold px-4 py-2 rounded-xl hover:bg-primary/90 transition-colors"
+                      className="flex-shrink-0 bg-primary text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors"
                       data-testid={`apply-${event.id}`}
                     >
                       신청하기
@@ -172,10 +172,10 @@ export default function EventsPage() {
             {pastEvents.map((event) => (
               <div 
                 key={event.id}
-                className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl"
+                className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg"
                 data-testid={`past-event-${event.id}`}
               >
-                <div className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0">
+                <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
                   <img src={event.image} alt={event.title} className="w-full h-full object-cover" />
                 </div>
                 <div className="flex-1">

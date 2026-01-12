@@ -23,7 +23,7 @@ export default function SearchPage() {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="건강식품 검색"
-                className="w-full pl-10 pr-10 py-3 bg-gray-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                className="w-full pl-10 pr-10 py-3 bg-gray-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
                 data-testid="search-input"
               />
               {query && (
@@ -73,7 +73,7 @@ export default function SearchPage() {
               {popularSearches.map((term, index) => (
                 <button
                   key={term}
-                  className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors"
+                  className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"
                   data-testid={`popular-${index}`}
                 >
                   <span className={`w-6 h-6 flex items-center justify-center text-sm font-bold rounded ${index < 3 ? "bg-primary text-white" : "bg-gray-100 text-gray-500"}`}>
