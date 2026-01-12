@@ -355,7 +355,7 @@ export default function EventDetailPage() {
 
               </div>
     {event.status === "모집중" && (
-        <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-100 z-50 max-w-[430px] mx-auto">
+        <div className="sticky bottom-16 left-0 right-0 p-4 bg-white border-t border-gray-100 z-40">
           <button 
             className="w-full bg-primary text-white font-semibold py-3 rounded-lg hover:bg-primary/90 transition-colors"
             data-testid="apply-event-button"
