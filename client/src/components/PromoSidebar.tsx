@@ -22,10 +22,6 @@ export function PromoSidebar() {
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
             
-            <span className="absolute top-4 left-4 bg-amber-400 text-amber-900 text-xs font-bold px-3 py-1.5 rounded-full z-10">
-              2026 설 얼리버드
-            </span>
-            
             <div className="absolute inset-0 flex flex-col justify-end p-6">
               <div className="text-center">
                 <h2 className="text-2xl font-bold text-white mb-2 font-serif leading-tight">
