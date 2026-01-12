@@ -91,7 +91,7 @@ export default function SubscriptionPage() {
         </div>
 
         <button className="w-full bg-amber-50 border-y border-amber-100 p-4 flex items-center gap-3 hover:bg-amber-100 transition-colors">
-          <div className="w-10 h-10 bg-amber-400 rounded-xl flex items-center justify-center">
+          <div className="w-10 h-10 bg-amber-400 rounded-lg flex items-center justify-center">
             <Gift className="w-5 h-5 text-white" />
           </div>
           <div className="flex-1 text-left">
@@ -114,7 +114,7 @@ export default function SubscriptionPage() {
               { icon: Heart, label: "맞춤 구성", desc: "건강상태 맞춤" },
               { icon: Users, label: "손편지 동봉", desc: "마음을 전해요" },
             ].map((item) => (
-              <div key={item.label} className="bg-gray-50 rounded-xl p-3 text-center">
+              <div key={item.label} className="bg-gray-50 rounded-lg p-3 text-center">
                 <item.icon className="w-6 h-6 text-primary mx-auto mb-2" />
                 <p className="text-xs font-semibold text-gray-800">{item.label}</p>
                 <p className="text-xs text-gray-500">{item.desc}</p>
@@ -133,7 +133,7 @@ export default function SubscriptionPage() {
             {subscriptionPlans.map((plan) => (
               <button
                 key={plan.id}
-                className={`w-full text-left p-4 rounded-2xl border-2 transition-all ${
+                className={`w-full text-left p-4 rounded-lg border-2 transition-all ${
                   plan.popular 
                     ? "border-primary bg-white shadow-lg" 
                     : "border-gray-200 bg-white hover:border-gray-300"
@@ -173,7 +173,7 @@ export default function SubscriptionPage() {
           >
             {monthlyStories.map((story) => (
               <div key={story.month} className="flex-shrink-0 w-40">
-                <div className="relative rounded-xl overflow-hidden mb-2">
+                <div className="relative rounded-lg overflow-hidden mb-2">
                   <img src={story.image} alt={story.theme} className="w-full aspect-square object-cover" />
                   <span className="absolute top-2 left-2 bg-primary text-white text-xs font-bold px-2 py-0.5 rounded">{story.month}</span>
                 </div>
@@ -193,7 +193,7 @@ export default function SubscriptionPage() {
           
           <div className="space-y-3">
             {reviews.map((review) => (
-              <div key={review.id} className="bg-gray-50 rounded-xl p-4">
+              <div key={review.id} className="bg-gray-50 rounded-lg p-4">
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
                     <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
@@ -218,7 +218,7 @@ export default function SubscriptionPage() {
             ))}
           </div>
           
-          <button className="w-full mt-4 py-3 text-center text-sm text-gray-500 border border-gray-200 rounded-xl hover:bg-gray-50">
+          <button className="w-full mt-4 py-3 text-center text-sm text-gray-500 border border-gray-200 rounded-lg hover:bg-gray-50">
             후기 더보기
           </button>
         </div>
