@@ -310,17 +310,17 @@ export default function EventDetailPage() {
           </ul>
         </div>
 
-        {event.status === "모집중" && (
-          <div className="p-4">
-            <button 
-              className="w-full bg-primary text-white font-semibold py-3 rounded-lg hover:bg-primary/90 transition-colors"
-              data-testid="apply-event-button"
-            >
-              신청하기
-            </button>
-          </div>
-        )}
-      </div>
+              </div>
+    {event.status === "모집중" && (
+        <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-100 z-50 max-w-[430px] mx-auto">
+          <button 
+            className="w-full bg-primary text-white font-semibold py-3 rounded-lg hover:bg-primary/90 transition-colors"
+            data-testid="apply-event-button"
+          >
+            신청하기
+          </button>
+        </div>
+      )}
     </AppLayout>
   );
 }
