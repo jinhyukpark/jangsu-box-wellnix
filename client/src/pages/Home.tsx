@@ -6,8 +6,7 @@ import { ProductSection } from "@/components/ProductSection";
 import { SubscriptionBanner } from "@/components/SubscriptionBanner";
 import { PromoBanner } from "@/components/PromoBanner";
 import { EventSection } from "@/components/EventSection";
-import { BottomNav } from "@/components/BottomNav";
-import { PromoSidebar } from "@/components/PromoSidebar";
+import { AppLayout } from "@/components/AppLayout";
 import giftBoxImage from "@assets/generated_images/premium_korean_health_gift_box.png";
 
 const bestProducts = [
@@ -36,55 +35,47 @@ const giftProducts = [
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-background flex justify-center">
-      <PromoSidebar />
+    <AppLayout>
+      <div className="sticky top-0 z-50">
+        <CouponBanner />
+        <Header />
+      </div>
       
-      <main className="w-full max-w-[430px] bg-white shadow-xl">
-        <div className="sticky top-0 z-50">
-          <CouponBanner />
-          <Header />
-        </div>
+      <div className="pb-20">
+        <HeroBanner />
         
-        <div className="pb-20">
-          <HeroBanner />
-          
-          <CategoryGrid />
-          
-          <div className="h-2 bg-gray-50" />
-          
-          <ProductSection 
-            title="베스트 상품" 
-            subtitle="가장 사랑받는 건강식품"
-            products={bestProducts}
-          />
-          
-          <SubscriptionBanner />
-          
-          <ProductSection 
-            title="신상품" 
-            subtitle="새롭게 출시된 건강식품"
-            products={newProducts}
-          />
-          
-          <div className="h-2 bg-gray-50" />
-          
-          <EventSection />
-          
-          <div className="h-2 bg-gray-50" />
-          
-          <ProductSection 
-            title="설 선물 추천" 
-            subtitle="부모님께 드리는 건강 선물"
-            products={giftProducts}
-          />
-          
-          <PromoBanner />
-        </div>
+        <CategoryGrid />
         
-        <div className="sticky bottom-0 w-full z-50">
-          <BottomNav />
-        </div>
-      </main>
-    </div>
+        <div className="h-2 bg-gray-50" />
+        
+        <ProductSection 
+          title="베스트 상품" 
+          subtitle="가장 사랑받는 건강식품"
+          products={bestProducts}
+        />
+        
+        <SubscriptionBanner />
+        
+        <ProductSection 
+          title="신상품" 
+          subtitle="새롭게 출시된 건강식품"
+          products={newProducts}
+        />
+        
+        <div className="h-2 bg-gray-50" />
+        
+        <EventSection />
+        
+        <div className="h-2 bg-gray-50" />
+        
+        <ProductSection 
+          title="설 선물 추천" 
+          subtitle="부모님께 드리는 건강 선물"
+          products={giftProducts}
+        />
+        
+        <PromoBanner />
+      </div>
+    </AppLayout>
   );
 }

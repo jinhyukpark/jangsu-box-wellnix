@@ -1,8 +1,7 @@
 import { useState, useRef } from "react";
 import { Filter, ChevronDown, ArrowLeft } from "lucide-react";
 import { useLocation } from "wouter";
-import { BottomNav } from "@/components/BottomNav";
-import { PromoSidebar } from "@/components/PromoSidebar";
+import { AppLayout } from "@/components/AppLayout";
 import giftBoxImage from "@assets/generated_images/premium_korean_health_gift_box.png";
 import ginsengImg from "@assets/generated_images/korean_red_ginseng_roots.png";
 import heartImg from "@assets/generated_images/heart_health_supplements.png";
@@ -57,116 +56,108 @@ export default function GiftsPage() {
     : products;
 
   return (
-    <div className="min-h-screen bg-background flex justify-center">
-      <PromoSidebar />
-      
-      <main className="w-full max-w-[430px] bg-white shadow-xl">
-        <header className="sticky top-0 z-50 bg-white border-b border-gray-100">
-          <div className="p-4 flex items-center gap-3">
-            <button 
-              onClick={() => setLocation("/")}
-              className="p-1 hover:bg-gray-100 rounded-full"
-              data-testid="back-btn"
-            >
-              <ArrowLeft className="w-5 h-5 text-gray-600" />
-            </button>
-            <div>
-              <h1 className="text-xl font-bold text-gray-900">선물관</h1>
-              <p className="text-sm text-gray-500">소중한 분께 건강을 선물하세요</p>
-            </div>
-          </div>
-          
-          <div 
-            ref={scrollRef}
-            onWheel={handleWheel}
-            className="px-4 pb-4 overflow-x-auto scrollbar-hide"
+    <AppLayout>
+      <header className="sticky top-0 z-50 bg-white border-b border-gray-100">
+        <div className="p-4 flex items-center gap-3">
+          <button 
+            onClick={() => setLocation("/")}
+            className="p-1 hover:bg-gray-100 rounded-full"
+            data-testid="back-btn"
           >
-            <div className="flex gap-4">
-              {categories.map((cat) => {
-                const isSelected = cat.label === "전체" ? selectedCategory === null : selectedCategory === cat.label;
-                return (
-                  <button
-                    key={cat.label}
-                    onClick={() => setSelectedCategory(cat.label === "전체" ? null : cat.label)}
-                    className={`flex flex-col items-center gap-2 min-w-[60px] transition-all ${
-                      isSelected ? "opacity-100" : "opacity-70 hover:opacity-100"
-                    }`}
-                    data-testid={`gift-cat-${cat.label}`}
-                  >
-                    <div className={`w-14 h-14 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center transition-all ${
-                      isSelected ? "ring-2 ring-primary ring-offset-2" : ""
-                    }`}>
-                      {cat.image ? (
-                        <img 
-                          src={cat.image} 
-                          alt={cat.label}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <span className="text-lg font-bold text-primary">All</span>
-                      )}
-                    </div>
-                    <span className={`text-xs font-medium ${
-                      isSelected ? "text-primary" : "text-gray-700"
-                    }`}>{cat.label}</span>
-                  </button>
-                );
-              })}
-            </div>
+            <ArrowLeft className="w-5 h-5 text-gray-600" />
+          </button>
+          <div>
+            <h1 className="text-xl font-bold text-gray-900">선물관</h1>
+            <p className="text-sm text-gray-500">소중한 분께 건강을 선물하세요</p>
           </div>
-          
-          <div className="px-4 pb-3 flex items-center justify-between border-t border-gray-50 pt-3">
-            <span className="text-sm text-gray-500">
-              {selectedCategory ? `${selectedCategory} ` : "전체 "}
-              {filteredProducts.length}개 상품
-            </span>
-            <div className="flex items-center gap-2">
-              <button className="flex items-center gap-1 text-sm text-gray-600" data-testid="sort-btn">
-                인기순 <ChevronDown className="w-4 h-4" />
-              </button>
-              <button className="p-2 rounded-lg hover:bg-gray-100" data-testid="filter-btn">
-                <Filter className="w-4 h-4 text-gray-600" />
-              </button>
-            </div>
-          </div>
-        </header>
+        </div>
         
-        <div className="p-4 pb-24">
-          <div className="grid grid-cols-2 gap-3">
-            {filteredProducts.map((product) => (
-              <div key={product.id} className="group cursor-pointer" data-testid={`gift-product-${product.id}`}>
-                <div className="relative rounded-lg overflow-hidden bg-gray-50 mb-2">
-                  <img 
-                    src={product.image} 
-                    alt={product.name}
-                    className="w-full aspect-square object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                </div>
-                <h3 className="text-sm font-medium text-gray-800 line-clamp-2 leading-snug mb-1">{product.name}</h3>
-                <div className="flex items-center gap-1">
-                  {product.originalPrice && (
-                    <span className="text-sm font-bold text-red-500">
-                      {Math.round((1 - product.price / product.originalPrice) * 100)}%
-                    </span>
-                  )}
-                  <span className="text-base font-bold text-gray-900">
-                    {product.price.toLocaleString()}원
-                  </span>
-                </div>
-                <div className="flex items-center gap-1 text-xs text-gray-500 mt-0.5">
-                  <span className="text-yellow-500">★</span>
-                  <span>{product.rating}</span>
-                  <span>({product.reviewCount.toLocaleString()})</span>
-                </div>
+        <div 
+          ref={scrollRef}
+          onWheel={handleWheel}
+          className="px-4 pb-4 overflow-x-auto scrollbar-hide"
+        >
+          <div className="flex gap-4">
+            {categories.map((cat) => {
+              const isSelected = cat.label === "전체" ? selectedCategory === null : selectedCategory === cat.label;
+              return (
+                <button
+                  key={cat.label}
+                  onClick={() => setSelectedCategory(cat.label === "전체" ? null : cat.label)}
+                  className={`flex flex-col items-center gap-2 min-w-[60px] transition-all ${
+                    isSelected ? "opacity-100" : "opacity-70 hover:opacity-100"
+                  }`}
+                  data-testid={`gift-cat-${cat.label}`}
+                >
+                  <div className={`w-14 h-14 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center transition-all ${
+                    isSelected ? "ring-2 ring-primary ring-offset-2" : ""
+                  }`}>
+                    {cat.image ? (
+                      <img 
+                        src={cat.image} 
+                        alt={cat.label}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-lg font-bold text-primary">All</span>
+                    )}
+                  </div>
+                  <span className={`text-xs font-medium ${
+                    isSelected ? "text-primary" : "text-gray-700"
+                  }`}>{cat.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+        
+        <div className="px-4 pb-3 flex items-center justify-between border-t border-gray-50 pt-3">
+          <span className="text-sm text-gray-500">
+            {selectedCategory ? `${selectedCategory} ` : "전체 "}
+            {filteredProducts.length}개 상품
+          </span>
+          <div className="flex items-center gap-2">
+            <button className="flex items-center gap-1 text-sm text-gray-600" data-testid="sort-btn">
+              인기순 <ChevronDown className="w-4 h-4" />
+            </button>
+            <button className="p-2 rounded-lg hover:bg-gray-100" data-testid="filter-btn">
+              <Filter className="w-4 h-4 text-gray-600" />
+            </button>
+          </div>
+        </div>
+      </header>
+      
+      <div className="p-4 pb-24">
+        <div className="grid grid-cols-2 gap-3">
+          {filteredProducts.map((product) => (
+            <div key={product.id} className="group cursor-pointer" data-testid={`gift-product-${product.id}`}>
+              <div className="relative rounded-lg overflow-hidden bg-gray-50 mb-2">
+                <img 
+                  src={product.image} 
+                  alt={product.name}
+                  className="w-full aspect-square object-cover group-hover:scale-105 transition-transform duration-300"
+                />
               </div>
-            ))}
-          </div>
+              <h3 className="text-sm font-medium text-gray-800 line-clamp-2 leading-snug mb-1">{product.name}</h3>
+              <div className="flex items-center gap-1">
+                {product.originalPrice && (
+                  <span className="text-sm font-bold text-red-500">
+                    {Math.round((1 - product.price / product.originalPrice) * 100)}%
+                  </span>
+                )}
+                <span className="text-base font-bold text-gray-900">
+                  {product.price.toLocaleString()}원
+                </span>
+              </div>
+              <div className="flex items-center gap-1 text-xs text-gray-500 mt-0.5">
+                <span className="text-yellow-500">★</span>
+                <span>{product.rating}</span>
+                <span>({product.reviewCount.toLocaleString()})</span>
+              </div>
+            </div>
+          ))}
         </div>
-        
-        <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] z-50">
-          <BottomNav />
-        </div>
-      </main>
-    </div>
+      </div>
+    </AppLayout>
   );
 }
