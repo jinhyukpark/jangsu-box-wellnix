@@ -13,7 +13,7 @@ export default function SearchPage() {
     <div className="min-h-screen bg-background flex justify-center">
       <PromoSidebar />
       
-      <main className="w-full max-w-[430px] bg-white min-h-screen relative shadow-xl">
+      <main className="w-full max-w-[430px] bg-white h-screen flex flex-col shadow-xl overflow-hidden">
         <div className="sticky top-0 z-50 bg-white border-b border-gray-100 p-4">
           <div className="flex items-center gap-3">
             <div className="flex-1 relative">
@@ -39,7 +39,7 @@ export default function SearchPage() {
           </div>
         </div>
         
-        <div className="pb-24 p-4">
+        <div className="flex-1 overflow-y-auto p-4">
           {recentSearches.length > 0 && (
             <section className="mb-6">
               <div className="flex items-center justify-between mb-3">
@@ -86,7 +86,9 @@ export default function SearchPage() {
           </section>
         </div>
         
-        <BottomNav />
+        <div className="flex-shrink-0">
+          <BottomNav />
+        </div>
       </main>
     </div>
   );

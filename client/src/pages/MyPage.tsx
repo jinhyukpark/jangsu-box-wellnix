@@ -24,7 +24,7 @@ export default function MyPage() {
     <div className="min-h-screen bg-background flex justify-center">
       <PromoSidebar />
       
-      <main className="w-full max-w-[430px] bg-white min-h-screen relative shadow-xl">
+      <main className="w-full max-w-[430px] bg-white h-screen flex flex-col shadow-xl overflow-hidden">
         <header className="bg-gradient-to-br from-primary to-emerald-600 p-6 pb-20">
           <div className="flex items-center justify-between mb-4">
             <h1 className="text-xl font-bold text-white">마이페이지</h1>
@@ -76,7 +76,7 @@ export default function MyPage() {
           </div>
         </div>
         
-        <div className="pb-24 px-4">
+        <div className="flex-1 overflow-y-auto px-4 pb-4">
           <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
             {menuItems.map((item, index) => {
               const Icon = item.icon;
@@ -114,7 +114,9 @@ export default function MyPage() {
           </button>
         </div>
         
-        <BottomNav />
+        <div className="flex-shrink-0">
+          <BottomNav />
+        </div>
       </main>
     </div>
   );

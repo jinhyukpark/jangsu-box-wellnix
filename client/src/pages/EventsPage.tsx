@@ -64,13 +64,13 @@ export default function EventsPage() {
     <div className="min-h-screen bg-background flex justify-center">
       <PromoSidebar />
       
-      <main className="w-full max-w-[430px] bg-white min-h-screen relative shadow-xl">
+      <main className="w-full max-w-[430px] bg-white h-screen flex flex-col shadow-xl overflow-hidden">
         <header className="sticky top-0 z-50 bg-white border-b border-gray-100 p-4">
           <h1 className="text-xl font-bold text-gray-900">건강 행사</h1>
           <p className="text-sm text-gray-500 mt-0.5">다양한 건강 프로그램에 참여하세요</p>
         </header>
         
-        <div className="pb-24">
+        <div className="flex-1 overflow-y-auto">
           <section className="p-4">
             <h2 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
               <Calendar className="w-5 h-5 text-primary" />
@@ -165,7 +165,9 @@ export default function EventsPage() {
           </section>
         </div>
         
-        <BottomNav />
+        <div className="flex-shrink-0">
+          <BottomNav />
+        </div>
       </main>
     </div>
   );

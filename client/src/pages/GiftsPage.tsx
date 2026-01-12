@@ -19,7 +19,7 @@ export default function GiftsPage() {
     <div className="min-h-screen bg-background flex justify-center">
       <PromoSidebar />
       
-      <main className="w-full max-w-[430px] bg-white min-h-screen relative shadow-xl">
+      <main className="w-full max-w-[430px] bg-white h-screen flex flex-col shadow-xl overflow-hidden">
         <header className="sticky top-0 z-50 bg-white border-b border-gray-100">
           <div className="p-4">
             <h1 className="text-xl font-bold text-gray-900">선물관</h1>
@@ -57,7 +57,7 @@ export default function GiftsPage() {
           </div>
         </header>
         
-        <div className="pb-24 p-4">
+        <div className="flex-1 overflow-y-auto p-4">
           <div className="grid grid-cols-2 gap-3">
             {products.map((product) => (
               <div key={product.id} className="group cursor-pointer" data-testid={`gift-product-${product.id}`}>
@@ -89,7 +89,9 @@ export default function GiftsPage() {
           </div>
         </div>
         
-        <BottomNav />
+        <div className="flex-shrink-0">
+          <BottomNav />
+        </div>
       </main>
     </div>
   );

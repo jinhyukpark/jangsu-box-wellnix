@@ -39,11 +39,11 @@ export default function Home() {
     <div className="min-h-screen bg-background flex justify-center">
       <PromoSidebar />
       
-      <main className="w-full max-w-[430px] bg-white min-h-screen relative shadow-xl">
+      <main className="w-full max-w-[430px] bg-white h-screen flex flex-col shadow-xl overflow-hidden">
         <CouponBanner />
         <Header />
         
-        <div className="pb-24">
+        <div className="flex-1 overflow-y-auto pb-4">
           <HeroBanner />
           
           <CategoryGrid />
@@ -79,7 +79,9 @@ export default function Home() {
           <PromoBanner />
         </div>
         
-        <BottomNav />
+        <div className="flex-shrink-0">
+          <BottomNav />
+        </div>
       </main>
     </div>
   );
