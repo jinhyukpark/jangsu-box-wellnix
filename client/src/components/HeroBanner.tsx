@@ -9,7 +9,7 @@ const banners = [
     subtitle: "장수 박스로 부모님께\n건강을 선물하세요",
     badge: "최대 40% 할인",
     image: giftSetImage,
-    bgColor: "bg-gradient-to-br from-teal-700 to-teal-900",
+    bgColor: "bg-[#3d6b64]",
   },
   {
     id: 2,
