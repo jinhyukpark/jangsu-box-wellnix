@@ -1,3 +1,4 @@
+import { useLocation } from "wouter";
 import ginsengImg from "@assets/generated_images/korean_red_ginseng_roots.png";
 import heartImg from "@assets/generated_images/heart_health_supplements.png";
 import vitaminImg from "@assets/generated_images/vitamin_supplements_pills.png";
@@ -23,6 +24,12 @@ const categories = [
 ];
 
 export function CategoryGrid() {
+  const [, setLocation] = useLocation();
+
+  const handleCategoryClick = () => {
+    setLocation("/gifts");
+  };
+
   return (
     <div className="px-4 py-5">
       <div className="grid grid-cols-5 gap-3">
@@ -33,6 +40,7 @@ export function CategoryGrid() {
               data-testid={`category-${cat.label}`}
               className="flex flex-col items-center gap-2 group animate-fade-in"
               style={{ animationDelay: `${index * 50}ms` }}
+              onClick={handleCategoryClick}
             >
               <div className="w-14 h-14 rounded-full overflow-hidden bg-gray-50 flex items-center justify-center transition-all duration-200 group-hover:scale-105 group-hover:shadow-md">
                 <img 
