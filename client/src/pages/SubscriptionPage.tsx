@@ -14,7 +14,7 @@ const reviews = [
 const subscriptionPlans = [
   { 
     id: "basic", 
-    name: "베이직 박스", 
+    name: "효심 박스", 
     price: 89000, 
     originalPrice: 120000,
     description: "매월 엄선된 건강식품 3~4종",
@@ -23,20 +23,20 @@ const subscriptionPlans = [
   },
   { 
     id: "premium", 
-    name: "프리미엄 박스", 
+    name: "장수 박스", 
     price: 159000, 
     originalPrice: 200000,
-    description: "프리미엄 건강식품 5~6종 + 특별선물",
-    features: ["고급 홍삼/녹용 포함", "시즌 한정 특별구성", "고급 포장 & 손편지"],
+    description: "엄선된 건강식품 5~6종 + 추억상자",
+    features: ["고급 홍삼/녹용 포함", "시즌 한정 특별구성", "고급 포장 & 추억상자"],
     popular: true
   },
   { 
     id: "vip", 
-    name: "VIP 박스", 
+    name: "천수 박스", 
     price: 289000, 
     originalPrice: 350000,
-    description: "최상급 건강식품 8종 + VIP 혜택",
-    features: ["최상급 산삼/녹용", "1:1 건강상담", "VIP 전용 이벤트"],
+    description: "최상급 건강식품 8종 + 프리미엄 케어",
+    features: ["최상급 산삼/녹용", "1:1 건강상담", "명인 한정 상품"],
     popular: false
   },
 ];
