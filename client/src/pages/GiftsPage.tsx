@@ -155,7 +155,7 @@ export default function GiftsPage() {
           </div>
         </div>
         
-        <div className="sticky bottom-0 w-full z-50">
+        <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] z-50">
           <BottomNav />
         </div>
       </main>
