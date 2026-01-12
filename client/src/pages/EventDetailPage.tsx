@@ -1,5 +1,5 @@
 import { useParams, useLocation } from "wouter";
-import { ArrowLeft, Calendar, MapPin, Users, Clock, Gift, Utensils, Bus, CheckCircle, MessageCircle, Share2 } from "lucide-react";
+import { ArrowLeft, Calendar, MapPin, Users, Clock, Gift, Utensils, Bus, CheckCircle, MessageCircle, Share2, Building2, Phone, User } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import templeImage from "@assets/generated_images/korean_temple_autumn_travel.png";
 import hqImage from "@assets/generated_images/modern_wellness_company_hq.png";
@@ -22,6 +22,7 @@ const eventsData: Record<string, {
   benefits: { icon: string; title: string; description: string }[];
   promotions: { title: string; description: string }[];
   notes: string[];
+  organizer: { name: string; contact: string; manager: string; email: string };
 }> = {
   "1": {
     id: "1",
@@ -58,6 +59,12 @@ const eventsData: Record<string, {
       "참석 확정 문자가 발송됩니다.",
       "행사 당일 마스크 착용을 권장합니다.",
     ],
+    organizer: {
+      name: "웰닉스 헬스케어",
+      contact: "02-1234-5678",
+      manager: "김건강 매니저",
+      email: "event@wellnix.co.kr",
+    },
   },
   "2": {
     id: "2",
@@ -93,6 +100,12 @@ const eventsData: Record<string, {
       "인터넷 연결 상태를 미리 확인해주세요.",
       "수업 10분 전까지 ZOOM에 접속해주세요.",
     ],
+    organizer: {
+      name: "웰닉스 아카데미",
+      contact: "02-1234-5679",
+      manager: "박평화 강사",
+      email: "class@wellnix.co.kr",
+    },
   },
   "3": {
     id: "3",
@@ -129,6 +142,12 @@ const eventsData: Record<string, {
       "모집이 마감되었습니다.",
       "다음 특강 일정은 추후 공지됩니다.",
     ],
+    organizer: {
+      name: "웰닉스 부산지점",
+      contact: "051-9876-5432",
+      manager: "이홍삼 팀장",
+      email: "busan@wellnix.co.kr",
+    },
   },
 };
 
@@ -297,6 +316,39 @@ export default function EventDetailPage() {
             </div>
           </div>
         )}
+
+        <div className="p-4 bg-white border-b border-gray-100">
+          <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+            <Building2 className="w-5 h-5 text-primary" />
+            주최측 정보
+          </h3>
+          <div className="space-y-3">
+            <div className="flex items-start gap-3">
+              <Building2 className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-medium text-gray-900">{event.organizer.name}</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <User className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm text-gray-600">담당자: {event.organizer.manager}</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <Phone className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm text-gray-600">{event.organizer.contact}</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <MessageCircle className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm text-gray-600">{event.organizer.email}</p>
+              </div>
+            </div>
+          </div>
+        </div>
 
         <div className="p-4 bg-white">
           <h3 className="font-semibold text-gray-900 mb-3">📌 안내사항</h3>
