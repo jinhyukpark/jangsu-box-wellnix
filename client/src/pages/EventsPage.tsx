@@ -1,6 +1,16 @@
+import { useState } from "react";
 import { Calendar, MapPin, Users, ChevronRight } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import giftBoxImage from "@assets/generated_images/premium_korean_health_gift_box.png";
+
+const months = [
+  { id: "2026-01", label: "1월", year: "2026" },
+  { id: "2026-02", label: "2월", year: "2026" },
+  { id: "2026-03", label: "3월", year: "2026" },
+  { id: "2026-04", label: "4월", year: "2026" },
+  { id: "2026-05", label: "5월", year: "2026" },
+  { id: "2026-06", label: "6월", year: "2026" },
+];
 
 const upcomingEvents = [
   {
@@ -59,11 +69,29 @@ const pastEvents = [
 ];
 
 export default function EventsPage() {
+  const [selectedMonth, setSelectedMonth] = useState("2026-01");
+
   return (
     <AppLayout>
-      <header className="sticky top-0 z-50 bg-white border-b border-gray-100 p-4">
-        <h1 className="text-xl font-bold text-gray-900">건강 행사</h1>
-        <p className="text-sm text-gray-500 mt-0.5">다양한 건강 프로그램에 참여하세요</p>
+      <header className="sticky top-0 z-50 bg-white border-b border-gray-100">
+        <div className="p-4 pb-2">
+          <h1 className="text-xl font-bold text-gray-900">건강 행사</h1>
+        </div>
+        <div className="px-4 pb-3 flex gap-2 overflow-x-auto scrollbar-hide">
+          {months.map((month) => (
+            <button
+              key={month.id}
+              onClick={() => setSelectedMonth(month.id)}
+              className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                selectedMonth === month.id 
+                  ? "bg-primary text-white" 
+                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              }`}
+            >
+              {month.label}
+            </button>
+          ))}
+        </div>
       </header>
       
       <div className="pb-24">
