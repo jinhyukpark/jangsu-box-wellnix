@@ -1,11 +1,15 @@
-import { useState, useRef } from "react";
+import { useRef } from "react";
 import { ArrowLeft, ShoppingCart, Gift, ChevronRight, Heart, Calendar, Users, Sparkles } from "lucide-react";
 import { useLocation } from "wouter";
 import { AppLayout } from "@/components/AppLayout";
 import giftBoxImage from "@assets/generated_images/premium_korean_health_gift_box.png";
 import happySeniorsImage from "@assets/generated_images/happy_seniors_receiving_gift.png";
 
-const recipientTabs = ["소중한 분", "연인", "부부", "친구", "조카"];
+const reviews = [
+  { id: "1", name: "김**", rating: 5, date: "2026.01.10", content: "부모님이 정말 좋아하세요! 매달 기다리신대요. 포장도 고급스럽고 내용물도 알차요.", product: "프리미엄 박스" },
+  { id: "2", name: "이**", rating: 5, date: "2026.01.08", content: "멀리 계신 시부모님께 효도하는 마음으로 구독했어요. 손편지 서비스가 특히 좋아요!", product: "베이직 박스" },
+  { id: "3", name: "박**", rating: 5, date: "2026.01.05", content: "3개월째 구독 중인데 매번 다른 구성이라 좋습니다. 홍삼 품질이 최고예요.", product: "VIP 박스" },
+];
 
 const subscriptionPlans = [
   { 
@@ -43,14 +47,7 @@ const monthlyStories = [
   { month: "3월", theme: "봄맞이 활력충전", highlight: "유기농 꿀 & 견과류", image: giftBoxImage },
 ];
 
-const popularGifts = [
-  { id: "1", name: "설 숙성한우 선물세트", price: 138000, tag: "최대 2.5만원 보자기 증정", option: "13.8만원 ~ 100만원(17타입)" },
-  { id: "2", name: "프레스티지 숙성한우 선물세트", price: 620000, tag: "특별 제작 한정 판매", option: "62만원 ~ 100만원(3타입)" },
-  { id: "3", name: "한우 에너지바 세트", price: 45000, originalPrice: 61000, tag: "신년 기획전", option: "45g / 45g*24" },
-];
-
 export default function SubscriptionPage() {
-  const [selectedTab, setSelectedTab] = useState("소중한 분");
   const [, setLocation] = useLocation();
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -190,47 +187,40 @@ export default function SubscriptionPage() {
         <div className="h-2 bg-gray-100" />
 
         <div className="p-4">
-          <h3 className="font-bold text-gray-900 mb-2 flex items-center gap-2">
-            차이를 안다면, 웰닉스 <span className="text-xl">🎁</span>
+          <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+            ⭐ 회원님 후기
           </h3>
-          <p className="text-sm text-gray-600 mb-4">떠오르는 분에게 맞춤 선물</p>
           
-          <div className="flex gap-2 mb-4 overflow-x-auto scrollbar-hide">
-            {recipientTabs.map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setSelectedTab(tab)}
-                className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                  selectedTab === tab 
-                    ? "bg-primary text-white" 
-                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                }`}
-              >
-                {tab}
-              </button>
-            ))}
-          </div>
-
           <div className="space-y-3">
-            {popularGifts.map((gift) => (
-              <div key={gift.id} className="flex gap-3 p-3 bg-gray-50 rounded-xl">
-                <div className="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0">
-                  <img src={giftBoxImage} alt={gift.name} className="w-full h-full object-cover" />
+            {reviews.map((review) => (
+              <div key={review.id} className="bg-gray-50 rounded-xl p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
+                      <span className="text-primary font-bold text-sm">{review.name.charAt(0)}</span>
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-800 text-sm">{review.name}</p>
+                      <p className="text-xs text-gray-500">{review.product}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="flex gap-0.5">
+                      {[...Array(review.rating)].map((_, i) => (
+                        <span key={i} className="text-amber-400 text-sm">★</span>
+                      ))}
+                    </div>
+                    <p className="text-xs text-gray-400">{review.date}</p>
+                  </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <span className="text-xs text-amber-600 font-medium">{gift.tag}</span>
-                  <h4 className="font-semibold text-gray-800 text-sm mt-0.5 truncate">{gift.name}</h4>
-                  <p className="text-xs text-gray-500 mt-0.5">{gift.option}</p>
-                  <p className="text-base font-bold text-gray-900 mt-1">
-                    {gift.price.toLocaleString()}원~
-                  </p>
-                </div>
-                <button className="self-end p-2 bg-white rounded-lg shadow-sm">
-                  <Gift className="w-5 h-5 text-primary" />
-                </button>
+                <p className="text-sm text-gray-600 leading-relaxed">{review.content}</p>
               </div>
             ))}
           </div>
+          
+          <button className="w-full mt-4 py-3 text-center text-sm text-gray-500 border border-gray-200 rounded-xl hover:bg-gray-50">
+            후기 더보기
+          </button>
         </div>
       </div>
     </AppLayout>
