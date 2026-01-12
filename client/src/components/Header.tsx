@@ -1,6 +1,16 @@
 import { Bell, ShoppingCart, Search } from "lucide-react";
+import { useRef } from "react";
 
 export function Header() {
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const handleWheel = (e: React.WheelEvent) => {
+    if (scrollRef.current) {
+      e.preventDefault();
+      scrollRef.current.scrollLeft += e.deltaY;
+    }
+  };
+
   return (
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-lg border-b border-gray-100">
       <div className="flex items-center justify-between px-4 py-3">
@@ -31,7 +41,11 @@ export function Header() {
         </div>
       </div>
       
-      <div className="px-4 pb-3 overflow-x-auto scrollbar-hide">
+      <div 
+        ref={scrollRef}
+        onWheel={handleWheel}
+        className="px-4 pb-3 overflow-x-auto scrollbar-hide"
+      >
         <div className="flex gap-2">
           {["홈", "PRESTIGE", "설 얼리버드", "구독 서비스", "건강정보"].map((tab, index) => (
             <button
