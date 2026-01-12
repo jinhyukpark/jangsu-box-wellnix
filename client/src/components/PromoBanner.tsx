@@ -1,6 +1,7 @@
-import { Smartphone } from "lucide-react";
+import { Smartphone, Phone, Clock, MapPin } from "lucide-react";
 import officeWorkersImage from "@assets/generated_images/office_workers_smiling_group.png";
 import giftBoxImage from "@assets/generated_images/premium_korean_health_gift_box.png";
+import customerServiceImage from "@assets/generated_images/customer_service_representative_headset.png";
 
 export function PromoBanner() {
   return (
@@ -60,6 +61,36 @@ export function PromoBanner() {
           </div>
         </div>
       </button>
+      
+      <div className="h-px bg-gray-200 my-4" />
+      
+      <div className="bg-[#006861] rounded-lg overflow-hidden flex items-stretch">
+        <div className="flex-1 p-5 text-white">
+          <h3 className="font-bold text-lg mb-1">고객센터</h3>
+          <p className="text-2xl font-bold mb-3">1588-0000</p>
+          <div className="space-y-1.5 text-sm text-white/80">
+            <div className="flex items-center gap-2">
+              <Clock className="w-4 h-4" />
+              <span>평일 09:00 - 18:00</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Phone className="w-4 h-4" />
+              <span>점심 12:00 - 13:00</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <MapPin className="w-4 h-4" />
+              <span>주말/공휴일 휴무</span>
+            </div>
+          </div>
+        </div>
+        <div className="w-28 overflow-hidden">
+          <img 
+            src={customerServiceImage} 
+            alt="고객센터" 
+            className="w-full h-full object-cover"
+          />
+        </div>
+      </div>
     </div>
   );
 }
