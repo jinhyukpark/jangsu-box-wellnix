@@ -3,7 +3,7 @@ import giftBoxImage from "@assets/generated_images/premium_korean_health_gift_bo
 
 export function PromoSidebar() {
   return (
-    <aside className="hidden lg:flex flex-col w-[420px] min-h-screen bg-gradient-to-b from-stone-100 via-stone-50 to-amber-50/30 relative mr-8">
+    <aside className="hidden lg:flex flex-col w-[420px] min-h-screen bg-background relative mr-8">
       <div className="flex flex-col h-screen justify-center p-8">
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-emerald-700 font-serif tracking-tight">
