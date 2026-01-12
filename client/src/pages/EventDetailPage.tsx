@@ -261,10 +261,7 @@ export default function EventDetailPage() {
         </div>
 
         <div className="p-4 bg-white border-b border-gray-100">
-          <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-            <Clock className="w-5 h-5 text-primary" />
-            프로그램 일정
-          </h3>
+          <h3 className="font-semibold text-gray-900 mb-3">프로그램 일정</h3>
           <div className="relative">
             {event.schedule.map((item, index) => (
               <div key={index} className="flex gap-4 relative">
@@ -284,10 +281,7 @@ export default function EventDetailPage() {
         </div>
 
         <div className="p-4 bg-white border-b border-gray-100">
-          <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-            <Gift className="w-5 h-5 text-primary" />
-            참가자 혜택
-          </h3>
+          <h3 className="font-semibold text-gray-900 mb-3">참가자 혜택</h3>
           <div className="space-y-3">
             {event.benefits.map((benefit, index) => (
               <div key={index} className="flex items-start gap-3 bg-primary/5 p-3 rounded-lg">
@@ -318,10 +312,7 @@ export default function EventDetailPage() {
         )}
 
         <div className="p-4 bg-white border-b border-gray-100">
-          <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-            <Building2 className="w-5 h-5 text-primary" />
-            주최측 정보
-          </h3>
+          <h3 className="font-semibold text-gray-900 mb-3">주최측 정보</h3>
           <div className="space-y-3">
             <div className="flex items-start gap-3">
               <Building2 className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
