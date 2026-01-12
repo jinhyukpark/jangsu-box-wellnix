@@ -1,7 +1,9 @@
 import { useState } from "react";
-import { Calendar, MapPin, Users, ChevronRight } from "lucide-react";
+import { Calendar, MapPin, Users } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
-import giftBoxImage from "@assets/generated_images/premium_korean_health_gift_box.png";
+import templeImage from "@assets/generated_images/korean_temple_autumn_travel.png";
+import hqImage from "@assets/generated_images/modern_wellness_company_hq.png";
+import rehabImage from "@assets/generated_images/senior_rehab_therapy_equipment.png";
 
 const months = [
   { id: "2026-01", label: "1월", year: "2026" },
@@ -23,7 +25,7 @@ const upcomingEvents = [
     location: "서울 강남구 웰닉스홀",
     participants: 127,
     maxParticipants: 150,
-    image: giftBoxImage,
+    image: hqImage,
     tag: "무료 세미나", status: "모집중",
     description: "새해 건강 관리 비법과 면역력 증진 방법을 전문가와 함께 알아봅니다.",
   },
@@ -35,7 +37,7 @@ const upcomingEvents = [
     location: "온라인 ZOOM",
     participants: 89,
     maxParticipants: 100,
-    image: giftBoxImage,
+    image: rehabImage,
     tag: "정기 클래스", status: "모집중",
     description: "전문 강사와 함께하는 시니어 맞춤 요가와 명상 프로그램입니다.",
   },
@@ -47,7 +49,7 @@ const upcomingEvents = [
     location: "부산 해운대 컨벤션센터",
     participants: 54,
     maxParticipants: 80,
-    image: giftBoxImage,
+    image: templeImage,
     tag: "건강 강좌", status: "마감됨",
     description: "홍삼의 효능과 올바른 섭취 방법에 대해 배워봅니다.",
   },
