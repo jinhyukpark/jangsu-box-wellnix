@@ -59,6 +59,7 @@ const upcomingEvents = [
 export default function EventsPage() {
   const [selectedMonth, setSelectedMonth] = useState("2026-01");
   const [selectedCategory, setSelectedCategory] = useState("전체");
+  const [selectedStatus, setSelectedStatus] = useState("전체");
 
   return (
     <AppLayout>
@@ -100,13 +101,34 @@ export default function EventsPage() {
       
       <div className="pb-24">
         <section className="p-4">
-          <h2 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-            <Calendar className="w-5 h-5 text-primary" />
-            예정된 행사
-          </h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-semibold text-gray-900 flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-primary" />
+              예정된 행사
+            </h2>
+            <div className="flex gap-1.5">
+              {["전체", "모집중", "마감됨"].map((status) => (
+                <button
+                  key={status}
+                  onClick={() => setSelectedStatus(status)}
+                  className={`px-2.5 py-1 text-xs font-medium rounded-lg transition-colors ${
+                    selectedStatus === status
+                      ? status === "모집중" ? "bg-amber-400 text-amber-900"
+                        : status === "마감됨" ? "bg-gray-400 text-white"
+                        : "bg-primary text-white"
+                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  }`}
+                >
+                  {status}
+                </button>
+              ))}
+            </div>
+          </div>
           
           <div className="space-y-4">
-            {upcomingEvents.map((event) => (
+            {upcomingEvents
+              .filter((event) => selectedStatus === "전체" || event.status === selectedStatus)
+              .map((event) => (
               <div 
                 key={event.id}
                 className="bg-white rounded-lg border border-gray-100 overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer"
