@@ -12,6 +12,8 @@ const months = [
   { id: "2026-06", label: "6월", year: "2026" },
 ];
 
+const categories = ["전체", "여행", "건강식품", "화장품", "운동", "요리"];
+
 const upcomingEvents = [
   {
     id: "1",
@@ -70,6 +72,7 @@ const pastEvents = [
 
 export default function EventsPage() {
   const [selectedMonth, setSelectedMonth] = useState("2026-01");
+  const [selectedCategory, setSelectedCategory] = useState("전체");
 
   return (
     <AppLayout>
@@ -77,7 +80,7 @@ export default function EventsPage() {
         <div className="p-4 pb-2">
           <h1 className="text-xl font-bold text-gray-900">건강 행사</h1>
         </div>
-        <div className="px-4 pb-3 flex gap-2 overflow-x-auto scrollbar-hide">
+        <div className="px-4 pb-2 flex gap-2 overflow-x-auto scrollbar-hide">
           {months.map((month) => (
             <button
               key={month.id}
@@ -89,6 +92,21 @@ export default function EventsPage() {
               }`}
             >
               {month.label}
+            </button>
+          ))}
+        </div>
+        <div className="px-4 pb-3 flex gap-2 overflow-x-auto scrollbar-hide">
+          {categories.map((category) => (
+            <button
+              key={category}
+              onClick={() => setSelectedCategory(category)}
+              className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-colors border ${
+                selectedCategory === category 
+                  ? "border-primary bg-primary/10 text-primary" 
+                  : "border-gray-200 text-gray-500 hover:border-gray-300"
+              }`}
+            >
+              {category}
             </button>
           ))}
         </div>
