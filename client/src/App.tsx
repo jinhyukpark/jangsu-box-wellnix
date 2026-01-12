@@ -10,6 +10,7 @@ import SubscriptionPage from "@/pages/SubscriptionPage";
 import EventsPage from "@/pages/EventsPage";
 import MyPage from "@/pages/MyPage";
 import StoryDetailPage from "@/pages/StoryDetailPage";
+import EventDetailPage from "@/pages/EventDetailPage";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -22,6 +23,7 @@ function Router() {
       <Route path="/events" component={EventsPage} />
       <Route path="/mypage" component={MyPage} />
       <Route path="/story/:id" component={StoryDetailPage} />
+      <Route path="/events/:id" component={EventDetailPage} />
       <Route component={NotFound} />
     </Switch>
   );

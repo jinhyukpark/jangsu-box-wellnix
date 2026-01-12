@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import { Calendar, MapPin, Users } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import templeImage from "@assets/generated_images/korean_temple_autumn_travel.png";
@@ -57,6 +58,7 @@ const upcomingEvents = [
 
 
 export default function EventsPage() {
+  const [, setLocation] = useLocation();
   const [selectedMonth, setSelectedMonth] = useState("2026-01");
   const [selectedCategory, setSelectedCategory] = useState("전체");
   const [selectedStatus, setSelectedStatus] = useState("전체");
@@ -131,6 +133,7 @@ export default function EventsPage() {
               .map((event) => (
               <div 
                 key={event.id}
+                onClick={() => setLocation(`/events/${event.id}`)}
                 className="bg-white rounded-lg border border-gray-100 overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer"
                 data-testid={`event-${event.id}`}
               >
