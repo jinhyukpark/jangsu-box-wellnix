@@ -1,6 +1,6 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
-import giftBoxImage from "@assets/generated_images/premium_korean_health_gift_box.png";
+import giftSetImage from "@assets/generated_images/luxury_korean_health_gift_set.png";
 
 const banners = [
   {
@@ -8,7 +8,7 @@ const banners = [
     title: "2026 설 얼리버드",
     subtitle: "장수 박스로 부모님께\n건강을 선물하세요",
     badge: "최대 40% 할인",
-    image: giftBoxImage,
+    image: giftSetImage,
     bgColor: "bg-gradient-to-br from-emerald-600 to-emerald-800",
   },
   {
@@ -16,7 +16,7 @@ const banners = [
     title: "매주 목요일은",
     subtitle: "웰닉스 구독자\n특별 할인의 날",
     badge: "구독 혜택",
-    image: giftBoxImage,
+    image: giftSetImage,
     bgColor: "bg-gradient-to-br from-amber-500 to-orange-600",
   },
   {
@@ -24,7 +24,7 @@ const banners = [
     title: "신규 가입 특별 혜택",
     subtitle: "첫 구독 시\n30% 할인 + 무료배송",
     badge: "신규 회원",
-    image: giftBoxImage,
+    image: giftSetImage,
     bgColor: "bg-gradient-to-br from-purple-600 to-indigo-700",
   },
 ];
@@ -45,11 +45,11 @@ export function HeroBanner() {
   return (
     <div className="relative overflow-hidden">
       <div 
-        className={`${banner.bgColor} px-4 py-6 min-h-[200px] transition-all duration-500 relative`}
+        className={`${banner.bgColor} px-4 py-5 min-h-[220px] transition-all duration-500 relative`}
         data-testid="hero-banner"
       >
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex-1 space-y-2">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1 space-y-2 pt-2">
             <span className="inline-block bg-white/20 backdrop-blur-sm text-white text-xs font-semibold px-3 py-1 rounded-full">
               {banner.badge}
             </span>
@@ -58,18 +58,20 @@ export function HeroBanner() {
               {banner.subtitle}
             </h2>
           </div>
-          <div className="w-32 h-32 rounded overflow-hidden shadow-2xl flex-shrink-0 relative">
+          <div className="w-40 h-40 rounded overflow-hidden shadow-2xl flex-shrink-0">
             <img 
               src={banner.image} 
               alt="프로모션 이미지"
               className="w-full h-full object-cover"
             />
-            <span className="absolute bottom-1.5 right-1.5 bg-black/40 backdrop-blur-sm text-white text-[10px] font-medium px-1.5 py-0.5 rounded">
-              {currentIndex + 1} / {banners.length}
-            </span>
           </div>
         </div>
         
+        <div className="flex items-center justify-end mt-3">
+          <span className="bg-black/30 backdrop-blur-sm text-white text-xs font-medium px-2.5 py-1 rounded">
+            {currentIndex + 1} / {banners.length}
+          </span>
+        </div>
       </div>
       
       <button 
