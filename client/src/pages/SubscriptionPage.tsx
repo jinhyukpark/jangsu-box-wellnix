@@ -42,9 +42,9 @@ const subscriptionPlans = [
 ];
 
 const monthlyStories = [
-  { month: "1월", theme: "새해 건강 기원", highlight: "6년근 홍삼정과 세트", image: giftBoxImage },
-  { month: "2월", theme: "사랑을 전하는 설날", highlight: "프리미엄 한우 세트", image: giftBoxImage },
-  { month: "3월", theme: "봄맞이 활력충전", highlight: "유기농 꿀 & 견과류", image: giftBoxImage },
+  { id: "1", month: "1월", theme: "새해 건강 기원", highlight: "6년근 홍삼정과 세트", image: giftBoxImage },
+  { id: "2", month: "2월", theme: "사랑을 전하는 설날", highlight: "프리미엄 한우 세트", image: giftBoxImage },
+  { id: "3", month: "3월", theme: "봄맞이 활력충전", highlight: "유기농 꿀 & 견과류", image: giftBoxImage },
 ];
 
 export default function SubscriptionPage() {
@@ -172,14 +172,18 @@ export default function SubscriptionPage() {
             className="flex gap-3 overflow-x-auto scrollbar-hide pb-2"
           >
             {monthlyStories.map((story) => (
-              <div key={story.month} className="flex-shrink-0 w-40">
+              <button 
+                key={story.id} 
+                onClick={() => setLocation(`/story/${story.id}`)}
+                className="flex-shrink-0 w-40 text-left"
+              >
                 <div className="relative rounded-lg overflow-hidden mb-2">
                   <img src={story.image} alt={story.theme} className="w-full aspect-square object-cover" />
                   <span className="absolute top-2 left-2 bg-primary text-white text-xs font-bold px-2 py-0.5 rounded">{story.month}</span>
                 </div>
                 <p className="font-semibold text-sm text-gray-800 truncate">{story.theme}</p>
                 <p className="text-xs text-gray-500 truncate">{story.highlight}</p>
-              </div>
+              </button>
             ))}
           </div>
         </div>
