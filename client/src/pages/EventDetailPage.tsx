@@ -1,5 +1,5 @@
 import { useParams, useLocation } from "wouter";
-import { ArrowLeft, Calendar, MapPin, Users, Clock, Gift, Utensils, Bus, CheckCircle } from "lucide-react";
+import { ArrowLeft, Calendar, MapPin, Users, Clock, Gift, Utensils, Bus, CheckCircle, MessageCircle, Share2 } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import templeImage from "@assets/generated_images/korean_temple_autumn_travel.png";
 import hqImage from "@assets/generated_images/modern_wellness_company_hq.png";
@@ -158,15 +158,33 @@ export default function EventDetailPage() {
   return (
     <AppLayout>
       <header className="sticky top-0 z-50 bg-white border-b border-gray-100">
-        <div className="flex items-center gap-3 p-4">
-          <button 
-            onClick={() => setLocation("/events")}
-            className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
-            data-testid="back-button"
-          >
-            <ArrowLeft className="w-5 h-5 text-gray-600" />
-          </button>
-          <h1 className="font-semibold text-gray-900">행사 상세</h1>
+        <div className="flex items-center justify-between p-4">
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => setLocation("/events")}
+              className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
+              data-testid="back-button"
+            >
+              <ArrowLeft className="w-5 h-5 text-gray-600" />
+            </button>
+            <h1 className="font-semibold text-gray-900">행사 상세</h1>
+          </div>
+          <div className="flex items-center gap-2">
+            <button 
+              className="p-2 hover:bg-yellow-50 rounded-lg transition-colors"
+              data-testid="share-kakao"
+              title="카카오톡 공유"
+            >
+              <MessageCircle className="w-5 h-5 text-yellow-500" />
+            </button>
+            <button 
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              data-testid="share-sms"
+              title="문자 공유"
+            >
+              <Share2 className="w-5 h-5 text-gray-600" />
+            </button>
+          </div>
         </div>
       </header>
 
