@@ -299,7 +299,7 @@ export default function EventDetailPage() {
 
         {event.promotions.length > 0 && (
           <div className="p-4 bg-white border-b border-gray-100">
-            <h3 className="font-semibold text-gray-900 mb-3">🎁 특별 프로모션</h3>
+            <h3 className="font-semibold text-gray-900 mb-3">특별 프로모션</h3>
             <div className="space-y-3">
               {event.promotions.map((promo, index) => (
                 <div key={index} className="bg-amber-50 border border-amber-200 p-3 rounded-lg">
@@ -342,7 +342,7 @@ export default function EventDetailPage() {
         </div>
 
         <div className="p-4 bg-white">
-          <h3 className="font-semibold text-gray-900 mb-3">📌 안내사항</h3>
+          <h3 className="font-semibold text-gray-900 mb-3">안내사항</h3>
           <ul className="space-y-2">
             {event.notes.map((note, index) => (
               <li key={index} className="text-sm text-gray-600 flex items-start gap-2">
