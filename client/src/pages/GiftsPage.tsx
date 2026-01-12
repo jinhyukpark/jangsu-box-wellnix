@@ -16,6 +16,7 @@ import petImg from "@assets/generated_images/cute_dog_and_cat_together.png";
 import dailyImg from "@assets/generated_images/daily_toiletries_products.png";
 
 const categories = [
+  { image: null, label: "전체" },
   { image: ginsengImg, label: "홍삼" },
   { image: heartImg, label: "혈압건강" },
   { image: vitaminImg, label: "영양제" },
@@ -81,29 +82,36 @@ export default function GiftsPage() {
             className="px-4 pb-4 overflow-x-auto scrollbar-hide"
           >
             <div className="flex gap-4">
-              {categories.map((cat) => (
-                <button
-                  key={cat.label}
-                  onClick={() => setSelectedCategory(selectedCategory === cat.label ? null : cat.label)}
-                  className={`flex flex-col items-center gap-2 min-w-[60px] transition-all ${
-                    selectedCategory === cat.label ? "opacity-100" : "opacity-70 hover:opacity-100"
-                  }`}
-                  data-testid={`gift-cat-${cat.label}`}
-                >
-                  <div className={`w-14 h-14 rounded-full overflow-hidden bg-gray-50 flex items-center justify-center transition-all ${
-                    selectedCategory === cat.label ? "ring-2 ring-primary ring-offset-2" : ""
-                  }`}>
-                    <img 
-                      src={cat.image} 
-                      alt={cat.label}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <span className={`text-xs font-medium ${
-                    selectedCategory === cat.label ? "text-primary" : "text-gray-700"
-                  }`}>{cat.label}</span>
-                </button>
-              ))}
+              {categories.map((cat) => {
+                const isSelected = cat.label === "전체" ? selectedCategory === null : selectedCategory === cat.label;
+                return (
+                  <button
+                    key={cat.label}
+                    onClick={() => setSelectedCategory(cat.label === "전체" ? null : cat.label)}
+                    className={`flex flex-col items-center gap-2 min-w-[60px] transition-all ${
+                      isSelected ? "opacity-100" : "opacity-70 hover:opacity-100"
+                    }`}
+                    data-testid={`gift-cat-${cat.label}`}
+                  >
+                    <div className={`w-14 h-14 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center transition-all ${
+                      isSelected ? "ring-2 ring-primary ring-offset-2" : ""
+                    }`}>
+                      {cat.image ? (
+                        <img 
+                          src={cat.image} 
+                          alt={cat.label}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <span className="text-lg font-bold text-primary">All</span>
+                      )}
+                    </div>
+                    <span className={`text-xs font-medium ${
+                      isSelected ? "text-primary" : "text-gray-700"
+                    }`}>{cat.label}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
           
