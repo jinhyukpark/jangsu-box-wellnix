@@ -1,4 +1,5 @@
 import { ChevronRight } from "lucide-react";
+import { useRef } from "react";
 import { ProductCard } from "./ProductCard";
 
 interface Product {
@@ -19,6 +20,15 @@ interface ProductSectionProps {
 }
 
 export function ProductSection({ title, subtitle, products }: ProductSectionProps) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const handleWheel = (e: React.WheelEvent) => {
+    if (scrollRef.current) {
+      e.preventDefault();
+      scrollRef.current.scrollLeft += e.deltaY;
+    }
+  };
+
   return (
     <section className="py-5">
       <div className="flex items-center justify-between px-4 mb-4">
@@ -33,7 +43,11 @@ export function ProductSection({ title, subtitle, products }: ProductSectionProp
           더보기 <ChevronRight className="w-4 h-4" />
         </button>
       </div>
-      <div className="flex gap-3 overflow-x-auto px-4 pb-2 scrollbar-hide">
+      <div 
+        ref={scrollRef}
+        onWheel={handleWheel}
+        className="flex gap-3 overflow-x-auto px-4 pb-2 scrollbar-hide"
+      >
         {products.map((product) => (
           <ProductCard key={product.id} {...product} />
         ))}
