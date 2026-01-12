@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { Calendar, MapPin, Users } from "lucide-react";
+import { Calendar, MapPin, Users, ShoppingCart } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import templeImage from "@assets/generated_images/korean_temple_autumn_travel.png";
 import hqImage from "@assets/generated_images/modern_wellness_company_hq.png";
@@ -66,8 +66,18 @@ export default function EventsPage() {
   return (
     <AppLayout>
       <header className="sticky top-0 z-50 bg-white border-b border-gray-100">
-        <div className="p-4 pb-2">
+        <div className="p-4 pb-2 flex items-center justify-between">
           <h1 className="text-xl font-bold text-gray-900">건강 행사</h1>
+          <button 
+            onClick={() => setLocation("/cart")}
+            className="relative p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            data-testid="cart-button"
+          >
+            <ShoppingCart className="w-5 h-5 text-gray-700" />
+            <span className="absolute -top-1 -right-1 w-5 h-5 bg-primary text-white text-xs font-bold rounded-full flex items-center justify-center">
+              2
+            </span>
+          </button>
         </div>
         <div className="px-4 pb-2 flex gap-2 overflow-x-auto scrollbar-hide">
           {months.map((month) => (
