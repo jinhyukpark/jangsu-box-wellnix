@@ -45,26 +45,26 @@ export function HeroBanner() {
   return (
     <div className="relative overflow-hidden">
       <div 
-        className={`${banner.bgColor} px-5 py-8 min-h-[240px] transition-all duration-500 relative`}
+        className={`${banner.bgColor} px-4 py-6 min-h-[200px] transition-all duration-500 relative`}
         data-testid="hero-banner"
       >
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex-1 space-y-3">
-            <span className="inline-block bg-white/20 backdrop-blur-sm text-white text-xs font-semibold px-3 py-1.5 rounded-full">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex-1 space-y-2">
+            <span className="inline-block bg-white/20 backdrop-blur-sm text-white text-xs font-semibold px-3 py-1 rounded-full">
               {banner.badge}
             </span>
             <p className="text-white/80 text-sm font-medium">{banner.title}</p>
-            <h2 className="text-white text-2xl font-bold leading-tight whitespace-pre-line">
+            <h2 className="text-white text-xl font-bold leading-tight whitespace-pre-line">
               {banner.subtitle}
             </h2>
           </div>
-          <div className="w-36 h-36 rounded-2xl overflow-hidden shadow-2xl flex-shrink-0 relative">
+          <div className="w-32 h-32 rounded-lg overflow-hidden shadow-2xl flex-shrink-0 relative">
             <img 
               src={banner.image} 
               alt="프로모션 이미지"
               className="w-full h-full object-cover"
             />
-            <span className="absolute bottom-2 right-2 bg-black/40 backdrop-blur-sm text-white text-xs font-medium px-2 py-1 rounded-lg">
+            <span className="absolute bottom-1.5 right-1.5 bg-black/40 backdrop-blur-sm text-white text-[10px] font-medium px-1.5 py-0.5 rounded">
               {currentIndex + 1} / {banners.length}
             </span>
           </div>
