@@ -11,6 +11,7 @@ import EventsPage from "@/pages/EventsPage";
 import MyPage from "@/pages/MyPage";
 import StoryDetailPage from "@/pages/StoryDetailPage";
 import EventDetailPage from "@/pages/EventDetailPage";
+import AdminPage from "@/pages/AdminPage";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -24,6 +25,7 @@ function Router() {
       <Route path="/mypage" component={MyPage} />
       <Route path="/story/:id" component={StoryDetailPage} />
       <Route path="/events/:id" component={EventDetailPage} />
+      <Route path="/admin" component={AdminPage} />
       <Route component={NotFound} />
     </Switch>
   );
