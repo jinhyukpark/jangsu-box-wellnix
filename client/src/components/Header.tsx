@@ -47,7 +47,7 @@ export function Header() {
         className="px-4 pb-3 overflow-x-auto scrollbar-hide"
       >
         <div className="flex gap-2">
-          {["홈", "PRESTIGE", "설 얼리버드", "구독 서비스", "건강정보"].map((tab, index) => (
+          {["홈", "설 선물세트", "장수박스", "건강 여행", "인기 상품"].map((tab, index) => (
             <button
               key={tab}
               className={`flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
