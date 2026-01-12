@@ -1,4 +1,4 @@
-import { ArrowLeft, Share2, Heart, Calendar, Package, Gift } from "lucide-react";
+import { ArrowLeft, Share2, Heart, Calendar, Package, Gift, CheckCircle, Building2, MapPin } from "lucide-react";
 import { useLocation, useParams } from "wouter";
 import { AppLayout } from "@/components/AppLayout";
 import giftBoxImage from "@assets/generated_images/premium_korean_health_gift_box.png";
@@ -18,6 +18,8 @@ const storiesData: Record<string, {
   sections: { title: string; content: string; image?: string }[];
   memoryBox: { title: string; story: string; item: string; image: string };
   products: { name: string; benefit: string; desc: string; image: string }[];
+  healthTips: { title: string; tips: string[] };
+  suppliers: { name: string; location: string; specialty: string }[];
 }> = {
   "1": {
     month: "1월",
@@ -53,6 +55,20 @@ const storiesData: Record<string, {
       { name: "국산 대추칩 80g", benefit: "혈액순환 개선", desc: "경북 경산 대추, 무첨가 자연건조", image: jujubeImage },
       { name: "유기농 호두 100g", benefit: "두뇌 건강", desc: "국산 유기농 인증, 저온 로스팅", image: walnutImage },
       { name: "전통 한과 세트", benefit: "기력 보충", desc: "수제 유과, 약과 5종 구성", image: hangwaImage },
+    ],
+    healthTips: {
+      title: "1월 건강 지킴 수칙",
+      tips: [
+        "아침 공복에 따뜻한 물 한 잔으로 하루를 시작하세요",
+        "실내 습도 50-60%를 유지해 호흡기 건강을 지키세요",
+        "하루 30분 이상 햇빛을 쬐어 비타민D를 보충하세요",
+        "홍삼은 아침 식후에 드시면 흡수율이 높아집니다"
+      ]
+    },
+    suppliers: [
+      { name: "금산인삼농협", location: "충남 금산군", specialty: "6년근 홍삼 전문" },
+      { name: "경산대추영농조합", location: "경북 경산시", specialty: "친환경 대추 재배" },
+      { name: "전통한과명인 김순희", location: "전북 전주시", specialty: "전통 한과 40년 명인" },
     ]
   },
   "2": {
@@ -89,6 +105,20 @@ const storiesData: Record<string, {
       { name: "1++ 한우 안심 200g", benefit: "저지방 고단백", desc: "가장 부드러운 부위, 스테이크용", image: giftBoxImage },
       { name: "명절 떡국떡 500g", benefit: "에너지 보충", desc: "국산 쌀 100%, 쫄깃한 식감", image: hangwaImage },
       { name: "전통 식혜 1L", benefit: "소화 촉진", desc: "무설탕, 국산 엿기름 사용", image: jujubeImage },
+    ],
+    healthTips: {
+      title: "2월 건강 지킴 수칙",
+      tips: [
+        "명절 과식 후에는 식혜나 수정과로 소화를 도우세요",
+        "기름진 음식 섭취 후 따뜻한 녹차가 좋습니다",
+        "가족과 함께 가벼운 산책으로 소화를 촉진하세요",
+        "고기는 쌈채소와 함께 드시면 영양 균형이 좋아요"
+      ]
+    },
+    suppliers: [
+      { name: "횡성한우조합", location: "강원 횡성군", specialty: "1++ 등급 한우 전문" },
+      { name: "이천쌀농협", location: "경기 이천시", specialty: "임금님표 이천쌀" },
+      { name: "전통주가 박막례", location: "경북 안동시", specialty: "전통 식혜/수정과 명인" },
     ]
   },
   "3": {
@@ -125,6 +155,20 @@ const storiesData: Record<string, {
       { name: "국산 아몬드 150g", benefit: "혈관 건강", desc: "저온 로스팅, 무염 무첨가", image: walnutImage },
       { name: "볶음 호두 100g", benefit: "두뇌 건강", desc: "국산 100%, 껍질째 볶음", image: walnutImage },
       { name: "캐슈넛 100g", benefit: "뼈 건강", desc: "베트남 직수입, 경화유 無", image: jujubeImage },
+    ],
+    healthTips: {
+      title: "3월 건강 지킴 수칙",
+      tips: [
+        "환절기 면역력을 위해 아침마다 꿀물을 드세요",
+        "미세먼지가 심한 날은 외출을 자제하세요",
+        "봄나물로 겨우내 부족한 비타민을 보충하세요",
+        "견과류는 하루 한 줌(30g)이 적당합니다"
+      ]
+    },
+    suppliers: [
+      { name: "지리산벌꿀영농조합", location: "전남 구례군", specialty: "지리산 천연 생꿀" },
+      { name: "김천견과류농장", location: "경북 김천시", specialty: "국산 호두/아몬드" },
+      { name: "하동녹차마을", location: "경남 하동군", specialty: "유기농 녹차/꿀차" },
     ]
   }
 };
@@ -218,6 +262,50 @@ export default function StoryDetailPage() {
                       <span className="text-xs text-primary bg-primary/10 px-2 py-0.5 rounded flex-shrink-0">{product.benefit}</span>
                     </div>
                     <p className="text-xs text-gray-500 mt-1">{product.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 mb-6">
+            <h3 className="font-bold text-gray-900 mb-3 flex items-center gap-2">
+              <CheckCircle className="w-5 h-5 text-primary" />
+              {story.healthTips.title}
+            </h3>
+            <ul className="space-y-2">
+              {story.healthTips.tips.map((tip, idx) => (
+                <li key={idx} className="flex items-start gap-2 text-sm text-gray-600">
+                  <span className="w-5 h-5 bg-primary/10 text-primary text-xs font-bold rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    {idx + 1}
+                  </span>
+                  {tip}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="border border-gray-100 rounded-lg p-4 mb-6">
+            <h3 className="font-bold text-gray-900 mb-3 flex items-center gap-2">
+              <Building2 className="w-5 h-5 text-gray-600" />
+              제휴 업체 정보
+            </h3>
+            <div className="space-y-3">
+              {story.suppliers.map((supplier, idx) => (
+                <div key={idx} className="flex items-center gap-3 pb-3 border-b border-gray-100 last:border-0 last:pb-0">
+                  <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Building2 className="w-5 h-5 text-gray-400" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-gray-800 text-sm">{supplier.name}</p>
+                    <div className="flex items-center gap-2 text-xs text-gray-500">
+                      <span className="flex items-center gap-0.5">
+                        <MapPin className="w-3 h-3" />
+                        {supplier.location}
+                      </span>
+                      <span>·</span>
+                      <span>{supplier.specialty}</span>
+                    </div>
                   </div>
                 </div>
               ))}
