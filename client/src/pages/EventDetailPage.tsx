@@ -228,11 +228,19 @@ export default function EventDetailPage() {
             <Clock className="w-5 h-5 text-primary" />
             프로그램 일정
           </h3>
-          <div className="space-y-2">
+          <div className="relative">
             {event.schedule.map((item, index) => (
-              <div key={index} className="flex gap-4 py-2 border-b border-gray-50 last:border-0">
-                <span className="text-sm font-medium text-primary w-14 flex-shrink-0">{item.time}</span>
-                <span className="text-sm text-gray-700">{item.activity}</span>
+              <div key={index} className="flex gap-4 relative">
+                <div className="flex flex-col items-center">
+                  <div className="w-3 h-3 bg-primary rounded-full flex-shrink-0 z-10" />
+                  {index < event.schedule.length - 1 && (
+                    <div className="w-0.5 bg-primary/30 flex-1 min-h-[40px]" />
+                  )}
+                </div>
+                <div className="pb-4">
+                  <span className="text-sm font-semibold text-primary">{item.time}</span>
+                  <p className="text-sm text-gray-700 mt-0.5">{item.activity}</p>
+                </div>
               </div>
             ))}
           </div>
