@@ -26,10 +26,10 @@ export function PromoSidebar() {
             <div className="absolute inset-0 flex flex-col justify-end p-6">
               <div className="text-center">
                 <h2 className="text-2xl font-bold text-white mb-2 font-serif leading-tight">
-                  차이를 안다면,
+                  건강한 삶의 명가,
                 </h2>
                 <h2 className="text-2xl font-bold text-white mb-3 font-serif leading-tight">
-                  선물은 웰닉스
+                  부모님 효도는 웰닉스
                 </h2>
                 <p className="text-white/80 text-sm leading-relaxed">
                   부모님의 건강을 생각하는 당신을 위한<br />
