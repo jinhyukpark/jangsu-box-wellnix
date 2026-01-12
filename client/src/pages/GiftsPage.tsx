@@ -15,7 +15,6 @@ import petImg from "@assets/generated_images/cute_dog_and_cat_together.png";
 import dailyImg from "@assets/generated_images/daily_toiletries_products.png";
 
 const categories = [
-  { image: null, label: "전체" },
   { image: ginsengImg, label: "홍삼" },
   { image: heartImg, label: "혈압건강" },
   { image: vitaminImg, label: "영양제" },
@@ -40,7 +39,7 @@ const products = [
 ];
 
 export default function GiftsPage() {
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [, setLocation] = useLocation();
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -51,8 +50,16 @@ export default function GiftsPage() {
     }
   };
 
-  const filteredProducts = selectedCategory 
-    ? products.filter(p => p.category === selectedCategory)
+  const toggleCategory = (label: string) => {
+    setSelectedCategories(prev => 
+      prev.includes(label) 
+        ? prev.filter(c => c !== label)
+        : [...prev, label]
+    );
+  };
+
+  const filteredProducts = selectedCategories.length > 0
+    ? products.filter(p => selectedCategories.includes(p.category))
     : products;
 
   return (
@@ -79,28 +86,24 @@ export default function GiftsPage() {
         >
           <div className="flex gap-4">
             {categories.map((cat) => {
-              const isSelected = cat.label === "전체" ? selectedCategory === null : selectedCategory === cat.label;
+              const isSelected = selectedCategories.includes(cat.label);
               return (
                 <button
                   key={cat.label}
-                  onClick={() => setSelectedCategory(cat.label === "전체" ? null : cat.label)}
+                  onClick={() => toggleCategory(cat.label)}
                   className={`flex flex-col items-center gap-2 min-w-[60px] transition-all ${
-                    isSelected ? "opacity-100" : "opacity-70 hover:opacity-100"
+                    isSelected || selectedCategories.length === 0 ? "opacity-100" : "opacity-50 hover:opacity-80"
                   }`}
                   data-testid={`gift-cat-${cat.label}`}
                 >
                   <div className={`w-14 h-14 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center transition-all ${
                     isSelected ? "ring-2 ring-primary ring-offset-2" : ""
                   }`}>
-                    {cat.image ? (
-                      <img 
-                        src={cat.image} 
-                        alt={cat.label}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <span className="text-lg font-bold text-primary">All</span>
-                    )}
+                    <img 
+                      src={cat.image} 
+                      alt={cat.label}
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                   <span className={`text-xs font-medium ${
                     isSelected ? "text-primary" : "text-gray-700"
@@ -113,7 +116,7 @@ export default function GiftsPage() {
         
         <div className="px-4 pb-3 flex items-center justify-between border-t border-gray-50 pt-3">
           <span className="text-sm text-gray-500">
-            {selectedCategory ? `${selectedCategory} ` : "전체 "}
+            {selectedCategories.length > 0 ? `${selectedCategories.join(", ")} ` : "전체 "}
             {filteredProducts.length}개 상품
           </span>
           <div className="flex items-center gap-2">
