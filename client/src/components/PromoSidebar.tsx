@@ -3,15 +3,15 @@ import giftBoxImage from "@assets/generated_images/premium_korean_health_gift_bo
 
 export function PromoSidebar() {
   return (
-    <aside className="hidden lg:flex flex-col w-[420px] min-h-screen bg-gradient-to-b from-stone-100 via-stone-50 to-amber-50/30 relative">
-      <div className="flex flex-col h-full p-8">
-        <div className="mb-10">
+    <aside className="hidden lg:flex flex-col w-[420px] min-h-screen bg-gradient-to-b from-stone-100 via-stone-50 to-amber-50/30 relative mr-8">
+      <div className="flex flex-col h-screen justify-center p-8">
+        <div className="mb-8">
           <h1 className="text-2xl font-bold text-emerald-700 font-serif tracking-tight">
             웰닉스
           </h1>
         </div>
         
-        <div className="flex-1 flex flex-col">
+        <div className="flex flex-col">
           <div className="bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-700 rounded-3xl p-6 mb-6 shadow-xl relative overflow-hidden">
             <div className="absolute inset-0 opacity-10">
               <div className="absolute top-0 right-0 w-40 h-40 bg-white/20 rounded-full blur-3xl" />
@@ -53,7 +53,7 @@ export function PromoSidebar() {
             </div>
           </div>
           
-          <div className="space-y-3 flex-1">
+          <div className="space-y-3">
             <button className="w-full bg-stone-200/80 hover:bg-stone-200 rounded-2xl p-4 flex items-center gap-4 transition-all group">
               <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-sm">
                 <Building2 className="w-6 h-6 text-stone-600" />
