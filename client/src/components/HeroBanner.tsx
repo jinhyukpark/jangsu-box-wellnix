@@ -6,7 +6,7 @@ const banners = [
   {
     id: 1,
     title: "2026 설 얼리버드",
-    subtitle: "장수 박스로 부모님께\n건강을 선물하세요",
+    subtitle: "설 선물 웰닉스로\n감사의 인사를 전하세요",
     badge: "최대 40% 할인",
     image: giftSetImage,
   },
