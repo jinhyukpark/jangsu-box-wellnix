@@ -43,34 +43,34 @@ export function PromoSidebar() {
           </div>
           
           <div className="space-y-3">
-            <button className="w-full bg-stone-200/80 hover:bg-stone-200 rounded p-4 flex items-center gap-4 transition-all group">
-              <div className="w-14 h-14 rounded overflow-hidden flex-shrink-0">
+            <button className="w-full bg-stone-100 hover:bg-stone-200 rounded overflow-hidden flex items-center transition-all group relative h-24">
+              <div className="text-left flex-1 p-4 z-10">
+                <h3 className="font-semibold text-stone-800 text-sm">기업 구매 전용 페이지</h3>
+                <p className="text-xs text-stone-500">바로가기</p>
+              </div>
+              <div className="absolute right-0 top-0 h-full w-32">
                 <img 
                   src={officeTeamImage} 
                   alt="기업 구매"
                   className="w-full h-full object-cover"
                 />
+                <div className="absolute inset-0 bg-gradient-to-r from-stone-100 to-transparent" />
               </div>
-              <div className="text-left flex-1">
-                <h3 className="font-semibold text-stone-800 text-sm">기업 구매 전용 페이지</h3>
-                <p className="text-xs text-stone-500">바로가기</p>
-              </div>
-              <ArrowRight className="w-5 h-5 text-stone-400 group-hover:translate-x-1 transition-transform" />
             </button>
             
-            <button className="w-full bg-[#006861]/10 hover:bg-[#006861]/20 rounded p-4 flex items-center gap-4 transition-all group">
-              <div className="w-14 h-14 rounded overflow-hidden flex-shrink-0">
+            <button className="w-full bg-[#e8f4f3] hover:bg-[#d8edeb] rounded overflow-hidden flex items-center transition-all group relative h-24">
+              <div className="text-left flex-1 p-4 z-10">
+                <h3 className="font-semibold text-stone-800 text-sm">365일 장수박스 서비스</h3>
+                <p className="text-xs text-stone-500">웰닉스 에디션에서 보기</p>
+              </div>
+              <div className="absolute right-0 top-0 h-full w-32">
                 <img 
                   src={giftSetImage} 
                   alt="장수박스"
                   className="w-full h-full object-cover"
                 />
+                <div className="absolute inset-0 bg-gradient-to-r from-[#e8f4f3] to-transparent" />
               </div>
-              <div className="text-left flex-1">
-                <h3 className="font-semibold text-stone-800 text-sm">365일 장수박스 서비스</h3>
-                <p className="text-xs text-stone-500">웰닉스 에디션에서 보기</p>
-              </div>
-              <ArrowRight className="w-5 h-5 text-stone-400 group-hover:translate-x-1 transition-transform" />
             </button>
             
             <button className="w-full bg-amber-50/80 hover:bg-amber-100/80 rounded p-4 flex items-center gap-4 transition-all group">
