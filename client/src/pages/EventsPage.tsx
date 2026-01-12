@@ -53,22 +53,6 @@ const upcomingEvents = [
   },
 ];
 
-const pastEvents = [
-  {
-    id: "4",
-    title: "2025 연말 건강 콘서트",
-    date: "2025.12.20 (토)",
-    participants: 245,
-    image: giftBoxImage,
-  },
-  {
-    id: "5",
-    title: "겨울철 면역력 강화 세미나",
-    date: "2025.12.10 (토)",
-    participants: 189,
-    image: giftBoxImage,
-  },
-];
 
 export default function EventsPage() {
   const [selectedMonth, setSelectedMonth] = useState("2026-01");
@@ -170,36 +154,6 @@ export default function EventsPage() {
                       신청하기
                     </button>
                   </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-        
-        <div className="h-2 bg-gray-50" />
-        
-        <section className="p-4">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-semibold text-gray-900">지난 행사</h2>
-            <button className="flex items-center text-sm text-gray-500" data-testid="past-events-more">
-              더보기 <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
-          
-          <div className="space-y-3">
-            {pastEvents.map((event) => (
-              <div 
-                key={event.id}
-                className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg"
-                data-testid={`past-event-${event.id}`}
-              >
-                <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
-                  <img src={event.image} alt={event.title} className="w-full h-full object-cover" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-medium text-gray-800 text-sm line-clamp-1">{event.title}</h3>
-                  <p className="text-xs text-gray-500 mt-0.5">{event.date}</p>
-                  <p className="text-xs text-gray-500">{event.participants}명 참여</p>
                 </div>
               </div>
             ))}
