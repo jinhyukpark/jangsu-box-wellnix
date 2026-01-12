@@ -1,7 +1,8 @@
-import { Gift, Truck, Shield, Phone, ArrowRight, Smartphone } from "lucide-react";
+import { Gift, Truck, Shield, Phone } from "lucide-react";
 import happySeniorsImage from "@assets/generated_images/happy_seniors_receiving_gift.png";
 import officeTeamImage from "@assets/generated_images/smiling_office_workers_team.png";
 import giftSetImage from "@assets/generated_images/korean_health_gift_set.png";
+import customerServiceImage from "@assets/generated_images/customer_service_representative_headset.png";
 
 export function PromoSidebar() {
   return (
@@ -69,20 +70,18 @@ export function PromoSidebar() {
               </div>
             </button>
             
-            <button className="w-full bg-amber-50/80 hover:bg-amber-100/80 rounded p-4 flex items-center gap-4 transition-all group">
-              <div className="w-12 h-12 bg-white rounded flex items-center justify-center shadow-sm">
-                <Smartphone className="w-6 h-6 text-amber-600" />
+            <button className="w-full bg-emerald-50 hover:bg-emerald-100 rounded overflow-hidden flex items-center transition-all group relative h-24">
+              <div className="text-left flex-1 p-4 z-10">
+                <h3 className="font-semibold text-stone-800 text-sm">고객센터 1588-0000</h3>
+                <p className="text-xs text-stone-500">평일 09:00 - 18:00</p>
               </div>
-              <div className="text-left flex-1">
-                <h3 className="font-semibold text-stone-800 text-sm">웰닉스 모바일 앱 설치하고</h3>
-                <p className="text-xs text-stone-500">다양한 혜택 받아보세요</p>
-              </div>
-              <div className="w-12 h-12 bg-white rounded-md p-1 shadow-sm">
-                <div className="w-full h-full bg-stone-800 rounded-sm grid grid-cols-4 grid-rows-4 gap-0.5 p-1">
-                  {Array.from({ length: 16 }).map((_, i) => (
-                    <div key={i} className={`rounded-sm ${i % 3 === 0 ? 'bg-white' : 'bg-stone-800'}`} />
-                  ))}
-                </div>
+              <div className="absolute right-0 top-0 h-full w-32">
+                <img 
+                  src={customerServiceImage} 
+                  alt="고객센터"
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-r from-emerald-50 to-transparent" />
               </div>
             </button>
           </div>
