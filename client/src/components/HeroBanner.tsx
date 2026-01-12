@@ -70,18 +70,6 @@ export function HeroBanner() {
           </div>
         </div>
         
-        <div className="flex gap-1.5 mt-5">
-          {banners.map((_, idx) => (
-            <button
-              key={idx}
-              onClick={() => setCurrentIndex(idx)}
-              className={`h-2 rounded-full transition-all duration-300 ${
-                idx === currentIndex ? "bg-white w-6" : "bg-white/40 w-2"
-              }`}
-              data-testid={`banner-dot-${idx}`}
-            />
-          ))}
-        </div>
       </div>
       
       <button 
