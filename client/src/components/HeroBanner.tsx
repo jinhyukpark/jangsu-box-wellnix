@@ -45,11 +45,11 @@ export function HeroBanner() {
   return (
     <div className="relative overflow-hidden">
       <div 
-        className={`${banner.bgColor} px-4 py-5 min-h-[220px] transition-all duration-500 relative`}
+        className={`${banner.bgColor} transition-all duration-500 relative`}
         data-testid="hero-banner"
       >
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex-1 space-y-2 pt-2">
+        <div className="flex">
+          <div className="flex-1 px-4 py-5 space-y-2">
             <span className="inline-block bg-white/20 backdrop-blur-sm text-white text-xs font-semibold px-3 py-1 rounded-full">
               {banner.badge}
             </span>
@@ -58,19 +58,16 @@ export function HeroBanner() {
               {banner.subtitle}
             </h2>
           </div>
-          <div className="w-40 h-40 rounded overflow-hidden shadow-2xl flex-shrink-0">
+          <div className="w-44 relative flex-shrink-0">
             <img 
               src={banner.image} 
               alt="프로모션 이미지"
               className="w-full h-full object-cover"
             />
+            <span className="absolute bottom-3 right-3 bg-black/40 backdrop-blur-sm text-white text-xs font-medium px-2.5 py-1 rounded z-10">
+              {currentIndex + 1} / {banners.length}
+            </span>
           </div>
-        </div>
-        
-        <div className="flex items-center justify-end mt-3">
-          <span className="bg-black/30 backdrop-blur-sm text-white text-xs font-medium px-2.5 py-1 rounded">
-            {currentIndex + 1} / {banners.length}
-          </span>
         </div>
       </div>
       
