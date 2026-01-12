@@ -13,7 +13,7 @@ interface EventCardProps {
 export function EventCard({ id, title, date, location, participants, image, tag }: EventCardProps) {
   return (
     <div 
-      className="flex-shrink-0 w-72 bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 group cursor-pointer hover:shadow-md transition-shadow"
+      className="flex-shrink-0 w-72 bg-white rounded overflow-hidden shadow-sm border border-gray-100 group cursor-pointer hover:shadow-md transition-shadow"
       data-testid={`event-card-${id}`}
     >
       <div className="relative h-36 overflow-hidden">

@@ -32,12 +32,12 @@ export function PromoBanner() {
         return (
           <button
             key={promo.title}
-            className={`w-full ${promo.color} rounded-2xl p-4 flex items-center justify-between group transition-all duration-200 hover:shadow-md animate-slide-up`}
+            className={`w-full ${promo.color} rounded p-4 flex items-center justify-between group transition-all duration-200 hover:shadow-md animate-slide-up`}
             style={{ animationDelay: `${index * 100}ms` }}
             data-testid={`promo-${index}`}
           >
             <div className="flex items-center gap-3">
-              <div className={`w-10 h-10 rounded-xl bg-white flex items-center justify-center ${promo.iconColor}`}>
+              <div className={`w-10 h-10 rounded bg-white flex items-center justify-center ${promo.iconColor}`}>
                 <Icon className="w-5 h-5" strokeWidth={1.8} />
               </div>
               <div className="text-left">

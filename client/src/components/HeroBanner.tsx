@@ -58,7 +58,7 @@ export function HeroBanner() {
               {banner.subtitle}
             </h2>
           </div>
-          <div className="w-32 h-32 rounded-lg overflow-hidden shadow-2xl flex-shrink-0 relative">
+          <div className="w-32 h-32 rounded overflow-hidden shadow-2xl flex-shrink-0 relative">
             <img 
               src={banner.image} 
               alt="프로모션 이미지"

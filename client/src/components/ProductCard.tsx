@@ -19,7 +19,7 @@ export function ProductCard({ id, name, price, originalPrice, image, rating, rev
       className="flex-shrink-0 w-40 group cursor-pointer"
       data-testid={`product-card-${id}`}
     >
-      <div className="relative mb-2 rounded-2xl overflow-hidden bg-gray-50">
+      <div className="relative mb-2 rounded overflow-hidden bg-gray-50">
         <img 
           src={image} 
           alt={name}

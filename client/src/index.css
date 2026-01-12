@@ -106,7 +106,7 @@
   --font-sans: 'Noto Sans KR', sans-serif;
   --font-serif: 'Noto Serif KR', serif;
   --font-mono: Menlo, monospace;
-  --radius: 0.75rem;
+  --radius: 0.25rem;
   --shadow-2xs: 0 1px 2px rgba(0,0,0,0.04);
   --shadow-xs: 0 1px 3px rgba(0,0,0,0.06);
   --shadow-sm: 0 2px 4px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);

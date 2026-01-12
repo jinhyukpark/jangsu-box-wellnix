@@ -34,7 +34,7 @@ export function CategoryGrid() {
               className="flex flex-col items-center gap-2 group animate-fade-in"
               style={{ animationDelay: `${index * 50}ms` }}
             >
-              <div className="w-14 h-14 rounded-2xl overflow-hidden bg-gray-50 flex items-center justify-center transition-all duration-200 group-hover:scale-105 group-hover:shadow-md">
+              <div className="w-14 h-14 rounded overflow-hidden bg-gray-50 flex items-center justify-center transition-all duration-200 group-hover:scale-105 group-hover:shadow-md">
                 <img 
                   src={cat.image} 
                   alt={cat.label}

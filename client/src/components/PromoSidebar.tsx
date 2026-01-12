@@ -12,14 +12,14 @@ export function PromoSidebar() {
         </div>
         
         <div className="flex flex-col">
-          <div className="bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-700 rounded-xl p-6 mb-6 shadow-xl relative overflow-hidden">
+          <div className="bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-700 rounded p-6 mb-6 shadow-xl relative overflow-hidden">
             <div className="absolute inset-0 opacity-10">
               <div className="absolute top-0 right-0 w-40 h-40 bg-white/20 rounded-full blur-3xl" />
               <div className="absolute bottom-0 left-0 w-32 h-32 bg-emerald-300/30 rounded-full blur-2xl" />
             </div>
             
             <div className="relative z-10">
-              <div className="w-full aspect-[4/3] rounded-lg overflow-hidden mb-5 shadow-2xl bg-white/10">
+              <div className="w-full aspect-[4/3] rounded overflow-hidden mb-5 shadow-2xl bg-white/10">
                 <img 
                   src={giftBoxImage} 
                   alt="장수 박스 선물세트"
@@ -43,7 +43,7 @@ export function PromoSidebar() {
                 </p>
                 
                 <button 
-                  className="w-full bg-white text-emerald-700 font-bold py-4 rounded-lg flex items-center justify-center gap-2 hover:bg-emerald-50 transition-all shadow-lg hover:shadow-xl"
+                  className="w-full bg-white text-emerald-700 font-bold py-4 rounded flex items-center justify-center gap-2 hover:bg-emerald-50 transition-all shadow-lg hover:shadow-xl"
                   data-testid="sidebar-cta"
                 >
                   지금 구매하기
@@ -54,8 +54,8 @@ export function PromoSidebar() {
           </div>
           
           <div className="space-y-3">
-            <button className="w-full bg-stone-200/80 hover:bg-stone-200 rounded-lg p-4 flex items-center gap-4 transition-all group">
-              <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center shadow-sm">
+            <button className="w-full bg-stone-200/80 hover:bg-stone-200 rounded p-4 flex items-center gap-4 transition-all group">
+              <div className="w-12 h-12 bg-white rounded flex items-center justify-center shadow-sm">
                 <Building2 className="w-6 h-6 text-stone-600" />
               </div>
               <div className="text-left flex-1">
@@ -65,8 +65,8 @@ export function PromoSidebar() {
               <ArrowRight className="w-5 h-5 text-stone-400 group-hover:translate-x-1 transition-transform" />
             </button>
             
-            <button className="w-full bg-emerald-50/80 hover:bg-emerald-100/80 rounded-lg p-4 flex items-center gap-4 transition-all group">
-              <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center shadow-sm">
+            <button className="w-full bg-emerald-50/80 hover:bg-emerald-100/80 rounded p-4 flex items-center gap-4 transition-all group">
+              <div className="w-12 h-12 bg-white rounded flex items-center justify-center shadow-sm">
                 <Headphones className="w-6 h-6 text-emerald-600" />
               </div>
               <div className="text-left flex-1">
@@ -76,8 +76,8 @@ export function PromoSidebar() {
               <ArrowRight className="w-5 h-5 text-stone-400 group-hover:translate-x-1 transition-transform" />
             </button>
             
-            <button className="w-full bg-amber-50/80 hover:bg-amber-100/80 rounded-lg p-4 flex items-center gap-4 transition-all group">
-              <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center shadow-sm">
+            <button className="w-full bg-amber-50/80 hover:bg-amber-100/80 rounded p-4 flex items-center gap-4 transition-all group">
+              <div className="w-12 h-12 bg-white rounded flex items-center justify-center shadow-sm">
                 <Smartphone className="w-6 h-6 text-amber-600" />
               </div>
               <div className="text-left flex-1">
