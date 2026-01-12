@@ -96,8 +96,8 @@ export default function GiftsPage() {
                   }`}
                   data-testid={`gift-cat-${cat.label}`}
                 >
-                  <div className={`w-14 h-14 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center transition-all ${
-                    isSelected ? "ring-2 ring-primary ring-offset-2" : ""
+                  <div className={`w-14 h-14 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center transition-all border-2 ${
+                    isSelected ? "border-[#006861]" : "border-transparent"
                   }`}>
                     <img 
                       src={cat.image} 
@@ -106,7 +106,7 @@ export default function GiftsPage() {
                     />
                   </div>
                   <span className={`text-xs font-medium ${
-                    isSelected ? "text-primary" : "text-gray-700"
+                    isSelected ? "text-[#006861]" : "text-gray-700"
                   }`}>{cat.label}</span>
                 </button>
               );
