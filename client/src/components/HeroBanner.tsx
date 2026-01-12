@@ -57,7 +57,7 @@ export function HeroBanner() {
             {banner.badge}
           </span>
           <p className="text-white/90 text-sm font-medium mb-1">{banner.title}</p>
-          <h2 className="text-white text-2xl font-bold leading-tight whitespace-pre-line drop-shadow-lg">
+          <h2 className="text-white text-2xl font-bold leading-tight whitespace-pre-line drop-shadow-lg font-serif">
             {banner.subtitle}
           </h2>
         </div>
