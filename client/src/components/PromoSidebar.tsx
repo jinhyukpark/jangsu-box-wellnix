@@ -3,8 +3,8 @@ import giftBoxImage from "@assets/generated_images/premium_korean_health_gift_bo
 
 export function PromoSidebar() {
   return (
-    <aside className="hidden lg:flex flex-col w-[420px] min-h-screen bg-background relative mr-8">
-      <div className="flex flex-col h-screen justify-center p-8">
+    <aside className="hidden lg:flex flex-col w-[420px] h-screen bg-background sticky top-0 mr-8">
+      <div className="flex flex-col h-full justify-center p-8 overflow-hidden">
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-emerald-700 font-serif tracking-tight">
             웰닉스
