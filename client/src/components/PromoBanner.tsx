@@ -1,5 +1,5 @@
 import { Smartphone, Phone, Clock, MapPin } from "lucide-react";
-import officeWorkersImage from "@assets/generated_images/office_workers_smiling_group.png";
+import officeWorkersImage from "@assets/generated_images/smiling_office_workers_team.png";
 import giftBoxImage from "@assets/generated_images/premium_korean_health_gift_box.png";
 import customerServiceImage from "@assets/generated_images/customer_service_representative_headset.png";
 
