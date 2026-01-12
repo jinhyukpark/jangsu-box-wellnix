@@ -1,5 +1,7 @@
-import { Gift, Truck, Shield, Phone, ArrowRight, Headphones, Smartphone, Building2 } from "lucide-react";
+import { Gift, Truck, Shield, Phone, ArrowRight, Smartphone } from "lucide-react";
 import happySeniorsImage from "@assets/generated_images/happy_seniors_receiving_gift.png";
+import officeTeamImage from "@assets/generated_images/smiling_office_workers_team.png";
+import giftSetImage from "@assets/generated_images/korean_health_gift_set.png";
 
 export function PromoSidebar() {
   return (
@@ -49,8 +51,12 @@ export function PromoSidebar() {
           
           <div className="space-y-3">
             <button className="w-full bg-stone-200/80 hover:bg-stone-200 rounded p-4 flex items-center gap-4 transition-all group">
-              <div className="w-12 h-12 bg-white rounded flex items-center justify-center shadow-sm">
-                <Building2 className="w-6 h-6 text-stone-600" />
+              <div className="w-14 h-14 rounded overflow-hidden flex-shrink-0">
+                <img 
+                  src={officeTeamImage} 
+                  alt="기업 구매"
+                  className="w-full h-full object-cover"
+                />
               </div>
               <div className="text-left flex-1">
                 <h3 className="font-semibold text-stone-800 text-sm">기업 구매 전용 페이지</h3>
@@ -60,11 +66,15 @@ export function PromoSidebar() {
             </button>
             
             <button className="w-full bg-[#006861]/10 hover:bg-[#006861]/20 rounded p-4 flex items-center gap-4 transition-all group">
-              <div className="w-12 h-12 bg-white rounded flex items-center justify-center shadow-sm">
-                <Headphones className="w-6 h-6 text-[#006861]" />
+              <div className="w-14 h-14 rounded overflow-hidden flex-shrink-0">
+                <img 
+                  src={giftSetImage} 
+                  alt="장수박스"
+                  className="w-full h-full object-cover"
+                />
               </div>
               <div className="text-left flex-1">
-                <h3 className="font-semibold text-stone-800 text-sm">받는 분 맞춤 컨시어지 서비스</h3>
+                <h3 className="font-semibold text-stone-800 text-sm">365일 장수박스 서비스</h3>
                 <p className="text-xs text-stone-500">웰닉스 에디션에서 보기</p>
               </div>
               <ArrowRight className="w-5 h-5 text-stone-400 group-hover:translate-x-1 transition-transform" />
