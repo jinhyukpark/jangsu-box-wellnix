@@ -1,4 +1,4 @@
-import { Heart, Check, ArrowRight } from "lucide-react";
+import { Heart, Check } from "lucide-react";
 import happySeniorsImage from "@assets/generated_images/happy_seniors_opening_gift_box.png";
 
 export function SubscriptionBanner() {
@@ -9,7 +9,7 @@ export function SubscriptionBanner() {
         alt="장수박스를 받은 행복한 부모님"
         className="w-full h-80 object-cover"
       />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/60 to-black/20" />
       
       <div className="absolute inset-0 flex flex-col justify-end p-5">
         <div className="flex items-center gap-2 mb-2">
@@ -24,29 +24,21 @@ export function SubscriptionBanner() {
         </p>
         
         <div className="space-y-1.5 mb-4">
-          <div className="flex items-center gap-2 text-white/90 text-sm">
+          <div className="flex items-center gap-2 text-white text-sm drop-shadow-md">
             <Check className="w-4 h-4 text-rose-400" />
             <span>손편지와 함께 전하는 마음</span>
           </div>
-          <div className="flex items-center gap-2 text-white/90 text-sm">
+          <div className="flex items-center gap-2 text-white text-sm drop-shadow-md">
             <Check className="w-4 h-4 text-rose-400" />
             <span>매달 새로운 건강 테마 상품</span>
           </div>
-          <div className="flex items-center gap-2 text-white/90 text-sm">
+          <div className="flex items-center gap-2 text-white text-sm drop-shadow-md">
             <Check className="w-4 h-4 text-rose-400" />
             <span>언제든 해지 가능</span>
           </div>
         </div>
         
-        <button 
-          className="w-full bg-white text-[#006861] font-semibold py-3 rounded flex items-center justify-center gap-2 hover:bg-gray-100 transition-colors"
-          data-testid="subscribe-cta"
-        >
-          구독 시작하기
-          <ArrowRight className="w-4 h-4" />
-        </button>
-        
-        <div className="mt-4 pt-3 border-t border-white/20 flex items-center justify-between">
+        <div className="pt-3 border-t border-white/20 flex items-center justify-between">
           <span className="text-white/60 text-sm">첫 달 특별가</span>
           <div className="flex items-baseline gap-2">
             <span className="text-white/40 text-sm line-through">89,000원</span>
