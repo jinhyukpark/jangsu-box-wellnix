@@ -24,7 +24,7 @@ const upcomingEvents = [
     participants: 127,
     maxParticipants: 150,
     image: giftBoxImage,
-    tag: "무료 세미나",
+    tag: "무료 세미나", status: "모집중",
     description: "새해 건강 관리 비법과 면역력 증진 방법을 전문가와 함께 알아봅니다.",
   },
   {
@@ -36,7 +36,7 @@ const upcomingEvents = [
     participants: 89,
     maxParticipants: 100,
     image: giftBoxImage,
-    tag: "정기 클래스",
+    tag: "정기 클래스", status: "모집중",
     description: "전문 강사와 함께하는 시니어 맞춤 요가와 명상 프로그램입니다.",
   },
   {
@@ -48,7 +48,7 @@ const upcomingEvents = [
     participants: 54,
     maxParticipants: 80,
     image: giftBoxImage,
-    tag: "건강 강좌",
+    tag: "건강 강좌", status: "마감됨",
     description: "홍삼의 효능과 올바른 섭취 방법에 대해 배워봅니다.",
   },
 ];
@@ -116,9 +116,18 @@ export default function EventsPage() {
                     alt={event.title}
                     className="w-full h-full object-cover"
                   />
-                  <span className="absolute top-3 left-3 bg-primary text-white text-xs font-semibold px-2.5 py-1 rounded-lg">
-                    {event.tag}
-                  </span>
+                  <div className="absolute top-3 left-3 flex gap-2">
+                    <span className="bg-primary text-white text-xs font-semibold px-2.5 py-1 rounded-lg">
+                      {event.tag}
+                    </span>
+                    <span className={`text-xs font-semibold px-2.5 py-1 rounded-lg ${
+                      event.status === "모집중" 
+                        ? "bg-amber-400 text-amber-900" 
+                        : "bg-gray-400 text-white"
+                    }`}>
+                      {event.status}
+                    </span>
+                  </div>
                 </div>
                 
                 <div className="p-4">
@@ -140,21 +149,7 @@ export default function EventsPage() {
                     </div>
                   </div>
                   
-                  <div className="flex items-center justify-between">
-                    <div className="w-full bg-gray-100 rounded-full h-2 mr-4">
-                      <div 
-                        className="bg-primary h-2 rounded-full transition-all"
-                        style={{ width: `${(event.participants / event.maxParticipants) * 100}%` }}
-                      />
-                    </div>
-                    <button 
-                      className="flex-shrink-0 bg-primary text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors"
-                      data-testid={`apply-${event.id}`}
-                    >
-                      신청하기
-                    </button>
-                  </div>
-                </div>
+                                  </div>
               </div>
             ))}
           </div>
