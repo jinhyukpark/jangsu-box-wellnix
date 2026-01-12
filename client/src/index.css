@@ -72,15 +72,15 @@
   --sidebar: 40 25% 96%;
   --sidebar-foreground: 30 15% 20%;
   --sidebar-border: 40 20% 88%;
-  --sidebar-primary: 142 50% 40%;
+  --sidebar-primary: 155 45% 32%;
   --sidebar-primary-foreground: 0 0% 100%;
   --sidebar-accent: 40 60% 50%;
   --sidebar-accent-foreground: 0 0% 100%;
-  --sidebar-ring: 142 50% 40%;
+  --sidebar-ring: 155 45% 32%;
   --popover: 0 0% 100%;
   --popover-foreground: 30 15% 15%;
   --popover-border: 40 20% 88%;
-  --primary: 142 50% 38%;
+  --primary: 155 45% 32%;
   --primary-foreground: 0 0% 100%;
   --secondary: 40 25% 94%;
   --secondary-foreground: 30 15% 25%;
@@ -91,14 +91,14 @@
   --destructive: 0 72% 51%;
   --destructive-foreground: 0 0% 100%;
   --input: 40 20% 88%;
-  --ring: 142 50% 40%;
-  --chart-1: 142 50% 40%;
+  --ring: 155 45% 32%;
+  --chart-1: 155 45% 32%;
   --chart-2: 35 85% 55%;
   --chart-3: 30 70% 45%;
   --chart-4: 200 60% 50%;
   --chart-5: 280 50% 55%;
 
-  --wellnix-green: 142 50% 38%;
+  --wellnix-green: 155 45% 32%;
   --wellnix-gold: 35 85% 55%;
   --wellnix-cream: 40 30% 96%;
   --wellnix-brown: 30 25% 30%;
