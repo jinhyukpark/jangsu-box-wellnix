@@ -7,7 +7,7 @@ import sleepImg from "@assets/generated_images/sleep_health_supplements.png";
 import teaImg from "@assets/generated_images/korean_tea_set.png";
 import jointImg from "@assets/generated_images/joint_health_supplements.png";
 import petImg from "@assets/generated_images/cute_dog_and_cat_together.png";
-import energyImg from "@assets/generated_images/energy_boosting_supplements.png";
+import dailyImg from "@assets/generated_images/daily_toiletries_products.png";
 
 const categories = [
   { image: ginsengImg, label: "홍삼" },
@@ -19,7 +19,7 @@ const categories = [
   { image: teaImg, label: "차/음료" },
   { image: jointImg, label: "관절건강" },
   { image: petImg, label: "반려동물" },
-  { image: energyImg, label: "활력증진" },
+  { image: dailyImg, label: "생활용품" },
 ];
 
 export function CategoryGrid() {
