@@ -6,7 +6,7 @@ import cosmeticsImg from "@assets/generated_images/luxury_cosmetics_skincare_set
 import sleepImg from "@assets/generated_images/sleep_health_supplements.png";
 import teaImg from "@assets/generated_images/korean_tea_set.png";
 import jointImg from "@assets/generated_images/joint_health_supplements.png";
-import petImg from "@assets/generated_images/pet_care_health_products.png";
+import petImg from "@assets/generated_images/cute_dog_and_cat_together.png";
 import energyImg from "@assets/generated_images/energy_boosting_supplements.png";
 
 const categories = [
