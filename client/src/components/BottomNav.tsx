@@ -1,10 +1,10 @@
-import { Home, Search, Gift, Calendar, User } from "lucide-react";
+import { Home, Gift, Package, Calendar, User } from "lucide-react";
 import { useLocation } from "wouter";
 
 const navItems = [
   { icon: Home, label: "홈", path: "/" },
-  { icon: Search, label: "탐색", path: "/search" },
   { icon: Gift, label: "선물관", path: "/gifts" },
+  { icon: Package, label: "장수박스", path: "/subscription" },
   { icon: Calendar, label: "행사", path: "/events" },
   { icon: User, label: "마이", path: "/mypage" },
 ];
