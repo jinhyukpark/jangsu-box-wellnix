@@ -11,13 +11,15 @@ export function AppLayout({ children }: AppLayoutProps) {
     <div className="min-h-screen bg-background flex justify-center">
       <PromoSidebar />
       
-      <main className="w-full max-w-[430px] bg-white shadow-xl relative">
-        {children}
+      <div className="w-full max-w-[430px] relative">
+        <main className="bg-white shadow-xl min-h-screen pb-20">
+          {children}
+        </main>
         
-        <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] z-50">
+        <div className="sticky bottom-0 w-full z-50">
           <BottomNav />
         </div>
-      </main>
+      </div>
     </div>
   );
 }
