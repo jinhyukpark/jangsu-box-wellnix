@@ -6,7 +6,7 @@ import customerServiceImage from "@assets/generated_images/customer_service_repr
 
 export function PromoSidebar() {
   return (
-    <aside className="hidden lg:flex flex-col w-[420px] h-screen bg-background sticky top-0 mr-8">
+    <aside className="hidden lg:flex flex-col w-[420px] h-screen bg-background sticky top-0 mr-16">
       <div className="flex flex-col h-full justify-center p-8 overflow-hidden">
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-[#006861] font-serif tracking-tight">
