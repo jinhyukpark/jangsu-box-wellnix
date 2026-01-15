@@ -1,3 +1,4 @@
+import { useLocation } from "wouter";
 import { Bell, ShoppingCart, ChevronRight, Gift, Package, Heart, Star, Truck, Award } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import giftBoxImage from "@assets/generated_images/premium_korean_health_gift_box.png";
@@ -9,6 +10,14 @@ const recentOrders = [
 ];
 
 export default function MyPage() {
+  const [, setLocation] = useLocation();
+
+  const handleMenuClick = (item: string) => {
+    if (item === "나의 리뷰") {
+      setLocation("/mypage/reviews");
+    }
+  };
+
   return (
     <AppLayout>
       <header className="sticky top-0 z-50 bg-white border-b border-gray-100">
@@ -140,7 +149,11 @@ export default function MyPage() {
               <h3 className="text-sm text-gray-500 mb-2">{section.title}</h3>
               <div className="bg-white rounded-lg border border-gray-100 overflow-hidden divide-y divide-gray-100">
                 {section.items.map((item) => (
-                  <button key={item} className="w-full flex items-center justify-between p-4 hover:bg-gray-50">
+                  <button 
+                    key={item} 
+                    className="w-full flex items-center justify-between p-4 hover:bg-gray-50"
+                    onClick={() => handleMenuClick(item)}
+                  >
                     <span className="font-medium text-gray-800">{item}</span>
                     <ChevronRight className="w-5 h-5 text-gray-400" />
                   </button>
