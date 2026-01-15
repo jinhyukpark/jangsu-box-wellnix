@@ -15,6 +15,8 @@ export default function MyPage() {
   const handleMenuClick = (item: string) => {
     if (item === "나의 리뷰") {
       setLocation("/mypage/reviews");
+    } else if (item === "찜한 상품") {
+      setLocation("/mypage/wishlist");
     }
   };
 
