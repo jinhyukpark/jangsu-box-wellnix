@@ -2,7 +2,7 @@ import { useState } from "react";
 import { 
   Package, Users, Gift, Calendar, CreditCard, Truck, MessageSquare, 
   ChevronRight, Search, Bell, Settings, LogOut, Menu, X,
-  TrendingUp, ShoppingBag, UserCheck, Clock
+  TrendingUp, ShoppingBag, UserCheck, Clock, HelpCircle
 } from "lucide-react";
 import {
   Dialog,
@@ -21,6 +21,7 @@ const menuItems = [
   { id: "payments", label: "결제 관리", icon: CreditCard },
   { id: "shipping", label: "배송 관리", icon: Truck },
   { id: "inquiries", label: "고객 문의", icon: MessageSquare },
+  { id: "faq", label: "FAQ 관리", icon: HelpCircle },
 ];
 
 const mockProducts = [
@@ -105,6 +106,13 @@ const mockInquiries = [
   { id: 2, member: "이미영", subject: "구독 해지 방법", category: "구독", status: "답변완료", date: "2026-01-11" },
   { id: 3, member: "박철수", subject: "상품 교환 요청", category: "교환/반품", status: "처리중", date: "2026-01-10" },
   { id: 4, member: "최지현", subject: "결제 오류", category: "결제", status: "답변대기", date: "2026-01-09" },
+];
+
+const mockFAQs = [
+  { id: 1, category: "장수박스", question: "장수박스 구독은 어떻게 신청하나요?", status: "게시중" },
+  { id: 2, category: "배송", question: "배송 기간은 얼마나 걸리나요?", status: "게시중" },
+  { id: 3, category: "교환/환불", question: "단순 변심으로 인한 반품이 가능한가요?", status: "게시중" },
+  { id: 4, category: "기타", question: "회원 탈퇴는 어떻게 하나요?", status: "숨김" },
 ];
 
 export default function AdminPage() {
@@ -534,6 +542,99 @@ export default function AdminPage() {
                       </td>
                       <td className="px-4 py-3">
                         <button className="text-sm text-primary hover:underline">답변</button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        );
+
+      case "faq":
+        return (
+          <div>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-gray-900">FAQ 관리</h2>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <button className="bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary/90 flex items-center gap-2">
+                    + FAQ 등록
+                  </button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[600px] bg-white">
+                  <DialogHeader>
+                    <DialogTitle className="text-xl font-bold text-gray-900">FAQ 등록</DialogTitle>
+                    <DialogDescription className="text-gray-500">
+                      자주 묻는 질문과 답변을 등록하세요.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4 pt-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">카테고리</label>
+                      <select className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary">
+                        <option>선택하세요</option>
+                        <option>장수박스</option>
+                        <option>배송</option>
+                        <option>행사/이벤트</option>
+                        <option>교환/환불</option>
+                        <option>기타</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">질문</label>
+                      <input 
+                        type="text" 
+                        placeholder="질문을 입력하세요" 
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">답변</label>
+                      <textarea 
+                        rows={5}
+                        placeholder="답변 내용을 입력하세요" 
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary resize-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="flex items-center gap-2 text-sm text-gray-700">
+                        <input type="checkbox" className="rounded border-gray-300 text-primary focus:ring-primary" defaultChecked />
+                        즉시 게시
+                      </label>
+                    </div>
+                    <button className="w-full bg-primary text-white font-bold py-3 rounded-lg hover:bg-primary/90">
+                      등록하기
+                    </button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
+            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b border-gray-200">
+                  <tr>
+                    <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">카테고리</th>
+                    <th className="text-left px-4 py-3 text-sm font-medium text-gray-600 w-1/2">질문</th>
+                    <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">상태</th>
+                    <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">관리</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {mockFAQs.map((faq) => (
+                    <tr key={faq.id} className="border-b border-gray-100 hover:bg-gray-50">
+                      <td className="px-4 py-3 text-sm text-gray-600">{faq.category}</td>
+                      <td className="px-4 py-3 text-sm text-gray-900 font-medium">{faq.question}</td>
+                      <td className="px-4 py-3">
+                        <span className={`text-xs px-2 py-1 rounded-full ${
+                          faq.status === "게시중" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600"
+                        }`}>
+                          {faq.status}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <button className="text-sm text-primary hover:underline mr-3">수정</button>
+                        <button className="text-sm text-red-500 hover:underline">삭제</button>
                       </td>
                     </tr>
                   ))}
