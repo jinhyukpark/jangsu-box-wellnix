@@ -19,6 +19,8 @@ export default function MyPage() {
       setLocation("/mypage/wishlist");
     } else if (item === "최근 본 상품") {
       setLocation("/mypage/recent");
+    } else if (item === "간편결제 관리") {
+      setLocation("/mypage/payment");
     }
   };
 
