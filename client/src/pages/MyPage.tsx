@@ -23,6 +23,8 @@ export default function MyPage() {
       setLocation("/mypage/payment");
     } else if (item === "배송지 관리") {
       setLocation("/mypage/shipping");
+    } else if (item === "알림 설정") {
+      setLocation("/mypage/notifications");
     }
   };
 
