@@ -100,7 +100,10 @@ export default function SubscriptionPage() {
           <div className="absolute bottom-4 right-4 bg-white/20 backdrop-blur px-2 py-1 rounded text-white text-xs">1 / 2</div>
         </div>
 
-        <button className="w-full bg-amber-50 border-y border-amber-100 p-4 flex items-center gap-3 hover:bg-amber-100 transition-colors">
+        <button 
+          onClick={() => setLocation("/jangsu-brand")}
+          className="w-full bg-amber-50 border-y border-amber-100 p-4 flex items-center gap-3 hover:bg-amber-100 transition-colors"
+        >
           <div className="w-10 h-10 bg-amber-400 rounded-lg flex items-center justify-center">
             <Gift className="w-5 h-5 text-white" />
           </div>
