@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useLocation } from "wouter";
-import { ArrowLeft, ChevronDown, ChevronUp, Megaphone, Info, AlertCircle, Calendar } from "lucide-react";
+import { ArrowLeft, ChevronDown, ChevronUp, Megaphone, Info, AlertCircle, Calendar, Search } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { SEO } from "@/components/SEO";
 
@@ -117,10 +117,39 @@ const getTypeStyles = (type: string) => {
 export default function NoticePage() {
   const [, setLocation] = useLocation();
   const [expandedId, setExpandedId] = useState<number | null>(null);
+  
+  // Filter state
+  const [searchQuery, setSearchQuery] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
 
   const toggleExpand = (id: number) => {
     setExpandedId(expandedId === id ? null : id);
   };
+
+  const filteredNotices = useMemo(() => {
+    return notices.filter(notice => {
+      // Search filter
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        const matchesTitle = notice.title.toLowerCase().includes(query);
+        const matchesContent = notice.content.toLowerCase().includes(query);
+        if (!matchesTitle && !matchesContent) return false;
+      }
+      
+      // Date filter
+      if (startDate || endDate) {
+        const noticeDate = new Date(notice.date.replace(/\./g, '-'));
+        const start = startDate ? new Date(startDate) : null;
+        const end = endDate ? new Date(endDate) : null;
+        
+        if (start && noticeDate < start) return false;
+        if (end && noticeDate > end) return false;
+      }
+      
+      return true;
+    });
+  }, [searchQuery, startDate, endDate]);
 
   return (
     <AppLayout hideNav>
@@ -141,50 +170,111 @@ export default function NoticePage() {
           </div>
         </header>
 
-        <div className="p-4 space-y-3">
-          {notices.map((notice) => {
-            const { label, className, icon: Icon } = getTypeStyles(notice.type);
-            const isExpanded = expandedId === notice.id;
+        {/* Filter Section */}
+        <div className="bg-white p-4 border-b border-gray-100 space-y-3">
+          {/* Search Bar */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <input 
+              type="text"
+              placeholder="검색어를 입력해주세요"
+              className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-primary transition-colors text-sm"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
 
-            return (
-              <div 
-                key={notice.id} 
-                className={`bg-white rounded-xl border transition-all duration-200 overflow-hidden ${
-                  isExpanded ? "border-primary shadow-md" : "border-gray-100 shadow-sm"
-                }`}
-              >
-                <button
-                  onClick={() => toggleExpand(notice.id)}
-                  className="w-full text-left p-4 flex items-start gap-3"
-                >
-                  <div className={`flex-shrink-0 px-2 py-1 rounded text-xs font-bold border flex items-center gap-1 ${className}`}>
-                    {notice.type === 'important' && <AlertCircle className="w-3 h-3" />}
-                    {label}
-                  </div>
-                  
-                  <div className="flex-1 min-w-0">
-                    <h3 className={`text-sm font-medium mb-1 transition-colors ${isExpanded ? "text-primary" : "text-gray-900"}`}>
-                      {notice.title}
-                    </h3>
-                    <p className="text-xs text-gray-400">{notice.date}</p>
-                  </div>
-
-                  <div className="flex-shrink-0 text-gray-400 pt-1">
-                    {isExpanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
-                  </div>
-                </button>
-
-                {isExpanded && (
-                  <div className="px-4 pb-5 pt-1">
-                    <div className="h-px bg-gray-100 mb-4" />
-                    <div className="text-sm text-gray-600 leading-relaxed whitespace-pre-line bg-gray-50 p-4 rounded-lg">
-                      {notice.content}
-                    </div>
-                  </div>
-                )}
+          {/* Date Range */}
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2">
+              <Calendar className="w-4 h-4 text-gray-500" />
+              <span className="text-sm font-medium text-gray-700 whitespace-nowrap">기간</span>
+            </div>
+            <div className="flex items-center gap-2 flex-1">
+              <div className="relative flex-1">
+                <input 
+                  type="date" 
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  className="w-full px-2 py-2 bg-gray-50 border border-gray-200 rounded-lg text-xs focus:outline-none focus:border-primary transition-colors"
+                />
               </div>
-            );
-          })}
+              <span className="text-gray-400">~</span>
+              <div className="relative flex-1">
+                <input 
+                  type="date" 
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  className="w-full px-2 py-2 bg-gray-50 border border-gray-200 rounded-lg text-xs focus:outline-none focus:border-primary transition-colors"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="p-4 space-y-3">
+          <div className="text-sm text-gray-600 flex justify-between items-center px-1">
+            <span>총 <span className="font-bold text-primary">{filteredNotices.length}</span>건</span>
+            {(searchQuery || startDate || endDate) && (
+              <button 
+                onClick={() => { setSearchQuery(""); setStartDate(""); setEndDate(""); }}
+                className="text-xs text-gray-400 underline"
+              >
+                필터 초기화
+              </button>
+            )}
+          </div>
+
+          {filteredNotices.length === 0 ? (
+            <div className="text-center py-20 text-gray-400">
+              <Megaphone className="w-10 h-10 mx-auto mb-3 text-gray-300" />
+              <p>검색 결과가 없습니다.</p>
+            </div>
+          ) : (
+            filteredNotices.map((notice) => {
+              const { label, className, icon: Icon } = getTypeStyles(notice.type);
+              const isExpanded = expandedId === notice.id;
+
+              return (
+                <div 
+                  key={notice.id} 
+                  className={`bg-white rounded-xl border transition-all duration-200 overflow-hidden ${
+                    isExpanded ? "border-primary shadow-md" : "border-gray-100 shadow-sm"
+                  }`}
+                >
+                  <button
+                    onClick={() => toggleExpand(notice.id)}
+                    className="w-full text-left p-4 flex items-start gap-3"
+                  >
+                    <div className={`flex-shrink-0 px-2 py-1 rounded text-xs font-bold border flex items-center gap-1 ${className}`}>
+                      {notice.type === 'important' && <AlertCircle className="w-3 h-3" />}
+                      {label}
+                    </div>
+                    
+                    <div className="flex-1 min-w-0">
+                      <h3 className={`text-sm font-medium mb-1 transition-colors ${isExpanded ? "text-primary" : "text-gray-900"}`}>
+                        {notice.title}
+                      </h3>
+                      <p className="text-xs text-gray-400">{notice.date}</p>
+                    </div>
+
+                    <div className="flex-shrink-0 text-gray-400 pt-1">
+                      {isExpanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+                    </div>
+                  </button>
+
+                  {isExpanded && (
+                    <div className="px-4 pb-5 pt-1">
+                      <div className="h-px bg-gray-100 mb-4" />
+                      <div className="text-sm text-gray-600 leading-relaxed whitespace-pre-line bg-gray-50 p-4 rounded-lg">
+                        {notice.content}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })
+          )}
         </div>
       </div>
     </AppLayout>
