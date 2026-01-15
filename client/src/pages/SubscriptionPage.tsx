@@ -74,7 +74,12 @@ export default function SubscriptionPage() {
             <h1 className="text-xl font-bold text-gray-900">장수박스</h1>
           </div>
           <div className="flex items-center gap-2">
-            <button className="px-3 py-1.5 border border-primary text-primary text-sm font-medium rounded-lg">기업문의</button>
+            <button 
+              onClick={() => setLocation("/corporate-inquiry")}
+              className="px-3 py-1.5 border border-primary text-primary text-sm font-medium rounded-lg"
+            >
+              기업문의
+            </button>
             <button className="relative p-2">
               <ShoppingCart className="w-6 h-6 text-gray-600" />
               <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-primary text-white text-xs font-bold rounded-full flex items-center justify-center">3</span>

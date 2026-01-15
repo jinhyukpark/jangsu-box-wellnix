@@ -24,7 +24,11 @@ export default function MyPage() {
         <div className="flex items-center justify-between p-4">
           <h1 className="text-xl font-bold text-gray-900">마이페이지</h1>
           <div className="flex items-center gap-2">
-            <button className="px-3 py-1.5 border border-primary text-primary text-sm font-medium rounded-lg hover:bg-primary/5 transition-colors" data-testid="corporate-inquiry">
+            <button 
+              onClick={() => setLocation("/corporate-inquiry")}
+              className="px-3 py-1.5 border border-primary text-primary text-sm font-medium rounded-lg hover:bg-primary/5 transition-colors" 
+              data-testid="corporate-inquiry"
+            >
               기업문의
             </button>
             <button className="p-2 relative" data-testid="notifications">

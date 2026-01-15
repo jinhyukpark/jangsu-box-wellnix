@@ -13,6 +13,7 @@ import StoryDetailPage from "@/pages/StoryDetailPage";
 import EventDetailPage from "@/pages/EventDetailPage";
 import AdminPage from "@/pages/AdminPage";
 import MyReviewsPage from "@/pages/MyReviewsPage";
+import CorporateInquiryPage from "@/pages/CorporateInquiryPage";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -28,6 +29,7 @@ function Router() {
       <Route path="/events/:id" component={EventDetailPage} />
       <Route path="/admin" component={AdminPage} />
       <Route path="/mypage/reviews" component={MyReviewsPage} />
+      <Route path="/corporate-inquiry" component={CorporateInquiryPage} />
       <Route component={NotFound} />
     </Switch>
   );
