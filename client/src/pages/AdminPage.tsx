@@ -2,7 +2,7 @@ import { useState } from "react";
 import { 
   Package, Users, Gift, Calendar, CreditCard, Truck, MessageSquare, 
   ChevronRight, Search, Bell, Settings, LogOut, Menu, X,
-  TrendingUp, ShoppingBag, UserCheck, Clock, HelpCircle, Star
+  TrendingUp, ShoppingBag, UserCheck, Clock, HelpCircle, Star, ShieldCheck
 } from "lucide-react";
 import {
   Dialog,
@@ -13,6 +13,8 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 
 const menuItems = [
   { id: "products", label: "상품 관리", icon: Package },
@@ -23,6 +25,7 @@ const menuItems = [
   { id: "shipping", label: "배송 관리", icon: Truck },
   { id: "inquiries", label: "고객 문의", icon: MessageSquare },
   { id: "faq", label: "FAQ 관리", icon: HelpCircle },
+  { id: "settings", label: "관리자 설정", icon: ShieldCheck },
 ];
 
 const mockProducts = [
@@ -114,6 +117,36 @@ const mockFAQs = [
   { id: 2, category: "배송", question: "배송 기간은 얼마나 걸리나요?", status: "게시중" },
   { id: 3, category: "교환/환불", question: "단순 변심으로 인한 반품이 가능한가요?", status: "게시중" },
   { id: 4, category: "기타", question: "회원 탈퇴는 어떻게 하나요?", status: "숨김" },
+];
+
+const mockAdmins = [
+  { 
+    id: 1, 
+    name: "최고관리자", 
+    email: "admin@wellnix.com", 
+    role: "슈퍼 관리자", 
+    status: "활성",
+    lastLogin: "2026-01-15 10:30",
+    permissions: ["all"]
+  },
+  { 
+    id: 2, 
+    name: "김철수", 
+    email: "cs@wellnix.com", 
+    role: "CS 매니저", 
+    status: "활성",
+    lastLogin: "2026-01-15 09:15",
+    permissions: ["inquiries", "members", "faq"]
+  },
+  { 
+    id: 3, 
+    name: "이영희", 
+    email: "md@wellnix.com", 
+    role: "MD", 
+    status: "활성",
+    lastLogin: "2026-01-14 18:20",
+    permissions: ["products", "events", "subscription"]
+  },
 ];
 
 // Mock data for member details
@@ -816,6 +849,142 @@ export default function AdminPage() {
                       <td className="px-4 py-3">
                         <button className="text-sm text-primary hover:underline mr-3">수정</button>
                         <button className="text-sm text-red-500 hover:underline">삭제</button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        );
+
+      case "settings":
+        return (
+          <div>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-gray-900">관리자 설정</h2>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <button className="bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary/90 flex items-center gap-2">
+                    + 관리자 추가
+                  </button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[600px] bg-white">
+                  <DialogHeader>
+                    <DialogTitle className="text-xl font-bold text-gray-900">새 관리자 등록</DialogTitle>
+                    <DialogDescription className="text-gray-500">
+                      새로운 관리자 계정을 생성하고 접근 권한을 설정하세요.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4 pt-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">이름</label>
+                        <input 
+                          type="text" 
+                          placeholder="이름 입력" 
+                          className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">직책</label>
+                        <input 
+                          type="text" 
+                          placeholder="직책 입력 (예: CS팀장)" 
+                          className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">이메일 (아이디)</label>
+                      <input 
+                        type="email" 
+                        placeholder="이메일 주소 입력" 
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">비밀번호</label>
+                      <input 
+                        type="password" 
+                        placeholder="비밀번호 설정" 
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary"
+                      />
+                    </div>
+                    
+                    <div className="pt-2">
+                      <label className="block text-sm font-bold text-gray-900 mb-3">접근 권한 설정</label>
+                      <div className="grid grid-cols-2 gap-3 bg-gray-50 p-4 rounded-lg border border-gray-100">
+                        {menuItems.filter(item => item.id !== "settings").map((item) => (
+                          <div key={item.id} className="flex items-center space-x-2">
+                            <Checkbox id={`perm-${item.id}`} />
+                            <Label 
+                              htmlFor={`perm-${item.id}`}
+                              className="text-sm font-medium text-gray-700 cursor-pointer"
+                            >
+                              {item.label}
+                            </Label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <button className="w-full bg-primary text-white font-bold py-3 rounded-lg hover:bg-primary/90 mt-2">
+                      관리자 등록 완료
+                    </button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
+
+            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b border-gray-200">
+                  <tr>
+                    <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">이름</th>
+                    <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">이메일</th>
+                    <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">직책</th>
+                    <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">접근 권한</th>
+                    <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">최근 접속</th>
+                    <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">상태</th>
+                    <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">관리</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {mockAdmins.map((admin) => (
+                    <tr key={admin.id} className="border-b border-gray-100 hover:bg-gray-50">
+                      <td className="px-4 py-3 text-sm font-medium text-gray-900">{admin.name}</td>
+                      <td className="px-4 py-3 text-sm text-gray-600">{admin.email}</td>
+                      <td className="px-4 py-3 text-sm text-gray-600">{admin.role}</td>
+                      <td className="px-4 py-3 text-sm text-gray-600">
+                        <div className="flex gap-1 flex-wrap max-w-[200px]">
+                          {admin.permissions.includes("all") ? (
+                            <span className="bg-gray-100 text-gray-700 px-1.5 py-0.5 rounded text-xs">전체 권한</span>
+                          ) : (
+                            admin.permissions.map(perm => {
+                              const label = menuItems.find(m => m.id === perm)?.label || perm;
+                              return (
+                                <span key={perm} className="bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded text-xs">
+                                  {label.replace(" 관리", "")}
+                                </span>
+                              );
+                            })
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-600">{admin.lastLogin}</td>
+                      <td className="px-4 py-3">
+                        <span className={`text-xs px-2 py-1 rounded-full ${
+                          admin.status === "활성" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600"
+                        }`}>
+                          {admin.status}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <button className="text-sm text-primary hover:underline mr-3">수정</button>
+                        {admin.role !== "슈퍼 관리자" && (
+                          <button className="text-sm text-red-500 hover:underline">삭제</button>
+                        )}
                       </td>
                     </tr>
                   ))}

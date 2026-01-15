@@ -12,6 +12,7 @@ import MyPage from "@/pages/MyPage";
 import StoryDetailPage from "@/pages/StoryDetailPage";
 import EventDetailPage from "@/pages/EventDetailPage";
 import AdminPage from "@/pages/AdminPage";
+import AdminLoginPage from "@/pages/AdminLoginPage";
 import MyReviewsPage from "@/pages/MyReviewsPage";
 import CorporateInquiryPage from "@/pages/CorporateInquiryPage";
 import MyWishlistPage from "@/pages/MyWishlistPage";
@@ -37,6 +38,7 @@ function Router() {
       <Route path="/story/:id" component={StoryDetailPage} />
       <Route path="/events/:id" component={EventDetailPage} />
       <Route path="/admin" component={AdminPage} />
+      <Route path="/admin/login" component={AdminLoginPage} />
       <Route path="/mypage/reviews" component={MyReviewsPage} />
       <Route path="/corporate-inquiry" component={CorporateInquiryPage} />
       <Route path="/mypage/wishlist" component={MyWishlistPage} />
