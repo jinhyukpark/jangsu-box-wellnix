@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { ArrowLeft, Building2, Gift, Users, Calendar, CheckCircle, Send } from "lucide-react";
+import { ArrowLeft, Building2, Gift, Users, Calendar, CheckCircle, Send, ChevronRight } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { SEO } from "@/components/SEO";
 import { toast } from "sonner";
@@ -102,21 +102,25 @@ export default function CorporateInquiryPage() {
         {/* Process Section */}
         <div className="px-5 py-8">
           <h3 className="font-bold text-gray-900 text-lg mb-6">진행 절차</h3>
-          <div className="relative flex justify-between">
-            {/* Connecting Line */}
-            <div className="absolute top-4 left-0 right-0 h-0.5 bg-gray-100 -z-10" />
-            
+          <div className="flex items-start justify-between">
             {[
               { step: "01", title: "문의 접수" },
               { step: "02", title: "상담/견적" },
               { step: "03", title: "계약 체결" },
               { step: "04", title: "상품 배송" },
-            ].map((item, idx) => (
-              <div key={idx} className="flex flex-col items-center bg-white px-2">
-                <div className="w-8 h-8 bg-primary text-white text-xs font-bold rounded-full flex items-center justify-center mb-2 border-4 border-white">
+            ].map((item, idx, arr) => (
+              <div key={idx} className="flex-1 relative flex flex-col items-center">
+                <div className="w-10 h-10 bg-primary text-white text-sm font-bold rounded-full flex items-center justify-center mb-2 z-10 relative">
                   {item.step}
                 </div>
-                <span className="text-xs font-medium text-gray-600">{item.title}</span>
+                <span className="text-xs font-medium text-gray-600 text-center whitespace-nowrap">{item.title}</span>
+                
+                {idx < arr.length - 1 && (
+                  <div className="absolute top-3 left-1/2 w-full flex items-center justify-center">
+                    <div className="w-full h-0.5 bg-gray-100 absolute top-1/2 -translate-y-1/2 left-0 -z-10" />
+                    <ChevronRight className="w-4 h-4 text-gray-300 bg-white" />
+                  </div>
+                )}
               </div>
             ))}
           </div>
