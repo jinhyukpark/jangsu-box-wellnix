@@ -25,6 +25,8 @@ export default function MyPage() {
       setLocation("/mypage/shipping");
     } else if (item === "알림 설정") {
       setLocation("/mypage/notifications");
+    } else if (item === "공지사항") {
+      setLocation("/notices");
     }
   };
 
