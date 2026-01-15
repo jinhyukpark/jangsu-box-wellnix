@@ -27,6 +27,8 @@ export default function MyPage() {
       setLocation("/mypage/notifications");
     } else if (item === "공지사항") {
       setLocation("/notices");
+    } else if (item === "자주 묻는 질문") {
+      setLocation("/faq");
     }
   };
 

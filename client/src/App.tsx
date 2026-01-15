@@ -20,6 +20,7 @@ import MyPaymentPage from "@/pages/MyPaymentPage";
 import MyShippingPage from "@/pages/MyShippingPage";
 import MyNotificationsPage from "@/pages/MyNotificationsPage";
 import NoticePage from "@/pages/NoticePage";
+import FAQPage from "@/pages/FAQPage";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -42,6 +43,7 @@ function Router() {
       <Route path="/mypage/shipping" component={MyShippingPage} />
       <Route path="/mypage/notifications" component={MyNotificationsPage} />
       <Route path="/notices" component={NoticePage} />
+      <Route path="/faq" component={FAQPage} />
       <Route component={NotFound} />
     </Switch>
   );
