@@ -1,6 +1,7 @@
 import { ArrowLeft, Share2, Heart, Calendar, Package, Gift, CheckCircle, Building2, MapPin } from "lucide-react";
 import { useLocation, useParams } from "wouter";
 import { AppLayout } from "@/components/AppLayout";
+import { SEO } from "@/components/SEO";
 import giftBoxImage from "@assets/generated_images/premium_korean_health_gift_box.png";
 import luckyPouchImage from "@assets/generated_images/korean_lucky_pouch_bokjumeoni.png";
 import ginsengImage from "@assets/generated_images/korean_red_ginseng_jeonggwa.png";
@@ -181,6 +182,10 @@ export default function StoryDetailPage() {
 
   return (
     <AppLayout hideNav>
+      <SEO 
+        title={`${story.month} ${story.theme} - 장수박스`} 
+        description={story.intro}
+      />
       <div className="min-h-screen bg-white">
         <div className="sticky top-0 bg-white/95 backdrop-blur z-10 px-4 py-3 flex items-center justify-between border-b border-gray-100">
           <button onClick={() => setLocation("/subscription")} className="p-1">

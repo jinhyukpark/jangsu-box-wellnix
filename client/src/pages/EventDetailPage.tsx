@@ -1,6 +1,7 @@
 import { useParams, useLocation } from "wouter";
 import { ArrowLeft, Calendar, MapPin, Users, Clock, Gift, Utensils, Bus, CheckCircle, MessageCircle, Share2, Building2, Phone, User } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
+import { SEO } from "@/components/SEO";
 import templeImage from "@assets/generated_images/korean_temple_autumn_travel.png";
 import hqImage from "@assets/generated_images/modern_wellness_company_hq.png";
 import rehabImage from "@assets/generated_images/senior_rehab_therapy_equipment.png";
@@ -176,6 +177,11 @@ export default function EventDetailPage() {
 
   return (
     <AppLayout>
+      <SEO 
+        title={event.title} 
+        description={event.description}
+        image={event.image}
+      />
       <header className="sticky top-0 z-50 bg-white border-b border-gray-100">
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center gap-3">

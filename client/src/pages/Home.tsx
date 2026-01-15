@@ -1,4 +1,5 @@
 import { Header } from "@/components/Header";
+import { SEO } from "@/components/SEO";
 import { CouponBanner } from "@/components/CouponBanner";
 import { HeroBanner } from "@/components/HeroBanner";
 import { CategoryGrid } from "@/components/CategoryGrid";
@@ -36,6 +37,10 @@ const giftProducts = [
 export default function Home() {
   return (
     <AppLayout>
+      <SEO 
+        title="홈" 
+        description="부모님을 위한 프리미엄 건강식품 큐레이션 서비스, 웰닉스입니다."
+      />
       <div className="sticky top-0 z-50">
         <CouponBanner />
         <Header />

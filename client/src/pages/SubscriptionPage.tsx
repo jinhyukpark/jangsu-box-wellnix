@@ -2,6 +2,7 @@ import { useRef } from "react";
 import { ArrowLeft, ShoppingCart, Gift, ChevronRight, Heart, Calendar, Users, Sparkles } from "lucide-react";
 import { useLocation } from "wouter";
 import { AppLayout } from "@/components/AppLayout";
+import { SEO } from "@/components/SEO";
 import giftBoxImage from "@assets/generated_images/premium_korean_health_gift_box.png";
 import happySeniorsImage from "@assets/generated_images/happy_seniors_receiving_gift.png";
 
@@ -60,6 +61,10 @@ export default function SubscriptionPage() {
 
   return (
     <AppLayout>
+      <SEO 
+        title="정기구독" 
+        description="매달 찾아오는 건강한 선물, 장수박스 정기구독 서비스입니다."
+      />
       <header className="sticky top-0 z-50 bg-white border-b border-gray-100">
         <div className="p-4 flex items-center justify-between">
           <div className="flex items-center gap-3">

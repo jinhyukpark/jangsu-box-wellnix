@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useLocation } from "wouter";
 import { Calendar, MapPin, Users, ShoppingCart } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
+import { SEO } from "@/components/SEO";
 import templeImage from "@assets/generated_images/korean_temple_autumn_travel.png";
 import hqImage from "@assets/generated_images/modern_wellness_company_hq.png";
 import rehabImage from "@assets/generated_images/senior_rehab_therapy_equipment.png";
@@ -65,6 +66,10 @@ export default function EventsPage() {
 
   return (
     <AppLayout>
+      <SEO 
+        title="건강 행사" 
+        description="웰닉스가 준비한 다양한 건강 행사와 클래스를 확인해보세요."
+      />
       <header className="sticky top-0 z-50 bg-white border-b border-gray-100">
         <div className="p-4 pb-2 flex items-center justify-between">
           <h1 className="text-xl font-bold text-gray-900">건강 행사</h1>
