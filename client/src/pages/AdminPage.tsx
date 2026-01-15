@@ -4,6 +4,14 @@ import {
   ChevronRight, Search, Bell, Settings, LogOut, Menu, X,
   TrendingUp, ShoppingBag, UserCheck, Clock
 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogDescription,
+} from "@/components/ui/dialog";
 
 const menuItems = [
   { id: "products", label: "상품 관리", icon: Package },
@@ -38,9 +46,45 @@ const mockSubscriptions = [
 ];
 
 const mockEvents = [
-  { id: 1, title: "2026 건강한 설맞이 특별 세미나", date: "2026-01-25", location: "서울 강남구", participants: 127, max: 150, status: "모집중" },
-  { id: 2, title: "시니어 요가 & 명상 클래스", date: "2026-02-05", location: "온라인 ZOOM", participants: 89, max: 100, status: "모집중" },
-  { id: 3, title: "홍삼 건강법 특강", date: "2026-03-15", location: "부산 해운대", participants: 80, max: 80, status: "마감" },
+  { 
+    id: 1, 
+    title: "2026 건강한 설맞이 특별 세미나", 
+    date: "2026-01-25", 
+    location: "서울 강남구", 
+    participants: 127, 
+    max: 150, 
+    status: "모집중",
+    description: "설 명절을 맞이하여 부모님 건강 관리 비법과 명절 증후군 예방 스트레칭을 배우는 특별 세미나입니다.",
+    participantList: [
+      { name: "김영수", phone: "010-1234-5678", status: "신청완료" },
+      { name: "이미영", phone: "010-2345-6789", status: "신청완료" },
+      { name: "박철수", phone: "010-3456-7890", status: "취소" },
+    ]
+  },
+  { 
+    id: 2, 
+    title: "시니어 요가 & 명상 클래스", 
+    date: "2026-02-05", 
+    location: "온라인 ZOOM", 
+    participants: 89, 
+    max: 100, 
+    status: "모집중",
+    description: "집에서 쉽게 따라할 수 있는 시니어 맞춤 요가와 마음의 평화를 찾는 명상 클래스입니다.",
+    participantList: [
+      { name: "최지현", phone: "010-4567-8901", status: "신청완료" },
+    ]
+  },
+  { 
+    id: 3, 
+    title: "홍삼 건강법 특강", 
+    date: "2026-03-15", 
+    location: "부산 해운대", 
+    participants: 80, 
+    max: 80, 
+    status: "마감",
+    description: "홍삼의 효능과 올바른 섭취 방법에 대해 알아보는 건강 특강입니다.",
+    participantList: []
+  },
 ];
 
 const mockPayments = [
@@ -66,6 +110,7 @@ const mockInquiries = [
 export default function AdminPage() {
   const [activeMenu, setActiveMenu] = useState("products");
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [selectedEvent, setSelectedEvent] = useState<typeof mockEvents[0] | null>(null);
 
   const renderContent = () => {
     switch (activeMenu) {
@@ -259,7 +304,75 @@ export default function AdminPage() {
                         </span>
                       </td>
                       <td className="px-4 py-3">
-                        <button className="text-sm text-primary hover:underline">수정</button>
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <button 
+                              className="text-sm text-primary hover:underline"
+                              onClick={() => setSelectedEvent(event)}
+                            >
+                              상세보기
+                            </button>
+                          </DialogTrigger>
+                          <DialogContent className="sm:max-w-[600px] bg-white">
+                            <DialogHeader>
+                              <DialogTitle className="text-xl font-bold text-gray-900">{selectedEvent?.title}</DialogTitle>
+                              <DialogDescription className="text-gray-500">
+                                행사 상세 정보와 참여자 명단을 확인하세요.
+                              </DialogDescription>
+                            </DialogHeader>
+                            <div className="space-y-6 pt-4">
+                              <div className="bg-gray-50 p-4 rounded-lg">
+                                <h4 className="font-bold text-sm text-gray-900 mb-2">행사 소개</h4>
+                                <p className="text-sm text-gray-600 leading-relaxed">
+                                  {selectedEvent?.description}
+                                </p>
+                              </div>
+
+                              <div>
+                                <h4 className="font-bold text-sm text-gray-900 mb-3 flex items-center justify-between">
+                                  <span>참여자 명단</span>
+                                  <span className="text-xs font-normal text-gray-500">
+                                    총 {selectedEvent?.participantList.length}명
+                                  </span>
+                                </h4>
+                                <div className="border rounded-lg overflow-hidden">
+                                  <table className="w-full">
+                                    <thead className="bg-gray-50 border-b">
+                                      <tr>
+                                        <th className="text-left text-xs font-medium text-gray-500 px-4 py-2">이름</th>
+                                        <th className="text-left text-xs font-medium text-gray-500 px-4 py-2">연락처</th>
+                                        <th className="text-right text-xs font-medium text-gray-500 px-4 py-2">상태</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-gray-100">
+                                      {selectedEvent?.participantList.length === 0 ? (
+                                        <tr>
+                                          <td colSpan={3} className="text-center py-4 text-xs text-gray-400">
+                                            참여자가 없습니다.
+                                          </td>
+                                        </tr>
+                                      ) : (
+                                        selectedEvent?.participantList.map((participant, i) => (
+                                          <tr key={i}>
+                                            <td className="px-4 py-2 text-sm text-gray-900">{participant.name}</td>
+                                            <td className="px-4 py-2 text-sm text-gray-600">{participant.phone}</td>
+                                            <td className="px-4 py-2 text-right">
+                                              <span className={`text-xs px-1.5 py-0.5 rounded ${
+                                                participant.status === "신청완료" ? "bg-green-50 text-green-600" : "bg-red-50 text-red-600"
+                                              }`}>
+                                                {participant.status}
+                                              </span>
+                                            </td>
+                                          </tr>
+                                        ))
+                                      )}
+                                    </tbody>
+                                  </table>
+                                </div>
+                              </div>
+                            </div>
+                          </DialogContent>
+                        </Dialog>
                       </td>
                     </tr>
                   ))}
@@ -437,128 +550,99 @@ export default function AdminPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
-      <aside className={`${sidebarOpen ? "w-64" : "w-16"} bg-white border-r border-gray-200 flex flex-col transition-all duration-300`}>
-        <div className="p-4 border-b border-gray-200 flex items-center justify-between">
-          {sidebarOpen && (
-            <h1 className="text-lg font-bold text-primary">웰닉스 관리자</h1>
+      {/* Sidebar */}
+      <div className={`fixed inset-y-0 left-0 bg-white border-r border-gray-200 z-50 transition-all duration-300 ${
+        sidebarOpen ? "w-64" : "w-20"
+      }`}>
+        <div className="flex items-center justify-between p-4 border-b border-gray-100 h-16">
+          {sidebarOpen ? (
+            <h1 className="text-xl font-bold text-primary">웰닉스 관리자</h1>
+          ) : (
+            <span className="text-xl font-bold text-primary mx-auto">W</span>
           )}
-          <button 
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-2 hover:bg-gray-100 rounded-lg"
-          >
+          <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-1 rounded hover:bg-gray-100">
             {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
-        
-        <nav className="flex-1 p-2">
-          {menuItems.map((item) => {
-            const Icon = item.icon;
-            return (
-              <button
-                key={item.id}
-                onClick={() => setActiveMenu(item.id)}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors ${
-                  activeMenu === item.id 
-                    ? "bg-primary/10 text-primary" 
-                    : "text-gray-600 hover:bg-gray-100"
-                }`}
-              >
-                <Icon className="w-5 h-5 flex-shrink-0" />
-                {sidebarOpen && <span className="text-sm font-medium">{item.label}</span>}
-              </button>
-            );
-          })}
+
+        <nav className="p-4 space-y-1">
+          {menuItems.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => setActiveMenu(item.id)}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
+                activeMenu === item.id 
+                  ? "bg-primary text-white" 
+                  : "text-gray-600 hover:bg-gray-100"
+              }`}
+            >
+              <item.icon className="w-5 h-5 flex-shrink-0" />
+              {sidebarOpen && <span className="font-medium">{item.label}</span>}
+            </button>
+          ))}
         </nav>
 
-        <div className="p-2 border-t border-gray-200">
-          <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 hover:bg-gray-100">
-            <Settings className="w-5 h-5 flex-shrink-0" />
-            {sidebarOpen && <span className="text-sm font-medium">설정</span>}
-          </button>
-          <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 hover:bg-gray-100">
-            <LogOut className="w-5 h-5 flex-shrink-0" />
-            {sidebarOpen && <span className="text-sm font-medium">로그아웃</span>}
-          </button>
+        <div className="absolute bottom-4 left-4 right-4">
+          {sidebarOpen ? (
+            <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 hover:bg-gray-100">
+              <LogOut className="w-5 h-5 flex-shrink-0" />
+              <span className="font-medium">로그아웃</span>
+            </button>
+          ) : (
+            <button className="w-full flex justify-center py-2.5 rounded-lg text-gray-600 hover:bg-gray-100">
+              <LogOut className="w-5 h-5" />
+            </button>
+          )}
         </div>
-      </aside>
+      </div>
 
-      <main className="flex-1 flex flex-col">
-        <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input 
-                type="text" 
-                placeholder="검색..." 
-                className="pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary w-64"
-              />
-            </div>
+      {/* Main Content */}
+      <div className={`flex-1 transition-all duration-300 ${sidebarOpen ? "ml-64" : "ml-20"}`}>
+        <header className="bg-white border-b border-gray-200 h-16 sticky top-0 z-40 px-6 flex items-center justify-between">
+          <div className="relative w-96">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input 
+              type="text" 
+              placeholder="검색..." 
+              className="w-full pl-9 pr-4 py-2 bg-gray-50 border-none rounded-lg text-sm focus:ring-1 focus:ring-primary"
+            />
           </div>
           <div className="flex items-center gap-4">
-            <button className="relative p-2 hover:bg-gray-100 rounded-lg">
+            <button className="relative p-2 rounded-full hover:bg-gray-100">
               <Bell className="w-5 h-5 text-gray-600" />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full" />
             </button>
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center">
-                <span className="text-sm font-medium text-primary">관</span>
-              </div>
-              <span className="text-sm font-medium text-gray-700">관리자</span>
+            <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
+              <span className="text-xs font-bold text-gray-600">AD</span>
             </div>
+            <span className="text-sm font-medium text-gray-900">관리자</span>
           </div>
         </header>
 
-        <div className="flex-1 p-6 overflow-auto">
-          <div className="grid grid-cols-4 gap-4 mb-6">
-            <div className="bg-white p-4 rounded-lg border border-gray-200">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <TrendingUp className="w-5 h-5 text-blue-600" />
+        <main className="p-6">
+          {/* Dashboard Stats (Visible on all pages for now, or could be separate dashboard) */}
+          <div className="grid grid-cols-4 gap-4 mb-8">
+            {[
+              { label: "오늘 매출", value: "₩2,450,000", icon: TrendingUp, color: "bg-blue-50 text-blue-600" },
+              { label: "오늘 주문", value: "23건", icon: ShoppingBag, color: "bg-green-50 text-green-600" },
+              { label: "신규 회원", value: "8명", icon: UserCheck, color: "bg-amber-50 text-amber-600" },
+              { label: "답변 대기", value: "2건", icon: Clock, color: "bg-red-50 text-red-600" },
+            ].map((stat) => (
+              <div key={stat.label} className="bg-white p-4 rounded-xl border border-gray-100 flex items-center gap-4">
+                <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${stat.color}`}>
+                  <stat.icon className="w-6 h-6" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">오늘 매출</p>
-                  <p className="text-lg font-bold text-gray-900">₩ 2,450,000</p>
+                  <p className="text-sm text-gray-500">{stat.label}</p>
+                  <p className="text-xl font-bold text-gray-900">{stat.value}</p>
                 </div>
               </div>
-            </div>
-            <div className="bg-white p-4 rounded-lg border border-gray-200">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                  <ShoppingBag className="w-5 h-5 text-green-600" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">오늘 주문</p>
-                  <p className="text-lg font-bold text-gray-900">23건</p>
-                </div>
-              </div>
-            </div>
-            <div className="bg-white p-4 rounded-lg border border-gray-200">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
-                  <UserCheck className="w-5 h-5 text-amber-600" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">신규 회원</p>
-                  <p className="text-lg font-bold text-gray-900">8명</p>
-                </div>
-              </div>
-            </div>
-            <div className="bg-white p-4 rounded-lg border border-gray-200">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
-                  <Clock className="w-5 h-5 text-red-600" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">답변 대기</p>
-                  <p className="text-lg font-bold text-gray-900">2건</p>
-                </div>
-              </div>
-            </div>
+            ))}
           </div>
 
           {renderContent()}
-        </div>
-      </main>
+        </main>
+      </div>
     </div>
   );
 }
