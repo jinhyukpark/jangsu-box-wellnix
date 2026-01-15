@@ -19,6 +19,16 @@ const initialReviews = [
     options: "옵션: 1.5kg (30뿌리)"
   },
   {
+    id: 11, // Second review for the same product
+    productId: "1",
+    productName: "6년근 홍삼 정과 선물세트",
+    productImage: giftBoxImage,
+    rating: 4,
+    date: "2025.09.20 10:15",
+    content: "지난번보다 배송이 조금 늦었지만 맛은 여전히 훌륭합니다. 재구매했습니다.",
+    options: "옵션: 1.5kg (30뿌리)"
+  },
+  {
     id: 2,
     productId: "2",
     productName: "유기농 벌꿀 & 호두 세트",
@@ -107,6 +117,19 @@ export default function MyReviewsPage() {
     });
   }, [reviews, startDate, endDate]);
 
+  // Group reviews by product
+  const groupedReviews = useMemo(() => {
+    const groups: { [key: string]: typeof initialReviews } = {};
+    filteredReviews.forEach(review => {
+      const key = review.productId ? review.productId : `deleted-${review.productName}`;
+      if (!groups[key]) {
+        groups[key] = [];
+      }
+      groups[key].push(review);
+    });
+    return Object.values(groups);
+  }, [filteredReviews]);
+
   return (
     <AppLayout hideNav>
       <SEO title="나의 리뷰 | 웰닉스" description="내가 작성한 리뷰를 확인하세요." />
@@ -183,72 +206,85 @@ export default function MyReviewsPage() {
             )}
           </div>
 
-          {filteredReviews.length === 0 ? (
+          {groupedReviews.length === 0 ? (
             <div className="text-center py-20 text-gray-400">
               <p>해당 기간에 작성된 리뷰가 없습니다.</p>
             </div>
           ) : (
-            filteredReviews.map((review) => (
-              <div 
-                key={review.id} 
-                className={`bg-white rounded-xl p-5 shadow-sm border transition-all ${
-                  selectedReviewIds.includes(review.id) ? "border-primary ring-1 ring-primary bg-primary/5" : "border-gray-100"
-                }`}
-              >
-                <div className="flex justify-between items-start mb-4">
-                  <div className="flex gap-3 flex-1 min-w-0">
+            groupedReviews.map((group) => {
+              const product = group[0]; // Use first review for product info
+              
+              return (
+                <div 
+                  key={product.productId || product.id} 
+                  className="bg-white rounded-xl p-5 shadow-sm border border-gray-100"
+                >
+                  {/* Product Info Header */}
+                  <div className="flex gap-3 mb-4 pb-4 border-b border-gray-50">
                     <div 
                       className="w-16 h-16 rounded-lg overflow-hidden border border-gray-100 flex-shrink-0 bg-gray-50 cursor-pointer group"
-                      onClick={() => handleProductClick(review.productId)}
+                      onClick={() => handleProductClick(product.productId)}
                     >
                       <img 
-                        src={review.productImage} 
-                        alt={review.productName} 
-                        className={`w-full h-full object-cover transition-transform group-hover:scale-105 ${!review.productId ? 'grayscale opacity-70' : ''}`}
+                        src={product.productImage} 
+                        alt={product.productName} 
+                        className={`w-full h-full object-cover transition-transform group-hover:scale-105 ${!product.productId ? 'grayscale opacity-70' : ''}`}
                       />
                     </div>
-                    <div className="flex-1 min-w-0">
+                    <div className="flex-1 min-w-0 flex flex-col justify-center">
                       <h3 
-                        className={`font-medium text-sm line-clamp-1 mb-1 cursor-pointer hover:underline ${!review.productId ? 'text-gray-400' : 'text-gray-900'}`}
-                        onClick={() => handleProductClick(review.productId)}
+                        className={`font-medium text-sm line-clamp-1 mb-1 cursor-pointer hover:underline ${!product.productId ? 'text-gray-400' : 'text-gray-900'}`}
+                        onClick={() => handleProductClick(product.productId)}
                       >
-                        {review.productName}
+                        {product.productName}
                       </h3>
-                      <p className="text-xs text-gray-400 mb-2">{review.options}</p>
-                      
-                      <div className="flex items-center gap-2">
-                        <div className="flex text-amber-400">
-                          {[...Array(5)].map((_, i) => (
-                            <Star 
-                              key={i} 
-                              className={`w-3 h-3 ${i < review.rating ? "fill-current" : "text-gray-200"}`} 
-                            />
-                          ))}
-                        </div>
-                        <span className="text-xs text-gray-400">{review.date}</span>
-                      </div>
+                      <p className="text-xs text-gray-400">{product.options}</p>
                     </div>
                   </div>
-                  
-                  <button 
-                    onClick={() => toggleReviewSelection(review.id)}
-                    className={`flex-shrink-0 w-6 h-6 rounded border flex items-center justify-center transition-colors ml-3 ${
-                      selectedReviewIds.includes(review.id) 
-                        ? "bg-primary border-primary text-white" 
-                        : "bg-white border-gray-300 text-transparent hover:border-gray-400"
-                    }`}
-                  >
-                    <Check className="w-4 h-4" />
-                  </button>
-                </div>
 
-                <div className="border-t border-gray-50 pt-3 mt-1">
-                  <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-line">
-                    {review.content}
-                  </p>
+                  {/* Reviews List for this Product */}
+                  <div className="space-y-4">
+                    {group.map((review, index) => (
+                      <div 
+                        key={review.id} 
+                        className={`relative ${index !== 0 ? "pt-4 border-t border-gray-50" : ""}`}
+                      >
+                        <div className="flex justify-between items-start mb-2">
+                          <div className="flex flex-col gap-1">
+                            <div className="flex items-center gap-2">
+                              <div className="flex text-amber-400">
+                                {[...Array(5)].map((_, i) => (
+                                  <Star 
+                                    key={i} 
+                                    className={`w-3.5 h-3.5 ${i < review.rating ? "fill-current" : "text-gray-200"}`} 
+                                  />
+                                ))}
+                              </div>
+                              <span className="text-xs text-gray-400">{review.date}</span>
+                            </div>
+                          </div>
+                          
+                          <button 
+                            onClick={() => toggleReviewSelection(review.id)}
+                            className={`flex-shrink-0 w-5 h-5 rounded border flex items-center justify-center transition-colors ${
+                              selectedReviewIds.includes(review.id) 
+                                ? "bg-primary border-primary text-white" 
+                                : "bg-white border-gray-300 text-transparent hover:border-gray-400"
+                            }`}
+                          >
+                            <Check className="w-3 h-3" />
+                          </button>
+                        </div>
+
+                        <p className={`text-gray-700 text-sm leading-relaxed whitespace-pre-line ${selectedReviewIds.includes(review.id) ? "opacity-50" : ""}`}>
+                          {review.content}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
       </div>
