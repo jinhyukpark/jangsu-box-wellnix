@@ -21,6 +21,8 @@ export default function MyPage() {
       setLocation("/mypage/recent");
     } else if (item === "간편결제 관리") {
       setLocation("/mypage/payment");
+    } else if (item === "배송지 관리") {
+      setLocation("/mypage/shipping");
     }
   };
 
