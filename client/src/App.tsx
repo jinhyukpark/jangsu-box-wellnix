@@ -15,6 +15,7 @@ import AdminPage from "@/pages/AdminPage";
 import MyReviewsPage from "@/pages/MyReviewsPage";
 import CorporateInquiryPage from "@/pages/CorporateInquiryPage";
 import MyWishlistPage from "@/pages/MyWishlistPage";
+import MyRecentProductsPage from "@/pages/MyRecentProductsPage";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -32,6 +33,7 @@ function Router() {
       <Route path="/mypage/reviews" component={MyReviewsPage} />
       <Route path="/corporate-inquiry" component={CorporateInquiryPage} />
       <Route path="/mypage/wishlist" component={MyWishlistPage} />
+      <Route path="/mypage/recent" component={MyRecentProductsPage} />
       <Route component={NotFound} />
     </Switch>
   );

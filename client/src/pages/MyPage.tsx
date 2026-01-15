@@ -17,6 +17,8 @@ export default function MyPage() {
       setLocation("/mypage/reviews");
     } else if (item === "찜한 상품") {
       setLocation("/mypage/wishlist");
+    } else if (item === "최근 본 상품") {
+      setLocation("/mypage/recent");
     }
   };
 
