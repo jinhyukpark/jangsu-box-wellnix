@@ -243,8 +243,20 @@ function LoginForm({ onLogin }: { onLogin: () => void }) {
       <div className="text-center">
         <p className="text-xs text-gray-400">
           {isSignup ? "가입" : "로그인"} 시{" "}
-          <span className="text-primary underline">이용약관</span> 및{" "}
-          <span className="text-primary underline">개인정보처리방침</span>에 동의합니다.
+          <button 
+            type="button"
+            onClick={() => setLocation("/terms")}
+            className="text-primary underline hover:text-primary/80"
+          >
+            이용약관
+          </button> 및{" "}
+          <button 
+            type="button"
+            onClick={() => setLocation("/privacy")}
+            className="text-primary underline hover:text-primary/80"
+          >
+            개인정보처리방침
+          </button>에 동의합니다.
         </p>
       </div>
     </div>

@@ -27,6 +27,8 @@ import JangsuBrandPage from "@/pages/JangsuBrandPage";
 import MyProfilePage from "@/pages/MyProfilePage";
 import EmailSentPage from "@/pages/EmailSentPage";
 import EmailVerifyPage from "@/pages/EmailVerifyPage";
+import TermsPage from "@/pages/TermsPage";
+import PrivacyPage from "@/pages/PrivacyPage";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -56,6 +58,8 @@ function Router() {
       <Route path="/mypage/profile" component={MyProfilePage} />
       <Route path="/email-sent" component={EmailSentPage} />
       <Route path="/verify-email" component={EmailVerifyPage} />
+      <Route path="/terms" component={TermsPage} />
+      <Route path="/privacy" component={PrivacyPage} />
       <Route component={NotFound} />
     </Switch>
   );
