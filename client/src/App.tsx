@@ -24,6 +24,7 @@ import NoticePage from "@/pages/NoticePage";
 import FAQPage from "@/pages/FAQPage";
 import MyInquiryPage from "@/pages/MyInquiryPage";
 import JangsuBrandPage from "@/pages/JangsuBrandPage";
+import MyProfilePage from "@/pages/MyProfilePage";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -50,6 +51,7 @@ function Router() {
       <Route path="/faq" component={FAQPage} />
       <Route path="/inquiry" component={MyInquiryPage} />
       <Route path="/jangsu-brand" component={JangsuBrandPage} />
+      <Route path="/mypage/profile" component={MyProfilePage} />
       <Route component={NotFound} />
     </Switch>
   );

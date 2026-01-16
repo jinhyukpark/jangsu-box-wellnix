@@ -13,7 +13,9 @@ export default function MyPage() {
   const [, setLocation] = useLocation();
 
   const handleMenuClick = (item: string) => {
-    if (item === "나의 리뷰") {
+    if (item === "회원정보 수정") {
+      setLocation("/mypage/profile");
+    } else if (item === "나의 리뷰") {
       setLocation("/mypage/reviews");
     } else if (item === "찜한 상품") {
       setLocation("/mypage/wishlist");
@@ -161,6 +163,7 @@ export default function MyPage() {
 
         <div className="px-4 space-y-4 mb-6">
           {[
+            { title: "내 정보", items: ["회원정보 수정"] },
             { title: "나의 활동", items: ["나의 리뷰", "찜한 상품", "최근 본 상품"] },
             { title: "결제/배송", items: ["간편결제 관리", "배송지 관리", "알림 설정"] },
             { title: "고객지원", items: ["공지사항", "자주 묻는 질문", "1:1 문의"] },
