@@ -25,6 +25,8 @@ import FAQPage from "@/pages/FAQPage";
 import MyInquiryPage from "@/pages/MyInquiryPage";
 import JangsuBrandPage from "@/pages/JangsuBrandPage";
 import MyProfilePage from "@/pages/MyProfilePage";
+import EmailSentPage from "@/pages/EmailSentPage";
+import EmailVerifyPage from "@/pages/EmailVerifyPage";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -52,6 +54,8 @@ function Router() {
       <Route path="/inquiry" component={MyInquiryPage} />
       <Route path="/jangsu-brand" component={JangsuBrandPage} />
       <Route path="/mypage/profile" component={MyProfilePage} />
+      <Route path="/email-sent" component={EmailSentPage} />
+      <Route path="/verify-email" component={EmailVerifyPage} />
       <Route component={NotFound} />
     </Switch>
   );

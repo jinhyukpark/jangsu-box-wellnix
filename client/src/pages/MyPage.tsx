@@ -12,9 +12,12 @@ const recentOrders = [
 ];
 
 function LoginForm({ onLogin }: { onLogin: () => void }) {
-  const [showEmailLogin, setShowEmailLogin] = useState(false);
+  const [, setLocation] = useLocation();
+  const [showEmailForm, setShowEmailForm] = useState(false);
+  const [isSignup, setIsSignup] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   const handleSocialLogin = (provider: string) => {
     toast.success(`${provider} 로그인 진행 중...`);
@@ -23,14 +26,44 @@ function LoginForm({ onLogin }: { onLogin: () => void }) {
     }, 1000);
   };
 
+  const validateEmail = (email: string) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  };
+
   const handleEmailLogin = (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
       toast.error("이메일과 비밀번호를 입력해주세요.");
       return;
     }
+    if (!validateEmail(email)) {
+      toast.error("올바른 이메일 형식을 입력해주세요.");
+      return;
+    }
     toast.success("로그인 성공!");
     onLogin();
+  };
+
+  const handleEmailSignup = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || !password || !confirmPassword) {
+      toast.error("모든 항목을 입력해주세요.");
+      return;
+    }
+    if (!validateEmail(email)) {
+      toast.error("올바른 이메일 형식을 입력해주세요.");
+      return;
+    }
+    if (password.length < 8) {
+      toast.error("비밀번호는 8자 이상이어야 합니다.");
+      return;
+    }
+    if (password !== confirmPassword) {
+      toast.error("비밀번호가 일치하지 않습니다.");
+      return;
+    }
+    toast.success("인증 이메일을 발송했습니다.");
+    setLocation(`/email-sent?email=${encodeURIComponent(email)}`);
   };
 
   return (
@@ -39,91 +72,178 @@ function LoginForm({ onLogin }: { onLogin: () => void }) {
         <div className="w-20 h-20 bg-gradient-to-br from-primary to-primary/70 rounded-full flex items-center justify-center mx-auto mb-4">
           <User className="w-10 h-10 text-white" />
         </div>
-        <h2 className="text-xl font-bold text-gray-900 mb-2">로그인이 필요합니다</h2>
-        <p className="text-sm text-gray-500">웰닉스의 다양한 서비스를 이용해보세요</p>
+        <h2 className="text-xl font-bold text-gray-900 mb-2">
+          {isSignup ? "이메일로 가입하기" : "로그인이 필요합니다"}
+        </h2>
+        <p className="text-sm text-gray-500">
+          {isSignup ? "이메일 인증 후 가입이 완료됩니다" : "웰닉스의 다양한 서비스를 이용해보세요"}
+        </p>
       </div>
 
-      <div className="space-y-3 mb-6">
-        <button
-          onClick={() => handleSocialLogin("카카오")}
-          className="w-full flex items-center justify-center gap-3 py-3.5 bg-[#FEE500] rounded-lg font-medium text-[#3C1E1E] hover:bg-[#FDD835] transition-colors"
-          data-testid="btn-kakao-login"
-        >
-          <svg viewBox="0 0 24 24" className="w-5 h-5" fill="#3C1E1E">
-            <path d="M12 3C6.477 3 2 6.477 2 10.5c0 2.47 1.607 4.647 4.031 5.903-.162.606-.583 2.19-.667 2.531-.104.422.155.416.326.303.135-.09 2.145-1.456 3.013-2.046.429.061.869.093 1.297.093 5.523 0 10-3.477 10-7.784C20 6.477 17.523 3 12 3z"/>
-          </svg>
-          카카오로 시작하기
-        </button>
-
-        <button
-          onClick={() => handleSocialLogin("Apple")}
-          className="w-full flex items-center justify-center gap-3 py-3.5 bg-black rounded-lg font-medium text-white hover:bg-gray-800 transition-colors"
-          data-testid="btn-apple-login"
-        >
-          <svg viewBox="0 0 24 24" className="w-5 h-5" fill="white">
-            <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
-          </svg>
-          Apple로 시작하기
-        </button>
-
-        <div className="relative flex items-center gap-3 my-4">
-          <div className="flex-1 h-px bg-gray-200" />
-          <span className="text-xs text-gray-400">또는</span>
-          <div className="flex-1 h-px bg-gray-200" />
-        </div>
-
-        {showEmailLogin ? (
-          <form onSubmit={handleEmailLogin} className="space-y-3">
-            <div>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="이메일"
-                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                data-testid="input-email"
-              />
-            </div>
-            <div>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="비밀번호"
-                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                data-testid="input-password"
-              />
-            </div>
-            <button
-              type="submit"
-              className="w-full py-3.5 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-colors"
-              data-testid="btn-email-submit"
-            >
-              이메일로 로그인
-            </button>
-            <button
-              type="button"
-              onClick={() => setShowEmailLogin(false)}
-              className="w-full py-2 text-sm text-gray-500 hover:text-gray-700"
-            >
-              다른 방법으로 로그인
-            </button>
-          </form>
-        ) : (
+      {!showEmailForm ? (
+        <div className="space-y-3 mb-6">
           <button
-            onClick={() => setShowEmailLogin(true)}
+            onClick={() => handleSocialLogin("카카오")}
+            className="w-full flex items-center justify-center gap-3 py-3.5 bg-[#FEE500] rounded-lg font-medium text-[#3C1E1E] hover:bg-[#FDD835] transition-colors"
+            data-testid="btn-kakao-login"
+          >
+            <svg viewBox="0 0 24 24" className="w-5 h-5" fill="#3C1E1E">
+              <path d="M12 3C6.477 3 2 6.477 2 10.5c0 2.47 1.607 4.647 4.031 5.903-.162.606-.583 2.19-.667 2.531-.104.422.155.416.326.303.135-.09 2.145-1.456 3.013-2.046.429.061.869.093 1.297.093 5.523 0 10-3.477 10-7.784C20 6.477 17.523 3 12 3z"/>
+            </svg>
+            카카오로 시작하기
+          </button>
+
+          <button
+            onClick={() => handleSocialLogin("Apple")}
+            className="w-full flex items-center justify-center gap-3 py-3.5 bg-black rounded-lg font-medium text-white hover:bg-gray-800 transition-colors"
+            data-testid="btn-apple-login"
+          >
+            <svg viewBox="0 0 24 24" className="w-5 h-5" fill="white">
+              <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+            </svg>
+            Apple로 시작하기
+          </button>
+
+          <div className="relative flex items-center gap-3 my-4">
+            <div className="flex-1 h-px bg-gray-200" />
+            <span className="text-xs text-gray-400">또는</span>
+            <div className="flex-1 h-px bg-gray-200" />
+          </div>
+
+          <button
+            onClick={() => setShowEmailForm(true)}
             className="w-full flex items-center justify-center gap-3 py-3.5 bg-gray-100 rounded-lg font-medium text-gray-700 hover:bg-gray-200 transition-colors"
             data-testid="btn-email-login"
           >
             <Mail className="w-5 h-5" />
-            이메일로 로그인
+            이메일로 로그인/가입
           </button>
-        )}
-      </div>
+        </div>
+      ) : (
+        <div className="mb-6">
+          <div className="flex bg-gray-100 rounded-lg p-1 mb-4">
+            <button
+              onClick={() => setIsSignup(false)}
+              className={`flex-1 py-2.5 rounded-md text-sm font-medium transition-colors ${
+                !isSignup ? "bg-white text-gray-900 shadow-sm" : "text-gray-500"
+              }`}
+              data-testid="tab-login"
+            >
+              로그인
+            </button>
+            <button
+              onClick={() => setIsSignup(true)}
+              className={`flex-1 py-2.5 rounded-md text-sm font-medium transition-colors ${
+                isSignup ? "bg-white text-gray-900 shadow-sm" : "text-gray-500"
+              }`}
+              data-testid="tab-signup"
+            >
+              회원가입
+            </button>
+          </div>
+
+          {isSignup ? (
+            <form onSubmit={handleEmailSignup} className="space-y-3">
+              <div>
+                <label className="block text-xs text-gray-500 mb-1">이메일</label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="example@email.com"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  data-testid="input-signup-email"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-gray-500 mb-1">비밀번호</label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="8자 이상 입력"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  data-testid="input-signup-password"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-gray-500 mb-1">비밀번호 확인</label>
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="비밀번호 다시 입력"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  data-testid="input-signup-confirm"
+                />
+              </div>
+              <button
+                type="submit"
+                className="w-full py-3.5 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
+                data-testid="btn-signup-submit"
+              >
+                <Mail className="w-5 h-5" />
+                인증 메일 받기
+              </button>
+            </form>
+          ) : (
+            <form onSubmit={handleEmailLogin} className="space-y-3">
+              <div>
+                <label className="block text-xs text-gray-500 mb-1">이메일</label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="example@email.com"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  data-testid="input-login-email"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-gray-500 mb-1">비밀번호</label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="비밀번호 입력"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  data-testid="input-login-password"
+                />
+              </div>
+              <button
+                type="submit"
+                className="w-full py-3.5 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-colors"
+                data-testid="btn-login-submit"
+              >
+                로그인
+              </button>
+              <button
+                type="button"
+                className="w-full py-2 text-sm text-gray-500 hover:text-primary transition-colors"
+              >
+                비밀번호를 잊으셨나요?
+              </button>
+            </form>
+          )}
+
+          <button
+            onClick={() => {
+              setShowEmailForm(false);
+              setEmail("");
+              setPassword("");
+              setConfirmPassword("");
+            }}
+            className="w-full py-2 mt-3 text-sm text-gray-500 hover:text-gray-700"
+          >
+            다른 방법으로 로그인
+          </button>
+        </div>
+      )}
 
       <div className="text-center">
         <p className="text-xs text-gray-400">
-          로그인 시 <span className="text-primary underline">이용약관</span> 및{" "}
+          {isSignup ? "가입" : "로그인"} 시{" "}
+          <span className="text-primary underline">이용약관</span> 및{" "}
           <span className="text-primary underline">개인정보처리방침</span>에 동의합니다.
         </p>
       </div>
