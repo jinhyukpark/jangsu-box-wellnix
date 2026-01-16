@@ -1,36 +1,35 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { Bell, ShoppingCart, ChevronRight, Gift, Package, Heart, Star, Truck, Award, Mail, User } from "lucide-react";
+import { Bell, ShoppingCart, ChevronRight, Gift, Package, Heart, Star, Truck, Award, Mail, User, Loader2 } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import giftBoxImage from "@assets/generated_images/premium_korean_health_gift_box.png";
 import happySeniorsImage from "@assets/generated_images/happy_seniors_receiving_gift.png";
 import { toast } from "sonner";
+import { useAuth } from "@/hooks/use-auth";
 
 const recentOrders = [
   { image: giftBoxImage, name: "[2026] 설 프리미엄 홍삼 선물세트", status: "배송중", date: "01.12 도착예정" },
   { image: giftBoxImage, name: "유기농 벌꿀 & 호두 세트", status: "구매확정", date: "01.08 배송완료" },
 ];
 
-function LoginForm({ onLogin }: { onLogin: () => void }) {
+function LoginForm({ onLogin, isLoading }: { onLogin: (email: string, password: string, name?: string) => Promise<void>; isLoading: boolean }) {
   const [, setLocation] = useLocation();
   const [showEmailForm, setShowEmailForm] = useState(false);
   const [isSignup, setIsSignup] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [name, setName] = useState("");
 
   const handleSocialLogin = (provider: string) => {
-    toast.success(`${provider} 로그인 진행 중...`);
-    setTimeout(() => {
-      onLogin();
-    }, 1000);
+    toast.info(`${provider} 로그인은 현재 준비 중입니다.`);
   };
 
   const validateEmail = (email: string) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
 
-  const handleEmailLogin = (e: React.FormEvent) => {
+  const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
       toast.error("이메일과 비밀번호를 입력해주세요.");
@@ -40,13 +39,17 @@ function LoginForm({ onLogin }: { onLogin: () => void }) {
       toast.error("올바른 이메일 형식을 입력해주세요.");
       return;
     }
-    toast.success("로그인 성공!");
-    onLogin();
+    try {
+      await onLogin(email, password);
+      toast.success("로그인 성공!");
+    } catch (error: any) {
+      toast.error(error.message || "로그인에 실패했습니다.");
+    }
   };
 
-  const handleEmailSignup = (e: React.FormEvent) => {
+  const handleEmailSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password || !confirmPassword) {
+    if (!email || !password || !confirmPassword || !name) {
       toast.error("모든 항목을 입력해주세요.");
       return;
     }
@@ -62,8 +65,12 @@ function LoginForm({ onLogin }: { onLogin: () => void }) {
       toast.error("비밀번호가 일치하지 않습니다.");
       return;
     }
-    toast.success("인증 이메일을 발송했습니다.");
-    setLocation(`/email-sent?email=${encodeURIComponent(email)}`);
+    try {
+      await onLogin(email, password, name);
+      toast.success("회원가입이 완료되었습니다!");
+    } catch (error: any) {
+      toast.error(error.message || "회원가입에 실패했습니다.");
+    }
   };
 
   return (
@@ -145,6 +152,17 @@ function LoginForm({ onLogin }: { onLogin: () => void }) {
           {isSignup ? (
             <form onSubmit={handleEmailSignup} className="space-y-3">
               <div>
+                <label className="block text-xs text-gray-500 mb-1">이름</label>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="이름을 입력해주세요"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  data-testid="input-signup-name"
+                />
+              </div>
+              <div>
                 <label className="block text-xs text-gray-500 mb-1">이메일</label>
                 <input
                   type="email"
@@ -179,11 +197,12 @@ function LoginForm({ onLogin }: { onLogin: () => void }) {
               </div>
               <button
                 type="submit"
-                className="w-full py-3.5 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
+                disabled={isLoading}
+                className="w-full py-3.5 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
                 data-testid="btn-signup-submit"
               >
-                <Mail className="w-5 h-5" />
-                인증 메일 받기
+                {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Mail className="w-5 h-5" />}
+                {isLoading ? "가입 중..." : "회원가입"}
               </button>
             </form>
           ) : (
@@ -212,10 +231,12 @@ function LoginForm({ onLogin }: { onLogin: () => void }) {
               </div>
               <button
                 type="submit"
-                className="w-full py-3.5 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-colors"
+                disabled={isLoading}
+                className="w-full py-3.5 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
                 data-testid="btn-login-submit"
               >
-                로그인
+                {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : null}
+                {isLoading ? "로그인 중..." : "로그인"}
               </button>
               <button
                 type="button"
@@ -265,7 +286,7 @@ function LoginForm({ onLogin }: { onLogin: () => void }) {
 
 export default function MyPage() {
   const [, setLocation] = useLocation();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { user, isAuthenticated, isLoading, login, register, logout, isLoginLoading, isRegisterLoading } = useAuth();
 
   const handleMenuClick = (item: string) => {
     if (item === "회원정보 수정") {
@@ -291,13 +312,16 @@ export default function MyPage() {
     }
   };
 
-  const handleLogin = () => {
-    setIsLoggedIn(true);
-    toast.success("로그인되었습니다!");
+  const handleAuth = async (email: string, password: string, name?: string) => {
+    if (name) {
+      await register({ email, password, name, authProvider: "email" });
+    } else {
+      await login({ email, password });
+    }
   };
 
-  const handleLogout = () => {
-    setIsLoggedIn(false);
+  const handleLogout = async () => {
+    await logout();
     toast.success("로그아웃되었습니다.");
   };
 
@@ -327,9 +351,9 @@ export default function MyPage() {
       </header>
 
       <div className="pb-24">
-        {!isLoggedIn ? (
+        {!isAuthenticated ? (
           <>
-            <LoginForm onLogin={handleLogin} />
+            <LoginForm onLogin={handleAuth} isLoading={isLoginLoading || isRegisterLoading} />
             
             <div className="px-4 space-y-4 mb-6">
               <div>
@@ -366,8 +390,8 @@ export default function MyPage() {
                   </span>
                 </div>
                 
-                <h2 className="text-2xl font-bold text-white mb-1">김건강님, 안녕하세요!</h2>
-                <p className="text-white/70 text-sm mb-4">웰닉스와 함께한 지 <span className="text-amber-300 font-semibold">365일</span>이 되었어요</p>
+                <h2 className="text-2xl font-bold text-white mb-1">{user?.name || "회원"}님, 안녕하세요!</h2>
+                <p className="text-white/70 text-sm mb-4">웰닉스와 함께 건강한 하루 보내세요</p>
                 
                 <div className="grid grid-cols-4 gap-2">
                   {[
