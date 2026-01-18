@@ -4,13 +4,13 @@ import * as schema from "@shared/schema";
 
 const { Pool } = pg;
 
-const connectionString = process.env.DATABASE_URL || process.env.SUPABASE_DATABASE_URL;
+const connectionString = process.env.SUPABASE_DATABASE_URL || process.env.DATABASE_URL;
 
 if (!connectionString) {
-  throw new Error("DATABASE_URL or SUPABASE_DATABASE_URL is not set");
+  throw new Error("SUPABASE_DATABASE_URL or DATABASE_URL is not set");
 }
 
-const useSSL = !process.env.DATABASE_URL && process.env.SUPABASE_DATABASE_URL;
+const useSSL = !!process.env.SUPABASE_DATABASE_URL;
 
 const pool = new Pool({
   connectionString,
