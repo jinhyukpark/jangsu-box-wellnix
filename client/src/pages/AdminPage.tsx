@@ -1,13 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { 
   Package, Users, Gift, Calendar, CreditCard, Truck, MessageSquare, 
   ChevronRight, Search, Bell, Settings, LogOut, Menu, X,
   TrendingUp, ShoppingBag, UserCheck, Clock, HelpCircle, Star, ShieldCheck, Loader2, ShieldX, Award,
-  ArrowUpDown, ArrowUp, ArrowDown
+  ArrowUpDown, ArrowUp, ArrowDown, Home, Image, Link2
 } from "lucide-react";
-import { useAdminProducts, useAdminCategories, useAdminMembers, useAdminSubscriptions, useAdminSubscriptionPlans, useAdminEvents, useAdminInquiries, useAdminFaqs, useAdminList, useDashboardStats, useCreateProduct, useUpdateProduct, useCreateCategory, useUpdateCategory, useDeleteCategory, useCreateFaq, useUpdateFaq, useDeleteFaq, useCreateSubscriptionPlan, useUpdateSubscriptionPlan, useDeleteSubscriptionPlan, useDeleteEvent } from "@/hooks/use-admin";
+import { useAdminProducts, useAdminCategories, useAdminMembers, useAdminSubscriptions, useAdminSubscriptionPlans, useAdminEvents, useAdminInquiries, useAdminFaqs, useAdminList, useDashboardStats, useCreateProduct, useUpdateProduct, useCreateCategory, useUpdateCategory, useDeleteCategory, useCreateFaq, useUpdateFaq, useDeleteFaq, useCreateSubscriptionPlan, useUpdateSubscriptionPlan, useDeleteSubscriptionPlan, useDeleteEvent, useMainPageSettings, useUpdateMainPageSettings, type MainPageSettings } from "@/hooks/use-admin";
 import { useAdminAuth, useAdminLogout } from "@/hooks/use-admin-auth";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -40,6 +40,7 @@ import {
 const menuItems = [
   { id: "members", label: "회원 관리", icon: Users },
   { id: "settings", label: "관리자 설정", icon: ShieldCheck },
+  { id: "main-page", label: "메인 페이지 설정", icon: Home },
   { id: "products", label: "상품 관리", icon: Package },
   { id: "brands", label: "브랜드 관리", icon: Award },
   { id: "subscription", label: "장수박스 관리", icon: Gift },
@@ -188,6 +189,279 @@ const mockMemberHistory = {
     { title: "홍삼 건강법 특강", date: "2025-11-20", status: "참여완료" },
   ]
 };
+
+function MainPageSettingsPanel({ products, events }: { products: any[], events: any[] }) {
+  const { toast } = useToast();
+  const { data: settings, isLoading } = useMainPageSettings();
+  const updateSettings = useUpdateMainPageSettings();
+  
+  const [localSettings, setLocalSettings] = useState<MainPageSettings>({
+    bestProductsCriteria: "sales",
+    bestProductsManualIds: [],
+    bestProductsLimit: 6,
+    adBannerImage: null,
+    adBannerLink: null,
+    adBannerEnabled: true,
+    newProductsCriteria: "recent",
+    newProductsManualIds: [],
+    newProductsLimit: 6,
+    newProductsDaysThreshold: 30,
+    eventsCriteria: "active",
+    eventsManualIds: [],
+    eventsLimit: 4,
+  });
+
+  useEffect(() => {
+    if (settings) {
+      setLocalSettings(settings);
+    }
+  }, [settings]);
+
+  const handleSave = async () => {
+    try {
+      await updateSettings.mutateAsync(localSettings);
+      toast({ title: "저장 완료", description: "메인 페이지 설정이 저장되었습니다." });
+    } catch (error) {
+      toast({ title: "저장 실패", description: "설정 저장 중 오류가 발생했습니다.", variant: "destructive" });
+    }
+  };
+
+  const toggleProductSelection = (productId: number, field: "bestProductsManualIds" | "newProductsManualIds") => {
+    const currentIds = localSettings[field] || [];
+    if (currentIds.includes(productId)) {
+      setLocalSettings({ ...localSettings, [field]: currentIds.filter(id => id !== productId) });
+    } else {
+      setLocalSettings({ ...localSettings, [field]: [...currentIds, productId] });
+    }
+  };
+
+  const toggleEventSelection = (eventId: number) => {
+    const currentIds = localSettings.eventsManualIds || [];
+    if (currentIds.includes(eventId)) {
+      setLocalSettings({ ...localSettings, eventsManualIds: currentIds.filter(id => id !== eventId) });
+    } else {
+      setLocalSettings({ ...localSettings, eventsManualIds: [...currentIds, eventId] });
+    }
+  };
+
+  if (isLoading) return <div className="text-center py-8 text-gray-500">로딩중...</div>;
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-xl font-bold text-gray-900">메인 페이지 설정</h2>
+        <Button onClick={handleSave} disabled={updateSettings.isPending}>
+          {updateSettings.isPending ? "저장중..." : "설정 저장"}
+        </Button>
+      </div>
+
+      <div className="space-y-6">
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+            <Star className="w-5 h-5 text-yellow-500" />
+            베스트 상품 설정
+          </h3>
+          <div className="space-y-4">
+            <div>
+              <Label>선택 기준</Label>
+              <Select 
+                value={localSettings.bestProductsCriteria} 
+                onValueChange={(v) => setLocalSettings({ ...localSettings, bestProductsCriteria: v as "sales" | "manual" })}
+              >
+                <SelectTrigger className="w-full mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="sales">구매순 (자동)</SelectItem>
+                  <SelectItem value="manual">직접 선택</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>표시 개수</Label>
+              <Input 
+                type="number" 
+                value={localSettings.bestProductsLimit} 
+                onChange={(e) => setLocalSettings({ ...localSettings, bestProductsLimit: parseInt(e.target.value) || 6 })}
+                className="mt-1"
+              />
+            </div>
+            {localSettings.bestProductsCriteria === "manual" && (
+              <div>
+                <Label className="mb-2 block">상품 선택</Label>
+                <div className="grid grid-cols-3 gap-2 max-h-48 overflow-y-auto border rounded p-2">
+                  {products?.map((product: any) => (
+                    <label key={product.id} className="flex items-center gap-2 p-2 hover:bg-gray-50 rounded cursor-pointer">
+                      <Checkbox 
+                        checked={localSettings.bestProductsManualIds?.includes(product.id)}
+                        onCheckedChange={() => toggleProductSelection(product.id, "bestProductsManualIds")}
+                      />
+                      <span className="text-sm truncate">{product.name}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+            <Image className="w-5 h-5 text-blue-500" />
+            중간 광고 배너 설정
+          </h3>
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <Checkbox 
+                id="adBannerEnabled"
+                checked={localSettings.adBannerEnabled}
+                onCheckedChange={(checked) => setLocalSettings({ ...localSettings, adBannerEnabled: !!checked })}
+              />
+              <Label htmlFor="adBannerEnabled">광고 배너 활성화</Label>
+            </div>
+            <div>
+              <Label>배너 이미지 URL</Label>
+              <Input 
+                value={localSettings.adBannerImage || ""} 
+                onChange={(e) => setLocalSettings({ ...localSettings, adBannerImage: e.target.value })}
+                placeholder="이미지 URL 입력 (예: /objects/public/...)"
+                className="mt-1"
+              />
+              {localSettings.adBannerImage && (
+                <div className="mt-2 relative w-full h-32 bg-gray-100 rounded overflow-hidden">
+                  <img src={localSettings.adBannerImage} alt="Banner preview" className="w-full h-full object-cover" />
+                </div>
+              )}
+            </div>
+            <div>
+              <Label className="flex items-center gap-1">
+                <Link2 className="w-4 h-4" />
+                배너 링크 URL
+              </Label>
+              <Input 
+                value={localSettings.adBannerLink || ""} 
+                onChange={(e) => setLocalSettings({ ...localSettings, adBannerLink: e.target.value })}
+                placeholder="클릭 시 이동할 URL (예: /subscription)"
+                className="mt-1"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+            <Package className="w-5 h-5 text-green-500" />
+            신상품 설정
+          </h3>
+          <div className="space-y-4">
+            <div>
+              <Label>선택 기준</Label>
+              <Select 
+                value={localSettings.newProductsCriteria} 
+                onValueChange={(v) => setLocalSettings({ ...localSettings, newProductsCriteria: v as "recent" | "manual" })}
+              >
+                <SelectTrigger className="w-full mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="recent">최근 등록순 (자동)</SelectItem>
+                  <SelectItem value="manual">직접 선택</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>표시 개수</Label>
+                <Input 
+                  type="number" 
+                  value={localSettings.newProductsLimit} 
+                  onChange={(e) => setLocalSettings({ ...localSettings, newProductsLimit: parseInt(e.target.value) || 6 })}
+                  className="mt-1"
+                />
+              </div>
+              {localSettings.newProductsCriteria === "recent" && (
+                <div>
+                  <Label>신상품 기준 (일)</Label>
+                  <Input 
+                    type="number" 
+                    value={localSettings.newProductsDaysThreshold} 
+                    onChange={(e) => setLocalSettings({ ...localSettings, newProductsDaysThreshold: parseInt(e.target.value) || 30 })}
+                    className="mt-1"
+                  />
+                </div>
+              )}
+            </div>
+            {localSettings.newProductsCriteria === "manual" && (
+              <div>
+                <Label className="mb-2 block">상품 선택</Label>
+                <div className="grid grid-cols-3 gap-2 max-h-48 overflow-y-auto border rounded p-2">
+                  {products?.map((product: any) => (
+                    <label key={product.id} className="flex items-center gap-2 p-2 hover:bg-gray-50 rounded cursor-pointer">
+                      <Checkbox 
+                        checked={localSettings.newProductsManualIds?.includes(product.id)}
+                        onCheckedChange={() => toggleProductSelection(product.id, "newProductsManualIds")}
+                      />
+                      <span className="text-sm truncate">{product.name}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+            <Calendar className="w-5 h-5 text-purple-500" />
+            건강 행사 & 일정 설정
+          </h3>
+          <div className="space-y-4">
+            <div>
+              <Label>선택 기준</Label>
+              <Select 
+                value={localSettings.eventsCriteria} 
+                onValueChange={(v) => setLocalSettings({ ...localSettings, eventsCriteria: v as "active" | "manual" })}
+              >
+                <SelectTrigger className="w-full mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">활성화된 행사만 (자동)</SelectItem>
+                  <SelectItem value="manual">직접 선택</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>표시 개수</Label>
+              <Input 
+                type="number" 
+                value={localSettings.eventsLimit} 
+                onChange={(e) => setLocalSettings({ ...localSettings, eventsLimit: parseInt(e.target.value) || 4 })}
+                className="mt-1"
+              />
+            </div>
+            {localSettings.eventsCriteria === "manual" && (
+              <div>
+                <Label className="mb-2 block">행사 선택</Label>
+                <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto border rounded p-2">
+                  {events?.map((event: any) => (
+                    <label key={event.id} className="flex items-center gap-2 p-2 hover:bg-gray-50 rounded cursor-pointer">
+                      <Checkbox 
+                        checked={localSettings.eventsManualIds?.includes(event.id)}
+                        onCheckedChange={() => toggleEventSelection(event.id)}
+                      />
+                      <span className="text-sm truncate">{event.title}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function AdminPage() {
   const [, setLocation] = useLocation();
@@ -2524,6 +2798,9 @@ export default function AdminPage() {
             </div>
           </div>
         );
+
+      case "main-page":
+        return <MainPageSettingsPanel products={products || []} events={events || []} />;
 
       case "base-settings":
         return (

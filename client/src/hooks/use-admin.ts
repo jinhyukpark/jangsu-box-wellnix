@@ -267,3 +267,36 @@ export function useDashboardStats() {
     queryFn: () => fetchWithAuth("/api/admin/dashboard"),
   });
 }
+
+export interface MainPageSettings {
+  id?: number;
+  bestProductsCriteria: "sales" | "manual";
+  bestProductsManualIds: number[];
+  bestProductsLimit: number;
+  adBannerImage: string | null;
+  adBannerLink: string | null;
+  adBannerEnabled: boolean;
+  newProductsCriteria: "recent" | "manual";
+  newProductsManualIds: number[];
+  newProductsLimit: number;
+  newProductsDaysThreshold: number;
+  eventsCriteria: "active" | "manual";
+  eventsManualIds: number[];
+  eventsLimit: number;
+}
+
+export function useMainPageSettings() {
+  return useQuery<MainPageSettings>({
+    queryKey: ["admin", "main-page-settings"],
+    queryFn: () => fetchWithAuth("/api/admin/main-page-settings"),
+  });
+}
+
+export function useUpdateMainPageSettings() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: Partial<MainPageSettings>) => 
+      fetchWithAuth("/api/admin/main-page-settings", { method: "PUT", body: JSON.stringify(data) }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin", "main-page-settings"] }),
+  });
+}

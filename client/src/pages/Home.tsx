@@ -9,6 +9,7 @@ import { PromoBanner } from "@/components/PromoBanner";
 import { EventSection } from "@/components/EventSection";
 import { AppLayout } from "@/components/AppLayout";
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "wouter";
 
 interface Product {
   id: number;
@@ -20,6 +21,23 @@ interface Product {
   reviewCount?: number;
   isFeatured?: boolean;
   status: string;
+  createdAt?: string;
+}
+
+interface MainPageSettings {
+  bestProductsCriteria: "sales" | "manual";
+  bestProductsManualIds: number[];
+  bestProductsLimit: number;
+  adBannerImage: string | null;
+  adBannerLink: string | null;
+  adBannerEnabled: boolean;
+  newProductsCriteria: "recent" | "manual";
+  newProductsManualIds: number[];
+  newProductsLimit: number;
+  newProductsDaysThreshold: number;
+  eventsCriteria: "active" | "manual";
+  eventsManualIds: number[];
+  eventsLimit: number;
 }
 
 export default function Home() {
@@ -32,26 +50,59 @@ export default function Home() {
     },
   });
 
+  const { data: settings } = useQuery<MainPageSettings>({
+    queryKey: ["/api/main-page-settings"],
+    queryFn: async () => {
+      const res = await fetch("/api/main-page-settings");
+      if (!res.ok) throw new Error("Failed to fetch settings");
+      return res.json();
+    },
+  });
+
   const activeProducts = products.filter(p => p.status === "active");
-  const featuredProducts = activeProducts.filter(p => p.isFeatured);
   
-  const bestProducts = featuredProducts.slice(0, 5).map((p, i) => ({
+  const getBestProducts = () => {
+    const limit = settings?.bestProductsLimit || 6;
+    if (settings?.bestProductsCriteria === "manual" && settings.bestProductsManualIds?.length > 0) {
+      return activeProducts
+        .filter(p => settings.bestProductsManualIds.includes(p.id))
+        .slice(0, limit);
+    }
+    return activeProducts.filter(p => p.isFeatured).slice(0, limit);
+  };
+
+  const getNewProducts = () => {
+    const limit = settings?.newProductsLimit || 6;
+    if (settings?.newProductsCriteria === "manual" && settings.newProductsManualIds?.length > 0) {
+      return activeProducts
+        .filter(p => settings.newProductsManualIds.includes(p.id))
+        .slice(0, limit);
+    }
+    const daysThreshold = settings?.newProductsDaysThreshold || 30;
+    const thresholdDate = new Date();
+    thresholdDate.setDate(thresholdDate.getDate() - daysThreshold);
+    return activeProducts
+      .filter(p => p.createdAt && new Date(p.createdAt) >= thresholdDate)
+      .slice(0, limit);
+  };
+  
+  const bestProducts = getBestProducts().map((p, i) => ({
     id: String(p.id),
     name: p.name,
     price: p.price,
     originalPrice: p.originalPrice || undefined,
-    image: p.image || "https://images.unsplash.com/photo-1505576399279-565b52d4ac71?w=400",
+    image: p.image || "/objects/public/d9f3ffe9-dc92-4270-a08d-699008125503",
     rating: parseFloat(p.rating || "4.5"),
     reviewCount: p.reviewCount || 0,
     badge: i === 0 ? "베스트" : (i === 2 ? "인기" : undefined),
   }));
 
-  const newProducts = activeProducts.slice(0, 5).map((p, i) => ({
+  const newProducts = getNewProducts().map((p, i) => ({
     id: String(p.id),
     name: p.name,
     price: p.price,
     originalPrice: p.originalPrice || undefined,
-    image: p.image || "https://images.unsplash.com/photo-1505576399279-565b52d4ac71?w=400",
+    image: p.image || "/objects/public/d9f3ffe9-dc92-4270-a08d-699008125503",
     rating: parseFloat(p.rating || "4.5"),
     reviewCount: p.reviewCount || 0,
     badge: i === 0 ? "NEW" : undefined,
@@ -62,7 +113,7 @@ export default function Home() {
     name: p.name,
     price: p.price,
     originalPrice: p.originalPrice || undefined,
-    image: p.image || "https://images.unsplash.com/photo-1505576399279-565b52d4ac71?w=400",
+    image: p.image || "/objects/public/d9f3ffe9-dc92-4270-a08d-699008125503",
     rating: parseFloat(p.rating || "4.5"),
     reviewCount: p.reviewCount || 0,
     badge: i === 0 ? "선물추천" : (i === 2 ? "인기" : undefined),
