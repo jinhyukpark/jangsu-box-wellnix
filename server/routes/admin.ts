@@ -121,20 +121,23 @@ router.put("/api/admin/products/:id", requireAdmin, async (req: Request, res: Re
   try {
     console.log("=== Product Update Request ===");
     console.log("Product ID:", req.params.id);
-    console.log("Request Body:", JSON.stringify(req.body, null, 2));
     
+    // Only allow these specific fields to be updated (no date fields, id, rating, reviewCount)
     const updateData: Record<string, any> = {};
-    const fields = [
+    const allowedFields = [
       'name', 'shortDescription', 'description', 'descriptionMarkdown',
       'categoryId', 'price', 'originalPrice', 'image', 'images', 'stock',
       'status', 'isFeatured', 'origin', 'manufacturer', 'expirationInfo',
       'storageMethod', 'shippingInfo', 'refundInfo'
     ];
-    for (const field of fields) {
+    
+    for (const field of allowedFields) {
       if (req.body[field] !== undefined) {
         updateData[field] = req.body[field];
       }
     }
+    
+    // Convert numeric fields from strings
     if (typeof updateData.price === 'string') {
       updateData.price = parseInt(updateData.price) || 0;
     }
@@ -147,20 +150,25 @@ router.put("/api/admin/products/:id", requireAdmin, async (req: Request, res: Re
     if (typeof updateData.categoryId === 'string') {
       updateData.categoryId = updateData.categoryId ? parseInt(updateData.categoryId) : null;
     }
+    
+    // Handle boolean conversion
+    if (typeof updateData.isFeatured === 'string') {
+      updateData.isFeatured = updateData.isFeatured === 'true';
+    }
+    
+    // Auto-generate description from markdown if needed
     if (updateData.descriptionMarkdown && !updateData.description) {
       updateData.description = updateData.descriptionMarkdown.replace(/[#*`\[\]]/g, '').substring(0, 500);
     }
     
-    console.log("Update Data:", JSON.stringify(updateData, null, 2));
+    console.log("Filtered Update Data:", JSON.stringify(updateData, null, 2));
     
     const product = await storage.updateProduct(parseInt(req.params.id), updateData);
     console.log("Update successful:", product?.id);
     res.json(product);
   } catch (error: any) {
     console.error("=== Product Update Error ===");
-    console.error("Error name:", error?.name);
     console.error("Error message:", error?.message);
-    console.error("Error stack:", error?.stack);
     res.status(400).json({ error: "상품 수정에 실패했습니다", details: error?.message });
   }
 });
