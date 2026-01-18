@@ -1,7 +1,7 @@
 import { Router, Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import { storage } from "../storage";
-import { insertAdminSchema } from "@shared/schema";
+import { insertAdminSchema, insertProductSchema } from "@shared/schema";
 import { requireAdmin } from "../middleware";
 
 const router = Router();
@@ -77,6 +77,84 @@ router.get("/api/admin/dashboard/stats", requireAdmin, async (req: Request, res:
     });
   } catch (error) {
     res.status(500).json({ error: "대시보드 통계를 가져오는데 실패했습니다" });
+  }
+});
+
+router.post("/api/admin/products", requireAdmin, async (req: Request, res: Response) => {
+  try {
+    if (!req.body.name || !req.body.price) {
+      return res.status(400).json({ error: "상품명과 가격은 필수입니다" });
+    }
+    let description = req.body.description || null;
+    if (!description && req.body.descriptionMarkdown) {
+      description = req.body.descriptionMarkdown.replace(/[#*`\[\]]/g, '').substring(0, 500);
+    }
+    const productData = {
+      name: req.body.name,
+      shortDescription: req.body.shortDescription || null,
+      description: description,
+      descriptionMarkdown: req.body.descriptionMarkdown || null,
+      categoryId: req.body.categoryId || null,
+      price: req.body.price,
+      originalPrice: req.body.originalPrice || null,
+      image: req.body.image || null,
+      images: req.body.images || [],
+      stock: req.body.stock || 0,
+      status: req.body.status || "active",
+      isFeatured: req.body.isFeatured || false,
+      origin: req.body.origin || "국내산",
+      manufacturer: req.body.manufacturer || "웰닉스(주)",
+      expirationInfo: req.body.expirationInfo || "별도 표시",
+      storageMethod: req.body.storageMethod || "직사광선을 피해 서늘한 곳에 보관",
+      shippingInfo: req.body.shippingInfo || null,
+      refundInfo: req.body.refundInfo || null,
+    };
+    const product = await storage.createProduct(productData);
+    res.json(product);
+  } catch (error) {
+    console.error("Product creation error:", error);
+    res.status(400).json({ error: "상품 등록에 실패했습니다" });
+  }
+});
+
+router.put("/api/admin/products/:id", requireAdmin, async (req: Request, res: Response) => {
+  try {
+    const updateData: Record<string, any> = {};
+    const fields = [
+      'name', 'shortDescription', 'description', 'descriptionMarkdown',
+      'categoryId', 'price', 'originalPrice', 'image', 'images', 'stock',
+      'status', 'isFeatured', 'origin', 'manufacturer', 'expirationInfo',
+      'storageMethod', 'shippingInfo', 'refundInfo'
+    ];
+    for (const field of fields) {
+      if (req.body[field] !== undefined) {
+        updateData[field] = req.body[field];
+      }
+    }
+    if (updateData.descriptionMarkdown && !updateData.description) {
+      updateData.description = updateData.descriptionMarkdown.replace(/[#*`\[\]]/g, '').substring(0, 500);
+    }
+    const product = await storage.updateProduct(parseInt(req.params.id), updateData);
+    res.json(product);
+  } catch (error) {
+    console.error("Product update error:", error);
+    res.status(400).json({ error: "상품 수정에 실패했습니다" });
+  }
+});
+
+router.post("/api/admin/reviews/:id/reply", requireAdmin, async (req: Request, res: Response) => {
+  try {
+    const reviewId = parseInt(req.params.id);
+    const { reply } = req.body;
+    const review = await storage.updateReview(reviewId, {
+      adminReply: reply,
+      adminReplyAt: new Date(),
+      adminReplyBy: req.session.adminId,
+    });
+    res.json(review);
+  } catch (error) {
+    console.error("Review reply error:", error);
+    res.status(400).json({ error: "답변 등록에 실패했습니다" });
   }
 });
 

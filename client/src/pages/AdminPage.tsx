@@ -727,10 +727,7 @@ export default function AdminPage() {
                     </Select>
                   </div>
                   <Button 
-                    onClick={() => {
-                      resetProductForm();
-                      setIsProductModalOpen(true);
-                    }}
+                    onClick={() => setLocation("/admin/products/new")}
                     className="bg-primary text-white ml-3"
                     data-testid="button-add-product"
                   >
@@ -824,7 +821,7 @@ export default function AdminPage() {
                         </td>
                         <td className="px-4 py-3">
                           <button 
-                            onClick={() => openEditModal(product)}
+                            onClick={() => setLocation(`/admin/products/${product.id}`)}
                             className="text-sm text-primary hover:underline"
                             data-testid={`button-edit-product-${product.id}`}
                           >

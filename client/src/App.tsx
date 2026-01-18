@@ -31,6 +31,7 @@ import TermsPage from "@/pages/TermsPage";
 import PrivacyPage from "@/pages/PrivacyPage";
 import ProductDetailPage from "@/pages/ProductDetailPage";
 import ProductGalleryPage from "@/pages/ProductGalleryPage";
+import AdminProductFormPage from "@/pages/AdminProductFormPage";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -46,6 +47,7 @@ function Router() {
       <Route path="/events/:id" component={EventDetailPage} />
       <Route path="/admin" component={AdminPage} />
       <Route path="/admin/login" component={AdminLoginPage} />
+      <Route path="/admin/products/:id" component={AdminProductFormPage} />
       <Route path="/mypage/reviews" component={MyReviewsPage} />
       <Route path="/corporate-inquiry" component={CorporateInquiryPage} />
       <Route path="/mypage/wishlist" component={MyWishlistPage} />

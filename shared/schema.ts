@@ -90,7 +90,9 @@ export type Category = typeof categories.$inferSelect;
 export const products = pgTable("products", {
   id: serial("id").primaryKey(),
   name: varchar("name", { length: 255 }).notNull(),
+  shortDescription: text("short_description"),
   description: text("description"),
+  descriptionMarkdown: text("description_markdown"),
   categoryId: integer("category_id").references(() => categories.id),
   price: integer("price").notNull(),
   originalPrice: integer("original_price"),
@@ -101,6 +103,12 @@ export const products = pgTable("products", {
   reviewCount: integer("review_count").default(0),
   status: varchar("status", { length: 20 }).default("active"),
   isFeatured: boolean("is_featured").default(false),
+  origin: varchar("origin", { length: 100 }).default("국내산"),
+  manufacturer: varchar("manufacturer", { length: 100 }).default("웰닉스(주)"),
+  expirationInfo: varchar("expiration_info", { length: 255 }).default("별도 표시"),
+  storageMethod: text("storage_method").default("직사광선을 피해 서늘한 곳에 보관"),
+  shippingInfo: text("shipping_info"),
+  refundInfo: text("refund_info"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
