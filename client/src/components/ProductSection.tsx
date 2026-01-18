@@ -1,5 +1,6 @@
 import { ChevronRight } from "lucide-react";
 import { useRef } from "react";
+import { useLocation } from "wouter";
 import { ProductCard } from "./ProductCard";
 
 interface Product {
@@ -17,10 +18,12 @@ interface ProductSectionProps {
   title: string;
   subtitle?: string;
   products: Product[];
+  linkTo?: string;
 }
 
-export function ProductSection({ title, subtitle, products }: ProductSectionProps) {
+export function ProductSection({ title, subtitle, products, linkTo = "/gifts" }: ProductSectionProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [, setLocation] = useLocation();
 
   const handleWheel = (e: React.WheelEvent) => {
     if (scrollRef.current) {
@@ -39,6 +42,7 @@ export function ProductSection({ title, subtitle, products }: ProductSectionProp
         <button 
           className="flex items-center text-sm text-gray-500 hover:text-gray-700"
           data-testid={`section-more-${title}`}
+          onClick={() => setLocation(linkTo)}
         >
           더보기 <ChevronRight className="w-4 h-4" />
         </button>
