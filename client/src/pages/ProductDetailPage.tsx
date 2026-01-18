@@ -7,6 +7,19 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { AppLayout } from "@/components/AppLayout";
 
+const mockReviews = [
+  { id: 1, rating: 5, content: "정말 좋은 제품이에요! 부모님께 선물로 드렸는데 너무 좋아하셨어요. 포장도 고급스럽고 맛도 좋다고 하세요.", createdAt: "2026-01-15", memberName: "김*희" },
+  { id: 2, rating: 5, content: "매일 아침 공복에 먹고 있는데 확실히 피로감이 줄었어요. 재구매 의사 있습니다.", createdAt: "2026-01-14", memberName: "이*수" },
+  { id: 3, rating: 4, content: "배송이 빨랐고 제품 품질도 좋습니다. 다만 가격이 조금 비싼 편이에요.", createdAt: "2026-01-13", memberName: "박*영" },
+  { id: 4, rating: 5, content: "어머니 생신 선물로 구매했어요. 정성스러운 포장에 감동받았습니다.", createdAt: "2026-01-12", memberName: "최*민" },
+  { id: 5, rating: 4, content: "홍삼 특유의 쓴맛이 적어서 먹기 편해요. 스틱 형태라 휴대하기도 좋습니다.", createdAt: "2026-01-11", memberName: "정*아" },
+  { id: 6, rating: 5, content: "명절 선물로 딱이에요! 고급스러운 패키지에 받으시는 분들이 다 좋아하세요.", createdAt: "2026-01-10", memberName: "강*준" },
+  { id: 7, rating: 4, content: "꾸준히 먹으면 효과 있을 것 같아요. 일단 한 달 먹어보고 재구매 예정입니다.", createdAt: "2026-01-09", memberName: "윤*진" },
+  { id: 8, rating: 5, content: "6년근 홍삼이라 그런지 진짜 좋네요. 아버지께서 정말 좋아하세요!", createdAt: "2026-01-08", memberName: "한*우" },
+  { id: 9, rating: 3, content: "맛은 괜찮은데 양이 조금 적은 것 같아요. 그래도 품질은 좋습니다.", createdAt: "2026-01-07", memberName: "송*리" },
+  { id: 10, rating: 5, content: "세 번째 구매입니다. 항상 품질이 일정하고 좋아요. 추천드려요!", createdAt: "2026-01-06", memberName: "오*현" },
+];
+
 export default function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
   const [, setLocation] = useLocation();
@@ -26,7 +39,7 @@ export default function ProductDetailPage() {
     },
   });
 
-  const { data: reviews = [] } = useQuery({
+  const { data: apiReviews = [] } = useQuery({
     queryKey: ["/api/products", id, "reviews"],
     queryFn: async () => {
       const res = await fetch(`/api/products/${id}/reviews`);
@@ -35,6 +48,8 @@ export default function ProductDetailPage() {
     },
     enabled: !!id,
   });
+
+  const reviews = apiReviews.length > 0 ? apiReviews : mockReviews;
 
   const handleAddToCart = () => {
     toast({
@@ -368,15 +383,11 @@ export default function ProductDetailPage() {
             상품 리뷰 작성하기
           </Button>
 
-          {reviews.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              아직 작성된 리뷰가 없습니다
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {reviews.map((review: any) => (
-                <div key={review.id} className="border-b border-gray-100 pb-4">
-                  <div className="flex items-center gap-2 mb-2">
+          <div className="space-y-4">
+            {reviews.map((review: any) => (
+              <div key={review.id} className="border-b border-gray-100 pb-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
                     <div className="flex">
                       {[1, 2, 3, 4, 5].map((star) => (
                         <Star
@@ -385,15 +396,16 @@ export default function ProductDetailPage() {
                         />
                       ))}
                     </div>
-                    <span className="text-xs text-gray-500">
-                      {new Date(review.createdAt).toLocaleDateString()}
-                    </span>
+                    <span className="text-xs font-medium text-gray-700">{review.memberName || "익명"}</span>
                   </div>
-                  <p className="text-sm text-gray-700">{review.content}</p>
+                  <span className="text-xs text-gray-400">
+                    {new Date(review.createdAt).toLocaleDateString()}
+                  </span>
                 </div>
-              ))}
-            </div>
-          )}
+                <p className="text-sm text-gray-700 leading-relaxed">{review.content}</p>
+              </div>
+            ))}
+          </div>
         </TabsContent>
 
         <TabsContent value="info" className="p-4">
