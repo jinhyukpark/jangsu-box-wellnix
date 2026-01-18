@@ -166,22 +166,22 @@ export default function ProductDetailPage() {
       </div>
 
       <Tabs defaultValue="description" className="w-full">
-        <TabsList className="w-full grid grid-cols-3 bg-white border-b border-gray-200 rounded-none h-12">
+        <TabsList className="w-full grid grid-cols-3 bg-white border-b border-gray-200 rounded-none h-12 p-0">
           <TabsTrigger 
             value="description" 
-            className="data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none"
+            className="h-full data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none bg-transparent -mb-px"
           >
             상품 설명
           </TabsTrigger>
           <TabsTrigger 
             value="reviews" 
-            className="data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none"
+            className="h-full data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none bg-transparent -mb-px"
           >
             상품 리뷰 ({reviews.length})
           </TabsTrigger>
           <TabsTrigger 
             value="info" 
-            className="data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none"
+            className="h-full data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none bg-transparent -mb-px"
           >
             상품 정보
           </TabsTrigger>
