@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { AppLayout } from "@/components/AppLayout";
 import ReactMarkdown from "react-markdown";
+import rehypeRaw from "rehype-raw";
 
 export default function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -203,6 +204,7 @@ export default function ProductDetailPage() {
             {product.descriptionMarkdown ? (
               <div className="prose prose-sm max-w-none prose-headings:text-gray-900 prose-h2:text-xl prose-h2:font-bold prose-h3:text-lg prose-h3:font-bold prose-h4:font-bold prose-p:text-gray-700 prose-p:leading-relaxed prose-li:text-gray-600 prose-img:rounded-lg prose-img:w-full prose-img:mb-4">
                 <ReactMarkdown
+                  rehypePlugins={[rehypeRaw]}
                   components={{
                     img: ({ node, ...props }) => (
                       <img {...props} className="rounded-lg w-full mb-4" loading="lazy" />
@@ -216,14 +218,36 @@ export default function ProductDetailPage() {
                     h4: ({ node, ...props }) => (
                       <h4 {...props} className="font-bold text-gray-900 mb-3" />
                     ),
-                    p: ({ node, ...props }) => (
-                      <p {...props} className="text-sm text-gray-700 leading-relaxed mb-4" />
-                    ),
+                    p: ({ node, children, ...props }) => {
+                      const childArray = Array.isArray(children) ? children : [children];
+                      const hasVideo = childArray.some((child: any) => 
+                        typeof child === 'object' && child?.type === 'video'
+                      );
+                      if (hasVideo) {
+                        return <div className="mb-4">{children}</div>;
+                      }
+                      return <p {...props} className="text-sm text-gray-700 leading-relaxed mb-4">{children}</p>;
+                    },
                     ul: ({ node, ...props }) => (
                       <ul {...props} className="text-sm text-gray-600 space-y-2 mb-6" />
                     ),
                     li: ({ node, ...props }) => (
                       <li {...props} className="text-sm text-gray-600" />
+                    ),
+                    table: ({ node, ...props }) => (
+                      <table {...props} className="w-full text-sm border-collapse border border-gray-200 mb-6" />
+                    ),
+                    th: ({ node, ...props }) => (
+                      <th {...props} className="border border-gray-200 bg-gray-50 px-3 py-2 text-left font-medium" />
+                    ),
+                    td: ({ node, ...props }) => (
+                      <td {...props} className="border border-gray-200 px-3 py-2" />
+                    ),
+                    blockquote: ({ node, ...props }) => (
+                      <blockquote {...props} className="border-l-4 border-primary pl-4 italic text-gray-600 mb-4" />
+                    ),
+                    hr: () => (
+                      <hr className="my-6 border-gray-200" />
                     ),
                   }}
                 >

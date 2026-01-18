@@ -677,14 +677,62 @@ export default function AdminProductFormPage() {
               </div>
 
               <div className="bg-white rounded-xl border border-gray-200 p-6">
-                <h3 className="text-lg font-bold text-gray-900 mb-4">배송 정보</h3>
-                <Textarea
-                  value={product.shippingInfo || ""}
-                  onChange={(e) => setProduct({ ...product, shippingInfo: e.target.value })}
-                  placeholder="배송 안내 정보를 입력하세요"
-                  rows={8}
-                  data-testid="input-shipping-info"
-                />
+                <h3 className="text-lg font-bold text-gray-900 mb-4">배송비 설정</h3>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="shippingCost">기본 배송비 (원)</Label>
+                      <Input
+                        id="shippingCost"
+                        type="number"
+                        placeholder="3500"
+                        defaultValue="3500"
+                        data-testid="input-shipping-cost"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="freeShippingThreshold">무료 배송 기준 (원)</Label>
+                      <Input
+                        id="freeShippingThreshold"
+                        type="number"
+                        placeholder="70000"
+                        defaultValue="70000"
+                        data-testid="input-free-shipping"
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="flex items-center gap-2">
+                      <Switch id="dawnDelivery" defaultChecked data-testid="switch-dawn-delivery" />
+                      <Label htmlFor="dawnDelivery">새벽 배송 가능</Label>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Switch id="regularDelivery" defaultChecked data-testid="switch-regular-delivery" />
+                      <Label htmlFor="regularDelivery">일반 배송 가능</Label>
+                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="deliveryNote">배송 안내 문구</Label>
+                    <Input
+                      id="deliveryNote"
+                      placeholder="~2월 4일 배송일 선택 가능"
+                      defaultValue="~2월 4일 배송일 선택 가능"
+                      data-testid="input-delivery-note"
+                    />
+                  </div>
+                </div>
+                <div className="mt-4 pt-4 border-t border-gray-200">
+                  <Label htmlFor="shippingInfo">상세 배송 안내 (사용자에게 표시)</Label>
+                  <Textarea
+                    id="shippingInfo"
+                    value={product.shippingInfo || ""}
+                    onChange={(e) => setProduct({ ...product, shippingInfo: e.target.value })}
+                    placeholder="배송 안내 정보를 입력하세요"
+                    rows={4}
+                    className="mt-2"
+                    data-testid="input-shipping-info"
+                  />
+                </div>
               </div>
 
               <div className="bg-white rounded-xl border border-gray-200 p-6 lg:col-span-2">
