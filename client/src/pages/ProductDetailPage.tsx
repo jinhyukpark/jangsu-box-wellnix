@@ -1,24 +1,11 @@
 import { useState } from "react";
 import { useParams, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
-import { ChevronLeft, Home, ShoppingCart, Star, Heart, Gift, ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronLeft, Home, ShoppingCart, Star, Heart, Gift, ChevronDown, ChevronUp, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { AppLayout } from "@/components/AppLayout";
-
-const mockReviews = [
-  { id: 1, rating: 5, content: "정말 좋은 제품이에요! 부모님께 선물로 드렸는데 너무 좋아하셨어요. 포장도 고급스럽고 맛도 좋다고 하세요.", createdAt: "2026-01-15", memberName: "김*희" },
-  { id: 2, rating: 5, content: "매일 아침 공복에 먹고 있는데 확실히 피로감이 줄었어요. 재구매 의사 있습니다.", createdAt: "2026-01-14", memberName: "이*수" },
-  { id: 3, rating: 4, content: "배송이 빨랐고 제품 품질도 좋습니다. 다만 가격이 조금 비싼 편이에요.", createdAt: "2026-01-13", memberName: "박*영" },
-  { id: 4, rating: 5, content: "어머니 생신 선물로 구매했어요. 정성스러운 포장에 감동받았습니다.", createdAt: "2026-01-12", memberName: "최*민" },
-  { id: 5, rating: 4, content: "홍삼 특유의 쓴맛이 적어서 먹기 편해요. 스틱 형태라 휴대하기도 좋습니다.", createdAt: "2026-01-11", memberName: "정*아" },
-  { id: 6, rating: 5, content: "명절 선물로 딱이에요! 고급스러운 패키지에 받으시는 분들이 다 좋아하세요.", createdAt: "2026-01-10", memberName: "강*준" },
-  { id: 7, rating: 4, content: "꾸준히 먹으면 효과 있을 것 같아요. 일단 한 달 먹어보고 재구매 예정입니다.", createdAt: "2026-01-09", memberName: "윤*진" },
-  { id: 8, rating: 5, content: "6년근 홍삼이라 그런지 진짜 좋네요. 아버지께서 정말 좋아하세요!", createdAt: "2026-01-08", memberName: "한*우" },
-  { id: 9, rating: 3, content: "맛은 괜찮은데 양이 조금 적은 것 같아요. 그래도 품질은 좋습니다.", createdAt: "2026-01-07", memberName: "송*리" },
-  { id: 10, rating: 5, content: "세 번째 구매입니다. 항상 품질이 일정하고 좋아요. 추천드려요!", createdAt: "2026-01-06", memberName: "오*현" },
-];
 
 export default function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -39,7 +26,7 @@ export default function ProductDetailPage() {
     },
   });
 
-  const { data: apiReviews = [] } = useQuery({
+  const { data: reviews = [] } = useQuery({
     queryKey: ["/api/products", id, "reviews"],
     queryFn: async () => {
       const res = await fetch(`/api/products/${id}/reviews`);
@@ -49,7 +36,10 @@ export default function ProductDetailPage() {
     enabled: !!id,
   });
 
-  const reviews = apiReviews.length > 0 ? apiReviews : mockReviews;
+  const allMedia: { type: 'image' | 'video'; url: string }[] = reviews.flatMap((r: any) => [
+    ...(r.images || []).map((url: string) => ({ type: 'image' as const, url })),
+    ...(r.videos || []).map((url: string) => ({ type: 'video' as const, url })),
+  ]).slice(0, 20);
 
   const handleAddToCart = () => {
     toast({
@@ -331,53 +321,42 @@ export default function ProductDetailPage() {
             </div>
           </div>
 
-          <div className="mb-6">
-            <div className="flex items-center justify-between mb-3">
-              <h4 className="font-bold text-gray-900">포토 & 동영상 리뷰</h4>
-              <button 
-                className="text-sm text-primary font-medium"
-                onClick={() => setLocation(`/products/${id}/gallery`)}
-                data-testid="button-view-all-photos"
-              >
-                전체보기
-              </button>
-            </div>
-            <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
-              {[
-                "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=200",
-                "https://images.unsplash.com/photo-1607619056574-7b8d3ee536b2?w=200",
-                "https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=200",
-                "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=200",
-                "https://images.unsplash.com/photo-1505576399279-565b52d4ac71?w=200",
-                "https://images.unsplash.com/photo-1498837167922-ddd27525d352?w=200",
-                "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=200",
-                "https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=200",
-                "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=200",
-                "https://images.unsplash.com/photo-1473093295043-cdd812d0e601?w=200",
-                "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=200",
-                "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=200",
-                "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=200",
-                "https://images.unsplash.com/photo-1484723091739-30a097e8f929?w=200",
-                "https://images.unsplash.com/photo-1476224203421-9ac39bcb3327?w=200",
-                "https://images.unsplash.com/photo-1432139509613-5c4255815697?w=200",
-                "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=200",
-                "https://images.unsplash.com/photo-1482049016gy04-7ff2e76f8eb3?w=200",
-                "https://images.unsplash.com/photo-1495521821757-a1efb6729352?w=200",
-                "https://images.unsplash.com/photo-1559847844-5315695dadae?w=200",
-              ].map((img, index) => (
-                <div 
-                  key={index}
-                  className="flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden bg-gray-100"
+          {allMedia.length > 0 && (
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-3">
+                <h4 className="font-bold text-gray-900">포토 & 동영상 리뷰</h4>
+                <button 
+                  className="text-sm text-primary font-medium"
+                  onClick={() => setLocation(`/products/${id}/gallery`)}
+                  data-testid="button-view-all-photos"
                 >
-                  <img 
-                    src={img} 
-                    alt={`리뷰 이미지 ${index + 1}`}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              ))}
+                  전체보기
+                </button>
+              </div>
+              <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
+                {allMedia.map((media, index) => (
+                  <div 
+                    key={index}
+                    className="flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden bg-gray-100 relative"
+                  >
+                    {media.type === 'video' ? (
+                      <>
+                        <div className="w-full h-full bg-gray-300 flex items-center justify-center">
+                          <Play className="w-6 h-6 text-white fill-white" />
+                        </div>
+                      </>
+                    ) : (
+                      <img 
+                        src={media.url} 
+                        alt={`리뷰 미디어 ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           <Button variant="outline" className="w-full mb-6" data-testid="button-write-review">
             상품 리뷰 작성하기
@@ -403,6 +382,41 @@ export default function ProductDetailPage() {
                   </span>
                 </div>
                 <p className="text-sm text-gray-700 leading-relaxed">{review.content}</p>
+                
+                {((review.images && review.images.length > 0) || (review.videos && review.videos.length > 0)) && (
+                  <div className="flex gap-2 mt-3 overflow-x-auto">
+                    {(review.images || []).map((img: string, idx: number) => (
+                      <img 
+                        key={`img-${idx}`}
+                        src={img} 
+                        alt={`리뷰 이미지 ${idx + 1}`}
+                        className="w-16 h-16 rounded-lg object-cover flex-shrink-0"
+                      />
+                    ))}
+                    {(review.videos || []).map((video: string, idx: number) => (
+                      <div 
+                        key={`vid-${idx}`}
+                        className="w-16 h-16 rounded-lg bg-gray-300 flex items-center justify-center flex-shrink-0"
+                      >
+                        <Play className="w-5 h-5 text-white fill-white" />
+                      </div>
+                    ))}
+                  </div>
+                )}
+                
+                {review.adminReply && (
+                  <div className="mt-3 bg-gray-50 rounded-lg p-3">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-xs font-bold text-primary">판매자</span>
+                      {review.adminReplyAt && (
+                        <span className="text-xs text-gray-400">
+                          {new Date(review.adminReplyAt).toLocaleDateString()}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-sm text-gray-600">{review.adminReply}</p>
+                  </div>
+                )}
               </div>
             ))}
           </div>
