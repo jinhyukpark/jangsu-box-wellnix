@@ -585,8 +585,8 @@ export default function AdminPage() {
 
               <TabsContent value="products" className="mt-4">
                 <div className="flex items-center justify-between mb-4">
-                  <div className="flex flex-wrap gap-3 flex-1">
-                    <div className="relative flex-1 min-w-[200px]">
+                  <div className="flex items-center gap-3 flex-1">
+                    <div className="relative flex-1 min-w-[200px] max-w-[300px]">
                       <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                       <Input
                         type="text"
@@ -598,27 +598,14 @@ export default function AdminPage() {
                       />
                     </div>
                     <Select value={productStatusFilter} onValueChange={setProductStatusFilter}>
-                      <SelectTrigger className="w-[140px]" data-testid="select-product-status">
-                        <SelectValue placeholder="상태 필터" />
+                      <SelectTrigger className="w-[120px]" data-testid="select-product-status">
+                        <SelectValue placeholder="상태" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">전체</SelectItem>
                         <SelectItem value="active">판매중</SelectItem>
                         <SelectItem value="pending">검수중</SelectItem>
                         <SelectItem value="inactive">대기중</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <Select value={productCategoryFilter} onValueChange={setProductCategoryFilter}>
-                      <SelectTrigger className="w-[160px]" data-testid="select-product-category">
-                        <SelectValue placeholder="카테고리 필터" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">전체 카테고리</SelectItem>
-                        {categories.map((category) => (
-                          <SelectItem key={category.id} value={category.id.toString()}>
-                            {category.name}
-                          </SelectItem>
-                        ))}
                       </SelectContent>
                     </Select>
                   </div>
@@ -632,6 +619,36 @@ export default function AdminPage() {
                   >
                     + 상품 등록
                   </Button>
+                </div>
+
+                <div className="mb-4 overflow-x-auto">
+                  <div className="flex gap-2 pb-2">
+                    <button
+                      onClick={() => setProductCategoryFilter("all")}
+                      className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
+                        productCategoryFilter === "all"
+                          ? "bg-primary text-white"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      }`}
+                      data-testid="category-tab-all"
+                    >
+                      전체
+                    </button>
+                    {categories.map((category) => (
+                      <button
+                        key={category.id}
+                        onClick={() => setProductCategoryFilter(category.id.toString())}
+                        className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
+                          productCategoryFilter === category.id.toString()
+                            ? "bg-primary text-white"
+                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                        }`}
+                        data-testid={`category-tab-${category.id}`}
+                      >
+                        {category.name}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
                 <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
