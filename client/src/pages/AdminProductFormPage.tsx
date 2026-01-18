@@ -305,6 +305,7 @@ export default function AdminProductFormPage() {
               <p className="text-sm text-gray-500 mb-4">
                 드래그하여 순서를 변경하고, 체크박스로 대표 이미지를 선택하세요.
                 <br /><span className="text-primary">(대표 이미지는 파란 테두리로 표시됩니다)</span>
+                <br /><span className="text-gray-400">권장 이미지 사이즈: 800 x 800px (정사각형, 1:1 비율)</span>
               </p>
               <div className="flex gap-4 flex-wrap mb-4">
                 {(() => {
