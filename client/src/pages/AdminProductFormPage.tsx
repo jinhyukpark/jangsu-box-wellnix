@@ -524,7 +524,7 @@ export default function AdminProductFormPage() {
                 <MDEditor
                   value={product.descriptionMarkdown || ""}
                   onChange={(value) => setProduct({ ...product, descriptionMarkdown: value || "" })}
-                  height={400}
+                  height={1200}
                   preview="live"
                   data-testid="markdown-editor"
                 />
