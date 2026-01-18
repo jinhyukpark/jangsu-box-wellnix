@@ -30,6 +30,7 @@ import EmailVerifyPage from "@/pages/EmailVerifyPage";
 import TermsPage from "@/pages/TermsPage";
 import PrivacyPage from "@/pages/PrivacyPage";
 import ProductDetailPage from "@/pages/ProductDetailPage";
+import ProductGalleryPage from "@/pages/ProductGalleryPage";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -62,6 +63,7 @@ function Router() {
       <Route path="/terms" component={TermsPage} />
       <Route path="/privacy" component={PrivacyPage} />
       <Route path="/products/:id" component={ProductDetailPage} />
+      <Route path="/products/:id/gallery" component={ProductGalleryPage} />
       <Route component={NotFound} />
     </Switch>
   );

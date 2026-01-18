@@ -316,6 +316,54 @@ export default function ProductDetailPage() {
             </div>
           </div>
 
+          <div className="mb-6">
+            <div className="flex items-center justify-between mb-3">
+              <h4 className="font-bold text-gray-900">포토 & 동영상 리뷰</h4>
+              <button 
+                className="text-sm text-primary font-medium"
+                onClick={() => setLocation(`/products/${id}/gallery`)}
+                data-testid="button-view-all-photos"
+              >
+                전체보기
+              </button>
+            </div>
+            <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
+              {[
+                "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=200",
+                "https://images.unsplash.com/photo-1607619056574-7b8d3ee536b2?w=200",
+                "https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=200",
+                "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=200",
+                "https://images.unsplash.com/photo-1505576399279-565b52d4ac71?w=200",
+                "https://images.unsplash.com/photo-1498837167922-ddd27525d352?w=200",
+                "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=200",
+                "https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=200",
+                "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=200",
+                "https://images.unsplash.com/photo-1473093295043-cdd812d0e601?w=200",
+                "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=200",
+                "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=200",
+                "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=200",
+                "https://images.unsplash.com/photo-1484723091739-30a097e8f929?w=200",
+                "https://images.unsplash.com/photo-1476224203421-9ac39bcb3327?w=200",
+                "https://images.unsplash.com/photo-1432139509613-5c4255815697?w=200",
+                "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=200",
+                "https://images.unsplash.com/photo-1482049016gy04-7ff2e76f8eb3?w=200",
+                "https://images.unsplash.com/photo-1495521821757-a1efb6729352?w=200",
+                "https://images.unsplash.com/photo-1559847844-5315695dadae?w=200",
+              ].map((img, index) => (
+                <div 
+                  key={index}
+                  className="flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden bg-gray-100"
+                >
+                  <img 
+                    src={img} 
+                    alt={`리뷰 이미지 ${index + 1}`}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+
           <Button variant="outline" className="w-full mb-6" data-testid="button-write-review">
             상품 리뷰 작성하기
           </Button>
