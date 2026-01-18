@@ -213,6 +213,7 @@ function MainPageSettingsPanel({ products, events }: { products: any[], events: 
 
   const [bestProductSearch, setBestProductSearch] = useState("");
   const [newProductSearch, setNewProductSearch] = useState("");
+  const [eventSearch, setEventSearch] = useState("");
 
   useEffect(() => {
     if (settings) {
@@ -494,8 +495,32 @@ function MainPageSettingsPanel({ products, events }: { products: any[], events: 
             {localSettings.eventsCriteria === "manual" && (
               <div>
                 <Label className="mb-2 block">행사 선택</Label>
+                <Input 
+                  placeholder="행사명으로 검색..."
+                  value={eventSearch}
+                  onChange={(e) => setEventSearch(e.target.value)}
+                  className="mb-2"
+                />
+                {localSettings.eventsManualIds?.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mb-2">
+                    {localSettings.eventsManualIds.map(id => {
+                      const event = events?.find((e: any) => e.id === id);
+                      return event ? (
+                        <span key={id} className="inline-flex items-center gap-1 bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded">
+                          {event.title}
+                          <button 
+                            onClick={() => toggleEventSelection(id)}
+                            className="hover:text-red-500"
+                          >×</button>
+                        </span>
+                      ) : null;
+                    })}
+                  </div>
+                )}
                 <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto border rounded p-2">
-                  {events?.map((event: any) => (
+                  {events?.filter((e: any) => 
+                    e.title.toLowerCase().includes(eventSearch.toLowerCase())
+                  ).map((event: any) => (
                     <label key={event.id} className="flex items-center gap-2 p-2 hover:bg-gray-50 rounded cursor-pointer">
                       <Checkbox 
                         checked={localSettings.eventsManualIds?.includes(event.id)}

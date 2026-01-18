@@ -1,57 +1,68 @@
-import { ChevronRight, Calendar } from "lucide-react";
+import { ChevronRight, Calendar, MapPin, Users } from "lucide-react";
 import { useRef } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { Link } from "wouter";
 import { images } from "@/lib/images";
 
-const events = [
-  {
-    id: 1,
-    company: "3H 웰니스 솔루션",
-    title: "2026 봄맞이 건강 힐링투어",
-    subtitle: "자연 속에서 건강을 찾다",
-    date: "2026.03.15 (토)",
-    departure: "서울 강남역 2번 출구",
-    departureTime: "07:00",
-    arrival: "강원도 평창 힐링리조트",
-    arrivalTime: "10:30",
-    price: 89000,
-    originalPrice: 150000,
-    image: images.seniorsHealthTourEvent,
-    included: ["왕복 버스", "점심 식사", "힐링 프로그램", "기념품"],
-  },
-  {
-    id: 2,
-    company: "웰닉스 아카데미",
-    title: "시니어 요가 & 명상 클래스",
-    subtitle: "마음의 평화를 찾는 시간",
-    date: "매주 수요일 10:00",
-    departure: "온라인 ZOOM",
-    departureTime: "10:00",
-    arrival: "자택에서 편하게",
-    arrivalTime: "11:30",
-    price: 29000,
-    originalPrice: 50000,
-    image: images.seniorsHealthTourEvent,
-    included: ["온라인 강의", "교재 제공", "수료증"],
-  },
-  {
-    id: 3,
-    company: "대한홍삼협회",
-    title: "홍삼 건강법 특강",
-    subtitle: "전문가에게 배우는 건강 비법",
-    date: "2026.02.01 (토)",
-    departure: "부산 해운대역 1번 출구",
-    departureTime: "14:00",
-    arrival: "해운대 컨벤션센터",
-    arrivalTime: "14:30",
-    price: 0,
-    originalPrice: 30000,
-    image: images.seniorsHealthTourEvent,
-    included: ["무료 세미나", "홍삼 시음", "선물 증정"],
-  },
-];
+interface Event {
+  id: number;
+  title: string;
+  description?: string;
+  date?: string;
+  endDate?: string;
+  time?: string;
+  location?: string;
+  locationType?: string;
+  detailedAddress?: string;
+  image?: string;
+  tag?: string;
+  category?: string;
+  maxParticipants?: number;
+  currentParticipants?: number;
+  status: string;
+  benefits?: string[];
+}
+
+interface MainPageSettings {
+  eventsCriteria: "active" | "manual";
+  eventsManualIds: number[];
+  eventsLimit: number;
+}
 
 export function EventSection() {
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  const { data: allEvents = [] } = useQuery<Event[]>({
+    queryKey: ["/api/events"],
+    queryFn: async () => {
+      const res = await fetch("/api/events");
+      if (!res.ok) throw new Error("Failed to fetch events");
+      return res.json();
+    },
+  });
+
+  const { data: settings } = useQuery<MainPageSettings>({
+    queryKey: ["/api/main-page-settings"],
+    queryFn: async () => {
+      const res = await fetch("/api/main-page-settings");
+      if (!res.ok) throw new Error("Failed to fetch settings");
+      return res.json();
+    },
+  });
+
+  const getFilteredEvents = () => {
+    const limit = settings?.eventsLimit || 4;
+    const activeEvents = allEvents.filter(e => e.status === "active" || e.status === "upcoming");
+    
+    if (settings?.eventsCriteria === "manual" && settings.eventsManualIds?.length > 0) {
+      return activeEvents
+        .filter(e => settings.eventsManualIds.includes(e.id))
+        .slice(0, limit);
+    }
+    return activeEvents.slice(0, limit);
+  };
+
+  const events = getFilteredEvents();
 
   const handleWheel = (e: React.WheelEvent) => {
     if (scrollRef.current) {
@@ -60,6 +71,17 @@ export function EventSection() {
     }
   };
 
+  const formatDate = (dateStr?: string) => {
+    if (!dateStr) return "";
+    const date = new Date(dateStr);
+    const days = ["일", "월", "화", "수", "목", "금", "토"];
+    return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, "0")}.${String(date.getDate()).padStart(2, "0")} (${days[date.getDay()]})`;
+  };
+
+  if (events.length === 0) {
+    return null;
+  }
+
   return (
     <section className="py-5">
       <div className="flex items-center justify-between px-4 mb-4">
@@ -67,12 +89,14 @@ export function EventSection() {
           <h2 className="text-lg font-bold text-gray-900">건강 행사 & 일정</h2>
           <p className="text-sm text-gray-500 mt-0.5">다양한 건강 프로그램에 참여하세요</p>
         </div>
-        <button 
-          className="flex items-center text-sm text-gray-500 hover:text-gray-700"
-          data-testid="events-more"
-        >
-          더보기 <ChevronRight className="w-4 h-4" />
-        </button>
+        <Link href="/events">
+          <button 
+            className="flex items-center text-sm text-gray-500 hover:text-gray-700"
+            data-testid="events-more"
+          >
+            더보기 <ChevronRight className="w-4 h-4" />
+          </button>
+        </Link>
       </div>
       
       <div 
@@ -81,78 +105,76 @@ export function EventSection() {
         className="flex gap-4 overflow-x-auto px-4 pb-4 scrollbar-hide snap-x snap-mandatory"
       >
         {events.map((event) => (
-          <div 
-            key={event.id}
-            className="flex-shrink-0 w-[85%] snap-start rounded overflow-hidden bg-white border border-gray-100 shadow-sm"
-          >
-            <div className="relative h-36 overflow-hidden">
-              <img 
-                src={event.image} 
-                alt={event.title}
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-              <div className="absolute bottom-3 left-3 right-3">
-                <span className="inline-block bg-[#006861] text-white text-xs font-bold px-2 py-1 rounded mb-1">
-                  {event.company}
-                </span>
-                <h3 className="text-white font-bold text-base leading-tight">{event.title}</h3>
-                <p className="text-white/80 text-xs">{event.subtitle}</p>
-              </div>
-            </div>
-            
-            <div className="p-4 space-y-3">
-              <div className="flex items-center gap-2 text-sm">
-                <Calendar className="w-4 h-4 text-[#006861]" />
-                <span className="font-medium text-gray-900">{event.date}</span>
-              </div>
-              
-              <div className="bg-gray-50 rounded p-3 space-y-2">
-                <div className="flex items-start gap-3">
-                  <div className="flex flex-col items-center">
-                    <div className="w-2.5 h-2.5 rounded-full bg-[#006861] border-2 border-white shadow" />
-                    <div className="w-0.5 h-6 bg-gray-300" />
-                    <div className="w-2.5 h-2.5 rounded-full bg-amber-500 border-2 border-white shadow" />
-                  </div>
-                  <div className="flex-1 space-y-2">
-                    <div>
-                      <p className="text-xs text-gray-500">출발 {event.departureTime}</p>
-                      <p className="text-sm font-medium text-gray-900">{event.departure}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-500">도착 {event.arrivalTime}</p>
-                      <p className="text-sm font-medium text-gray-900">{event.arrival}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="flex flex-wrap gap-1.5">
-                {event.included.map((item) => (
-                  <span key={item} className="text-xs bg-[#006861]/10 text-[#006861] px-2 py-1 rounded">
-                    {item}
-                  </span>
-                ))}
-              </div>
-              
-              <div className="flex items-center justify-between pt-2 border-t border-gray-100">
-                <div>
-                  {event.originalPrice > 0 && (
-                    <span className="text-xs text-gray-400 line-through">{event.originalPrice.toLocaleString()}원</span>
+          <Link key={event.id} href={`/events/${event.id}`}>
+            <div 
+              className="flex-shrink-0 w-[85%] snap-start rounded overflow-hidden bg-white border border-gray-100 shadow-sm cursor-pointer hover:shadow-md transition-shadow"
+            >
+              <div className="relative h-36 overflow-hidden">
+                <img 
+                  src={event.image || images.seniorsHealthTourEvent} 
+                  alt={event.title}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                <div className="absolute bottom-3 left-3 right-3">
+                  {event.tag && (
+                    <span className="inline-block bg-[#006861] text-white text-xs font-bold px-2 py-1 rounded mb-1">
+                      {event.tag}
+                    </span>
                   )}
-                  <span className="text-lg font-bold text-[#006861] ml-2">
-                    {event.price === 0 ? "무료" : `${event.price.toLocaleString()}원`}
+                  <h3 className="text-white font-bold text-base leading-tight">{event.title}</h3>
+                  {event.category && (
+                    <p className="text-white/80 text-xs">{event.category}</p>
+                  )}
+                </div>
+              </div>
+              
+              <div className="p-4 space-y-3">
+                <div className="flex items-center gap-2 text-sm">
+                  <Calendar className="w-4 h-4 text-[#006861]" />
+                  <span className="font-medium text-gray-900">
+                    {formatDate(event.date)}
+                    {event.time && ` ${event.time}`}
                   </span>
                 </div>
-                <button 
-                  className="bg-[#006861] text-white text-sm font-semibold px-4 py-2 rounded hover:bg-[#005550] transition-colors"
-                  data-testid={`event-apply-${event.id}`}
-                >
-                  신청하기
-                </button>
+                
+                {event.location && (
+                  <div className="flex items-center gap-2 text-sm">
+                    <MapPin className="w-4 h-4 text-gray-400" />
+                    <span className="text-gray-600">{event.location}</span>
+                  </div>
+                )}
+
+                {event.maxParticipants && (
+                  <div className="flex items-center gap-2 text-sm">
+                    <Users className="w-4 h-4 text-gray-400" />
+                    <span className="text-gray-600">
+                      {event.currentParticipants || 0} / {event.maxParticipants}명
+                    </span>
+                  </div>
+                )}
+                
+                {event.benefits && event.benefits.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5">
+                    {event.benefits.slice(0, 4).map((item, idx) => (
+                      <span key={idx} className="text-xs bg-[#006861]/10 text-[#006861] px-2 py-1 rounded">
+                        {item}
+                      </span>
+                    ))}
+                  </div>
+                )}
+                
+                <div className="flex items-center justify-end pt-2 border-t border-gray-100">
+                  <button 
+                    className="bg-[#006861] text-white text-sm font-semibold px-4 py-2 rounded hover:bg-[#005550] transition-colors"
+                    data-testid={`event-apply-${event.id}`}
+                  >
+                    신청하기
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
+          </Link>
         ))}
       </div>
     </section>
