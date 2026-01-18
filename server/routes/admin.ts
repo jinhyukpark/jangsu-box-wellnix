@@ -119,6 +119,10 @@ router.post("/api/admin/products", requireAdmin, async (req: Request, res: Respo
 
 router.put("/api/admin/products/:id", requireAdmin, async (req: Request, res: Response) => {
   try {
+    console.log("=== Product Update Request ===");
+    console.log("Product ID:", req.params.id);
+    console.log("Request Body:", JSON.stringify(req.body, null, 2));
+    
     const updateData: Record<string, any> = {};
     const fields = [
       'name', 'shortDescription', 'description', 'descriptionMarkdown',
@@ -146,10 +150,17 @@ router.put("/api/admin/products/:id", requireAdmin, async (req: Request, res: Re
     if (updateData.descriptionMarkdown && !updateData.description) {
       updateData.description = updateData.descriptionMarkdown.replace(/[#*`\[\]]/g, '').substring(0, 500);
     }
+    
+    console.log("Update Data:", JSON.stringify(updateData, null, 2));
+    
     const product = await storage.updateProduct(parseInt(req.params.id), updateData);
+    console.log("Update successful:", product?.id);
     res.json(product);
   } catch (error: any) {
-    console.error("Product update error:", error?.message || error);
+    console.error("=== Product Update Error ===");
+    console.error("Error name:", error?.name);
+    console.error("Error message:", error?.message);
+    console.error("Error stack:", error?.stack);
     res.status(400).json({ error: "상품 수정에 실패했습니다", details: error?.message });
   }
 });
