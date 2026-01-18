@@ -5,7 +5,7 @@ import {
   ChevronRight, Search, Bell, Settings, LogOut, Menu, X,
   TrendingUp, ShoppingBag, UserCheck, Clock, HelpCircle, Star, ShieldCheck, Loader2, ShieldX
 } from "lucide-react";
-import { useAdminProducts, useAdminCategories, useAdminMembers, useAdminSubscriptions, useAdminEvents, useAdminInquiries, useAdminFaqs, useAdminList, useDashboardStats } from "@/hooks/use-admin";
+import { useAdminProducts, useAdminCategories, useAdminMembers, useAdminSubscriptions, useAdminEvents, useAdminInquiries, useAdminFaqs, useAdminList, useDashboardStats, useCreateProduct, useUpdateProduct } from "@/hooks/use-admin";
 import { useAdminAuth, useAdminLogout } from "@/hooks/use-admin-auth";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -20,6 +20,20 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const menuItems = [
   { id: "products", label: "상품 관리", icon: Package },
@@ -178,6 +192,21 @@ export default function AdminPage() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
   const [selectedMember, setSelectedMember] = useState<any>(null);
+  const [productSearchQuery, setProductSearchQuery] = useState("");
+  const [productStatusFilter, setProductStatusFilter] = useState("all");
+  const [productCategoryFilter, setProductCategoryFilter] = useState("all");
+  const [isProductModalOpen, setIsProductModalOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<any>(null);
+  const [productForm, setProductForm] = useState({
+    name: "",
+    categoryId: 0,
+    price: 0,
+    originalPrice: 0,
+    stock: 0,
+    status: "active",
+    description: "",
+    image: ""
+  });
 
   const { data: authData, isLoading: authLoading, isFetching: authFetching } = useAdminAuth();
   const logoutMutation = useAdminLogout();
@@ -191,6 +220,9 @@ export default function AdminPage() {
   const { data: faqsData = [], isLoading: faqsLoading } = useAdminFaqs();
   const { data: adminsData = [], isLoading: adminsLoading } = useAdminList();
   const { data: dashboardStats } = useDashboardStats();
+
+  const createProductMutation = useCreateProduct();
+  const updateProductMutation = useUpdateProduct();
 
   const handleLogout = async () => {
     try {
@@ -290,14 +322,188 @@ export default function AdminPage() {
     switch (activeMenu) {
       case "products":
         if (productsLoading) return <div className="text-center py-8 text-gray-500">로딩중...</div>;
+        
+        const getProductStatusLabel = (status: string | null | undefined) => {
+          if (status === "active") return "판매중";
+          if (status === "pending") return "검수중";
+          if (status === "inactive") return "대기중";
+          return status || "-";
+        };
+
+        const getProductStatusStyle = (status: string | null | undefined) => {
+          if (status === "active") return "bg-green-100 text-green-700";
+          if (status === "pending") return "bg-yellow-100 text-yellow-700";
+          if (status === "inactive") return "bg-gray-100 text-gray-600";
+          return "bg-gray-100 text-gray-600";
+        };
+
+        const filteredProducts = products.filter((product) => {
+          const matchesSearch = productSearchQuery === "" || 
+            product.name.toLowerCase().includes(productSearchQuery.toLowerCase());
+          const matchesStatus = productStatusFilter === "all" || product.status === productStatusFilter;
+          const matchesCategory = productCategoryFilter === "all" || 
+            product.categoryId?.toString() === productCategoryFilter;
+          return matchesSearch && matchesStatus && matchesCategory;
+        });
+
+        const resetProductForm = () => {
+          setProductForm({
+            name: "",
+            categoryId: 0,
+            price: 0,
+            originalPrice: 0,
+            stock: 0,
+            status: "active",
+            description: "",
+            image: ""
+          });
+          setEditingProduct(null);
+        };
+
+        const handleCreateProduct = async () => {
+          try {
+            await createProductMutation.mutateAsync({
+              name: productForm.name,
+              categoryId: productForm.categoryId || null,
+              price: productForm.price,
+              originalPrice: productForm.originalPrice || null,
+              stock: productForm.stock,
+              status: productForm.status,
+              description: productForm.description || null,
+              image: productForm.image || null,
+            });
+            toast({
+              title: "상품 등록 완료",
+              description: "새 상품이 등록되었습니다.",
+            });
+            setIsProductModalOpen(false);
+            resetProductForm();
+          } catch (error) {
+            toast({
+              variant: "destructive",
+              title: "상품 등록 실패",
+              description: "다시 시도해주세요.",
+            });
+          }
+        };
+
+        const handleUpdateProduct = async () => {
+          if (!editingProduct) return;
+          try {
+            await updateProductMutation.mutateAsync({
+              id: editingProduct.id,
+              name: productForm.name,
+              categoryId: productForm.categoryId || null,
+              price: productForm.price,
+              originalPrice: productForm.originalPrice || null,
+              stock: productForm.stock,
+              status: productForm.status,
+              description: productForm.description || null,
+              image: productForm.image || null,
+            });
+            toast({
+              title: "상품 수정 완료",
+              description: "상품 정보가 수정되었습니다.",
+            });
+            setIsProductModalOpen(false);
+            resetProductForm();
+          } catch (error) {
+            toast({
+              variant: "destructive",
+              title: "상품 수정 실패",
+              description: "다시 시도해주세요.",
+            });
+          }
+        };
+
+        const handleStatusChange = async (productId: number, newStatus: string) => {
+          try {
+            await updateProductMutation.mutateAsync({
+              id: productId,
+              status: newStatus,
+            });
+            toast({
+              title: "상태 변경 완료",
+              description: "상품 상태가 변경되었습니다.",
+            });
+          } catch (error) {
+            toast({
+              variant: "destructive",
+              title: "상태 변경 실패",
+              description: "다시 시도해주세요.",
+            });
+          }
+        };
+
+        const openEditModal = (product: any) => {
+          setEditingProduct(product);
+          setProductForm({
+            name: product.name || "",
+            categoryId: product.categoryId || 0,
+            price: product.price || 0,
+            originalPrice: product.originalPrice || 0,
+            stock: product.stock || 0,
+            status: product.status || "active",
+            description: product.description || "",
+            image: product.image || ""
+          });
+          setIsProductModalOpen(true);
+        };
+
         return (
           <div>
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-bold text-gray-900">상품 관리</h2>
-              <button className="bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary/90">
+              <Button 
+                onClick={() => {
+                  resetProductForm();
+                  setIsProductModalOpen(true);
+                }}
+                className="bg-primary text-white"
+                data-testid="button-add-product"
+              >
                 + 상품 등록
-              </button>
+              </Button>
             </div>
+
+            <div className="flex flex-wrap gap-3 mb-4">
+              <div className="relative flex-1 min-w-[200px]">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Input
+                  type="text"
+                  placeholder="상품명 검색..."
+                  value={productSearchQuery}
+                  onChange={(e) => setProductSearchQuery(e.target.value)}
+                  className="pl-9"
+                  data-testid="input-product-search"
+                />
+              </div>
+              <Select value={productStatusFilter} onValueChange={setProductStatusFilter}>
+                <SelectTrigger className="w-[140px]" data-testid="select-product-status">
+                  <SelectValue placeholder="상태 필터" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">전체</SelectItem>
+                  <SelectItem value="active">판매중</SelectItem>
+                  <SelectItem value="pending">검수중</SelectItem>
+                  <SelectItem value="inactive">대기중</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={productCategoryFilter} onValueChange={setProductCategoryFilter}>
+                <SelectTrigger className="w-[160px]" data-testid="select-product-category">
+                  <SelectValue placeholder="카테고리 필터" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">전체 카테고리</SelectItem>
+                  {categories.map((category) => (
+                    <SelectItem key={category.id} value={category.id.toString()}>
+                      {category.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
             <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
               <table className="w-full">
                 <thead className="bg-gray-50 border-b border-gray-200">
@@ -311,8 +517,9 @@ export default function AdminPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {products.map((product) => {
-                    const statusText = getProductStatus(product.status);
+                  {filteredProducts.map((product) => {
+                    const statusLabel = getProductStatusLabel(product.status);
+                    const statusStyle = getProductStatusStyle(product.status);
                     return (
                       <tr key={product.id} className="border-b border-gray-100 hover:bg-gray-50">
                         <td className="px-4 py-3 text-sm text-gray-900">{product.name}</td>
@@ -320,21 +527,196 @@ export default function AdminPage() {
                         <td className="px-4 py-3 text-sm text-gray-900">{product.price.toLocaleString()}원</td>
                         <td className="px-4 py-3 text-sm text-gray-600">{product.stock ?? 0}개</td>
                         <td className="px-4 py-3">
-                          <span className={`text-xs px-2 py-1 rounded-full ${
-                            statusText === "판매중" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
-                          }`}>
-                            {statusText}
-                          </span>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <button 
+                                className={`text-xs px-2 py-1 rounded-full cursor-pointer hover:opacity-80 ${statusStyle}`}
+                                data-testid={`status-badge-${product.id}`}
+                              >
+                                {statusLabel}
+                              </button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent>
+                              <DropdownMenuItem 
+                                onClick={() => handleStatusChange(product.id, "active")}
+                                className="text-green-700"
+                              >
+                                판매중
+                              </DropdownMenuItem>
+                              <DropdownMenuItem 
+                                onClick={() => handleStatusChange(product.id, "pending")}
+                                className="text-yellow-700"
+                              >
+                                검수중
+                              </DropdownMenuItem>
+                              <DropdownMenuItem 
+                                onClick={() => handleStatusChange(product.id, "inactive")}
+                                className="text-gray-600"
+                              >
+                                대기중
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </td>
                         <td className="px-4 py-3">
-                          <button className="text-sm text-primary hover:underline">수정</button>
+                          <button 
+                            onClick={() => openEditModal(product)}
+                            className="text-sm text-primary hover:underline"
+                            data-testid={`button-edit-product-${product.id}`}
+                          >
+                            수정
+                          </button>
                         </td>
                       </tr>
                     );
                   })}
+                  {filteredProducts.length === 0 && (
+                    <tr>
+                      <td colSpan={6} className="px-4 py-8 text-center text-gray-500">
+                        검색 결과가 없습니다.
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
+
+            <Dialog open={isProductModalOpen} onOpenChange={setIsProductModalOpen}>
+              <DialogContent className="sm:max-w-[500px] bg-white">
+                <DialogHeader>
+                  <DialogTitle>{editingProduct ? "상품 수정" : "상품 등록"}</DialogTitle>
+                  <DialogDescription>
+                    {editingProduct ? "상품 정보를 수정합니다." : "새로운 상품을 등록합니다."}
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="product-name">상품명</Label>
+                    <Input
+                      id="product-name"
+                      value={productForm.name}
+                      onChange={(e) => setProductForm({ ...productForm, name: e.target.value })}
+                      placeholder="상품명을 입력하세요"
+                      data-testid="input-product-name"
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="product-category">카테고리</Label>
+                    <Select 
+                      value={productForm.categoryId?.toString() || "0"} 
+                      onValueChange={(value) => setProductForm({ ...productForm, categoryId: parseInt(value) })}
+                    >
+                      <SelectTrigger data-testid="select-product-form-category">
+                        <SelectValue placeholder="카테고리 선택" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="0">선택 안함</SelectItem>
+                        {categories.map((category) => (
+                          <SelectItem key={category.id} value={category.id.toString()}>
+                            {category.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="product-price">가격</Label>
+                      <Input
+                        id="product-price"
+                        type="number"
+                        value={productForm.price}
+                        onChange={(e) => setProductForm({ ...productForm, price: parseInt(e.target.value) || 0 })}
+                        placeholder="0"
+                        data-testid="input-product-price"
+                      />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="product-original-price">원가</Label>
+                      <Input
+                        id="product-original-price"
+                        type="number"
+                        value={productForm.originalPrice}
+                        onChange={(e) => setProductForm({ ...productForm, originalPrice: parseInt(e.target.value) || 0 })}
+                        placeholder="0"
+                        data-testid="input-product-original-price"
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="product-stock">재고</Label>
+                      <Input
+                        id="product-stock"
+                        type="number"
+                        value={productForm.stock}
+                        onChange={(e) => setProductForm({ ...productForm, stock: parseInt(e.target.value) || 0 })}
+                        placeholder="0"
+                        data-testid="input-product-stock"
+                      />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="product-status">상태</Label>
+                      <Select 
+                        value={productForm.status} 
+                        onValueChange={(value) => setProductForm({ ...productForm, status: value })}
+                      >
+                        <SelectTrigger data-testid="select-product-form-status">
+                          <SelectValue placeholder="상태 선택" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="active">판매중</SelectItem>
+                          <SelectItem value="pending">검수중</SelectItem>
+                          <SelectItem value="inactive">대기중</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="product-description">설명</Label>
+                    <Input
+                      id="product-description"
+                      value={productForm.description}
+                      onChange={(e) => setProductForm({ ...productForm, description: e.target.value })}
+                      placeholder="상품 설명을 입력하세요"
+                      data-testid="input-product-description"
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="product-image">이미지 URL</Label>
+                    <Input
+                      id="product-image"
+                      value={productForm.image}
+                      onChange={(e) => setProductForm({ ...productForm, image: e.target.value })}
+                      placeholder="이미지 URL을 입력하세요"
+                      data-testid="input-product-image"
+                    />
+                  </div>
+                </div>
+                <div className="flex justify-end gap-2">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      setIsProductModalOpen(false);
+                      resetProductForm();
+                    }}
+                    data-testid="button-cancel-product"
+                  >
+                    취소
+                  </Button>
+                  <Button 
+                    onClick={editingProduct ? handleUpdateProduct : handleCreateProduct}
+                    disabled={createProductMutation.isPending || updateProductMutation.isPending}
+                    data-testid="button-save-product"
+                  >
+                    {(createProductMutation.isPending || updateProductMutation.isPending) && (
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    )}
+                    {editingProduct ? "수정" : "등록"}
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
         );
 
