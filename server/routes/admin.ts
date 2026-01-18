@@ -283,4 +283,66 @@ router.put("/api/admin/branding/:key", requireAdmin, async (req: Request, res: R
   }
 });
 
+// ============================================================================
+// 메인 페이지 설정 관리
+// ============================================================================
+
+router.get("/api/admin/main-page-settings", requireAdmin, async (req: Request, res: Response) => {
+  try {
+    const settings = await storage.getMainPageSettings();
+    res.json(settings || {
+      bestProductsCriteria: "sales",
+      bestProductsManualIds: [],
+      bestProductsLimit: 6,
+      adBannerImage: null,
+      adBannerLink: null,
+      adBannerEnabled: true,
+      newProductsCriteria: "recent",
+      newProductsManualIds: [],
+      newProductsLimit: 6,
+      newProductsDaysThreshold: 30,
+      eventsCriteria: "active",
+      eventsManualIds: [],
+      eventsLimit: 4,
+    });
+  } catch (error) {
+    console.error("Get main page settings error:", error);
+    res.status(500).json({ error: "메인 페이지 설정을 불러올 수 없습니다" });
+  }
+});
+
+router.get("/api/main-page-settings", async (req: Request, res: Response) => {
+  try {
+    const settings = await storage.getMainPageSettings();
+    res.json(settings || {
+      bestProductsCriteria: "sales",
+      bestProductsManualIds: [],
+      bestProductsLimit: 6,
+      adBannerImage: null,
+      adBannerLink: null,
+      adBannerEnabled: true,
+      newProductsCriteria: "recent",
+      newProductsManualIds: [],
+      newProductsLimit: 6,
+      newProductsDaysThreshold: 30,
+      eventsCriteria: "active",
+      eventsManualIds: [],
+      eventsLimit: 4,
+    });
+  } catch (error) {
+    console.error("Get main page settings error:", error);
+    res.status(500).json({ error: "메인 페이지 설정을 불러올 수 없습니다" });
+  }
+});
+
+router.put("/api/admin/main-page-settings", requireAdmin, async (req: Request, res: Response) => {
+  try {
+    const settings = await storage.upsertMainPageSettings(req.body);
+    res.json(settings);
+  } catch (error) {
+    console.error("Update main page settings error:", error);
+    res.status(400).json({ error: "메인 페이지 설정 수정에 실패했습니다" });
+  }
+});
+
 export default router;
