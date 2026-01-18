@@ -102,11 +102,12 @@ export default function ProductDetailPage() {
   return (
     <AppLayout hideNav>
       <div className="min-h-screen bg-white pb-24">
-        <div className="absolute top-0 left-0 right-0 z-50">
+        <div className="sticky top-0 left-0 right-0 z-50 bg-white border-b border-gray-100">
           <div className="flex items-center justify-between px-4 py-3">
             <button onClick={() => window.history.back()} className="p-1" data-testid="button-back">
               <ChevronLeft className="w-6 h-6 text-gray-700" />
             </button>
+            <span className="text-base font-medium text-gray-900">상품 상세</span>
             <div className="flex items-center gap-3">
               <button onClick={() => setLocation("/")} className="p-1" data-testid="button-home">
                 <Home className="w-5 h-5 text-gray-600" />
