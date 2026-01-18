@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { 
   Package, Users, Gift, Calendar, CreditCard, Truck, MessageSquare, 
   ChevronRight, Search, Bell, Settings, LogOut, Menu, X,
@@ -191,6 +192,7 @@ const mockMemberHistory = {
 export default function AdminPage() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [activeMenu, setActiveMenu] = useState("products");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
@@ -246,6 +248,16 @@ export default function AdminPage() {
   const { data: faqsData = [], isLoading: faqsLoading } = useAdminFaqs();
   const { data: adminsData = [], isLoading: adminsLoading } = useAdminList();
   const { data: dashboardStats } = useDashboardStats();
+  const { data: brandingData = [] } = useQuery<any[]>({
+    queryKey: ["admin", "branding"],
+    queryFn: async () => {
+      const res = await fetch("/api/admin/branding", { credentials: "include" });
+      if (!res.ok) throw new Error("Failed to fetch branding");
+      return res.json();
+    },
+    enabled: !!authData?.admin,
+  });
+  const [editingBranding, setEditingBranding] = useState<any>(null);
 
   const createProductMutation = useCreateProduct();
   const updateProductMutation = useUpdateProduct();
@@ -255,6 +267,27 @@ export default function AdminPage() {
   const createFaqMutation = useCreateFaq();
   const updateFaqMutation = useUpdateFaq();
   const deleteFaqMutation = useDeleteFaq();
+
+  const updateBrandingMutation = useMutation({
+    mutationFn: async ({ key, data }: { key: string; data: any }) => {
+      const res = await fetch(`/api/admin/branding/${key}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error("Failed to update branding");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "branding"] });
+      setEditingBranding(null);
+      toast({ title: "저장 완료", description: "브랜딩 설정이 저장되었습니다." });
+    },
+    onError: () => {
+      toast({ variant: "destructive", title: "저장 실패", description: "다시 시도해주세요." });
+    },
+  });
 
   const handleLogout = async () => {
     try {
@@ -2188,6 +2221,9 @@ export default function AdminPage() {
                 <TabsTrigger value="delivery" className="data-[state=active]:bg-white rounded-md px-4 py-2">
                   배송 정책
                 </TabsTrigger>
+                <TabsTrigger value="branding" className="data-[state=active]:bg-white rounded-md px-4 py-2">
+                  사이트 브랜딩
+                </TabsTrigger>
               </TabsList>
 
               <TabsContent value="business">
@@ -2281,6 +2317,177 @@ export default function AdminPage() {
                     <Button className="bg-primary text-white hover:bg-primary/90">저장하기</Button>
                   </div>
                 </div>
+              </TabsContent>
+
+              <TabsContent value="branding">
+                <div className="bg-white rounded-lg border border-gray-200 p-6">
+                  <h3 className="text-lg font-bold text-gray-900 mb-6">사이트 브랜딩</h3>
+                  <p className="text-sm text-gray-500 mb-6">메인 페이지 히어로 섹션과 배너의 텍스트, 이미지, 색상을 설정합니다.</p>
+                  
+                  <div className="space-y-6">
+                    {brandingData.map((item: any) => (
+                      <div key={item.key} className="border border-gray-200 rounded-lg p-4">
+                        <div className="flex items-center justify-between mb-4">
+                          <div>
+                            <h4 className="font-bold text-gray-900">
+                              {item.key === "hero" ? "히어로 섹션" : `배너 ${item.key.replace("banner", "")}`}
+                            </h4>
+                            <p className="text-sm text-gray-500">{item.title || "제목 없음"}</p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className={`px-2 py-1 rounded text-xs ${item.isActive ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600"}`}>
+                              {item.isActive ? "활성" : "비활성"}
+                            </span>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => setEditingBranding(item)}
+                            >
+                              수정
+                            </Button>
+                          </div>
+                        </div>
+                        
+                        {item.image && (
+                          <div className="mb-3">
+                            <img 
+                              src={item.image} 
+                              alt={item.title || "브랜딩 이미지"} 
+                              className="h-20 rounded border border-gray-200 object-cover"
+                              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                            />
+                          </div>
+                        )}
+                        
+                        <div className="grid grid-cols-2 gap-4 text-sm">
+                          <div>
+                            <span className="text-gray-500">배경색:</span>
+                            <span className="ml-2 px-2 py-0.5 rounded" style={{ backgroundColor: item.backgroundColor, color: item.textColor }}>
+                              {item.backgroundColor}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-gray-500">텍스트색:</span>
+                            <span className="ml-2">{item.textColor}</span>
+                          </div>
+                          {item.linkUrl && (
+                            <div className="col-span-2">
+                              <span className="text-gray-500">링크:</span>
+                              <span className="ml-2 text-primary">{item.linkUrl}</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {editingBranding && (
+                  <Dialog open={!!editingBranding} onOpenChange={() => setEditingBranding(null)}>
+                    <DialogContent className="sm:max-w-[600px] bg-white max-h-[90vh] overflow-y-auto">
+                      <DialogHeader>
+                        <DialogTitle className="text-xl font-bold text-gray-900">
+                          {editingBranding.key === "hero" ? "히어로 섹션" : `배너 ${editingBranding.key.replace("banner", "")}`} 수정
+                        </DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4 pt-4">
+                        <div>
+                          <Label>제목</Label>
+                          <Input 
+                            value={editingBranding.title || ""} 
+                            onChange={(e) => setEditingBranding({ ...editingBranding, title: e.target.value })}
+                            placeholder="제목 입력"
+                          />
+                        </div>
+                        <div>
+                          <Label>부제목</Label>
+                          <Input 
+                            value={editingBranding.subtitle || ""} 
+                            onChange={(e) => setEditingBranding({ ...editingBranding, subtitle: e.target.value })}
+                            placeholder="부제목 입력"
+                          />
+                        </div>
+                        <div>
+                          <Label>이미지 URL</Label>
+                          <Input 
+                            value={editingBranding.image || ""} 
+                            onChange={(e) => setEditingBranding({ ...editingBranding, image: e.target.value })}
+                            placeholder="이미지 URL 입력"
+                          />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>배경색</Label>
+                            <div className="flex gap-2">
+                              <input 
+                                type="color" 
+                                value={editingBranding.backgroundColor || "#ffffff"} 
+                                onChange={(e) => setEditingBranding({ ...editingBranding, backgroundColor: e.target.value })}
+                                className="w-10 h-10 rounded border cursor-pointer"
+                              />
+                              <Input 
+                                value={editingBranding.backgroundColor || "#ffffff"} 
+                                onChange={(e) => setEditingBranding({ ...editingBranding, backgroundColor: e.target.value })}
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <Label>텍스트색</Label>
+                            <div className="flex gap-2">
+                              <input 
+                                type="color" 
+                                value={editingBranding.textColor || "#000000"} 
+                                onChange={(e) => setEditingBranding({ ...editingBranding, textColor: e.target.value })}
+                                className="w-10 h-10 rounded border cursor-pointer"
+                              />
+                              <Input 
+                                value={editingBranding.textColor || "#000000"} 
+                                onChange={(e) => setEditingBranding({ ...editingBranding, textColor: e.target.value })}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                        <div>
+                          <Label>링크 URL</Label>
+                          <Input 
+                            value={editingBranding.linkUrl || ""} 
+                            onChange={(e) => setEditingBranding({ ...editingBranding, linkUrl: e.target.value })}
+                            placeholder="/subscription"
+                          />
+                        </div>
+                        <div>
+                          <Label>링크 텍스트</Label>
+                          <Input 
+                            value={editingBranding.linkText || ""} 
+                            onChange={(e) => setEditingBranding({ ...editingBranding, linkText: e.target.value })}
+                            placeholder="바로가기"
+                          />
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Checkbox 
+                            id="branding-active"
+                            checked={editingBranding.isActive}
+                            onCheckedChange={(checked) => setEditingBranding({ ...editingBranding, isActive: checked })}
+                          />
+                          <Label htmlFor="branding-active">활성화</Label>
+                        </div>
+                        <div className="flex justify-end gap-2 pt-4">
+                          <Button variant="outline" onClick={() => setEditingBranding(null)}>취소</Button>
+                          <Button 
+                            onClick={() => updateBrandingMutation.mutate({ 
+                              key: editingBranding.key, 
+                              data: editingBranding 
+                            })}
+                            disabled={updateBrandingMutation.isPending}
+                            className="bg-primary text-white hover:bg-primary/90"
+                          >
+                            {updateBrandingMutation.isPending ? "저장 중..." : "저장"}
+                          </Button>
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                )}
               </TabsContent>
             </Tabs>
           </div>
