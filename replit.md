@@ -31,8 +31,24 @@ Preferred communication style: Simple, everyday language.
 - **Framework**: Express.js (Node.js) serving as the API server
 - **Language**: TypeScript
 - **API Pattern**: RESTful endpoints prefixed with `/api`
-- **Storage Layer**: Abstracted storage interface (`IStorage`) with in-memory implementation (`MemStorage`) - designed for easy swap to database
+- **Storage Layer**: Abstracted storage interface (`IStorage`) with PostgreSQL implementation
 - **Build**: esbuild for server bundling, Vite for client bundling
+
+### API Route Structure
+Routes are organized by feature in `server/routes/`:
+- `auth.ts` - Member authentication (register, login, logout, session)
+- `admin-auth.ts` - Admin authentication
+- `products.ts` - Products and categories CRUD
+- `subscriptions.ts` - Subscription plans and member subscriptions
+- `events.ts` - Health events and participant management
+- `orders.ts` - Cart, orders, payments, shipping
+- `members.ts` - Member profile, reviews, wishlist, notifications, addresses
+- `support.ts` - Inquiries, notices, FAQs
+- `admin.ts` - Admin management and dashboard stats
+
+Middleware (`server/middleware.ts`):
+- `requireAuth` - Member authentication check
+- `requireAdmin` - Admin authentication check
 
 ### Data Storage
 - **ORM**: Drizzle ORM with PostgreSQL dialect configured
