@@ -6,7 +6,7 @@ const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 export const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
 
-const BUCKET_NAME = "wellnix-images";
+const BUCKET_NAME = "_public";
 
 export class SupabaseStorageService {
   async getUploadUrl(fileName: string, contentType: string): Promise<{ uploadUrl: string; objectPath: string }> {
