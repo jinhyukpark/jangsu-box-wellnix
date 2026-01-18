@@ -24,6 +24,7 @@ import {
   type Faq, type InsertFaq, faqs,
   type Inquiry, type InsertInquiry, inquiries,
   type Address, type InsertAddress, addresses,
+  type SiteBranding, type InsertSiteBranding, siteBranding,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -181,6 +182,11 @@ export interface IStorage {
   updateAddress(id: number, data: Partial<InsertAddress>): Promise<Address | undefined>;
   deleteAddress(id: number): Promise<boolean>;
   setDefaultAddress(memberId: number, addressId: number): Promise<boolean>;
+
+  // Site Branding
+  getSiteBranding(key: string): Promise<SiteBranding | undefined>;
+  getAllSiteBranding(): Promise<SiteBranding[]>;
+  upsertSiteBranding(key: string, data: Partial<InsertSiteBranding>): Promise<SiteBranding>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -755,6 +761,32 @@ export class DatabaseStorage implements IStorage {
     await db.update(addresses).set({ isDefault: false }).where(eq(addresses.memberId, memberId));
     await db.update(addresses).set({ isDefault: true }).where(eq(addresses.id, addressId));
     return true;
+  }
+
+  // Site Branding
+  async getSiteBranding(key: string): Promise<SiteBranding | undefined> {
+    const [item] = await db.select().from(siteBranding).where(eq(siteBranding.key, key));
+    return item;
+  }
+
+  async getAllSiteBranding(): Promise<SiteBranding[]> {
+    return db.select().from(siteBranding).orderBy(asc(siteBranding.displayOrder));
+  }
+
+  async upsertSiteBranding(key: string, data: Partial<InsertSiteBranding>): Promise<SiteBranding> {
+    const existing = await this.getSiteBranding(key);
+    if (existing) {
+      const [updated] = await db.update(siteBranding)
+        .set({ ...data, updatedAt: new Date() })
+        .where(eq(siteBranding.key, key))
+        .returning();
+      return updated;
+    } else {
+      const [created] = await db.insert(siteBranding)
+        .values({ ...data, key } as InsertSiteBranding)
+        .returning();
+      return created;
+    }
   }
 }
 

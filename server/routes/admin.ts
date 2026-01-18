@@ -247,4 +247,40 @@ router.delete("/api/admin/reviews/:id/reply", requireAdmin, async (req: Request,
   }
 });
 
+// ============================================================================
+// 사이트 브랜딩 관리
+// ============================================================================
+
+router.get("/api/admin/branding", requireAdmin, async (req: Request, res: Response) => {
+  try {
+    const items = await storage.getAllSiteBranding();
+    res.json(items);
+  } catch (error) {
+    console.error("Get branding error:", error);
+    res.status(500).json({ error: "브랜딩 정보를 불러올 수 없습니다" });
+  }
+});
+
+router.get("/api/branding", async (req: Request, res: Response) => {
+  try {
+    const items = await storage.getAllSiteBranding();
+    res.json(items);
+  } catch (error) {
+    console.error("Get branding error:", error);
+    res.status(500).json({ error: "브랜딩 정보를 불러올 수 없습니다" });
+  }
+});
+
+router.put("/api/admin/branding/:key", requireAdmin, async (req: Request, res: Response) => {
+  try {
+    const { key } = req.params;
+    const data = req.body;
+    const item = await storage.upsertSiteBranding(key, data);
+    res.json(item);
+  } catch (error) {
+    console.error("Update branding error:", error);
+    res.status(400).json({ error: "브랜딩 정보 수정에 실패했습니다" });
+  }
+});
+
 export default router;

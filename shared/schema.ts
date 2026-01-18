@@ -643,6 +643,35 @@ export const sessions = pgTable("sessions", {
 });
 
 // ============================================================================
+// 사이트 브랜딩 설정 (Site Branding)
+// ============================================================================
+
+export const siteBranding = pgTable("site_branding", {
+  id: serial("id").primaryKey(),
+  key: varchar("key", { length: 50 }).notNull().unique(), // hero, banner1, banner2, banner3
+  title: varchar("title", { length: 255 }),
+  subtitle: text("subtitle"),
+  image: text("image"),
+  backgroundColor: varchar("background_color", { length: 20 }).default("#ffffff"),
+  textColor: varchar("text_color", { length: 20 }).default("#000000"),
+  linkUrl: text("link_url"),
+  linkText: varchar("link_text", { length: 100 }),
+  isActive: boolean("is_active").default(true),
+  displayOrder: integer("display_order").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertSiteBrandingSchema = createInsertSchema(siteBranding).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertSiteBranding = z.infer<typeof insertSiteBrandingSchema>;
+export type SiteBranding = typeof siteBranding.$inferSelect;
+
+// ============================================================================
 // Relations
 // ============================================================================
 
