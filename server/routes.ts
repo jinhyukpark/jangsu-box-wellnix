@@ -961,5 +961,43 @@ export async function registerRoutes(
     res.json(coupons);
   });
 
+  app.get("/api/admin/dashboard", requireAdmin, async (req, res) => {
+    try {
+      const products = await storage.getAllProducts();
+      const members = await storage.getAllMembers();
+      const orders = await storage.getAllOrders();
+      const inquiries = await storage.getAllInquiries();
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      const todayOrders = orders.filter(o => new Date(o.createdAt!) >= today);
+      const todaySales = todayOrders.reduce((sum, o) => sum + (o.totalAmount || 0), 0);
+      const newMembers = members.filter(m => new Date(m.createdAt!) >= today).length;
+      const pendingInquiries = inquiries.filter(i => i.status === "pending").length;
+
+      res.json({
+        todaySales,
+        todayOrders: todayOrders.length,
+        newMembers,
+        pendingInquiries,
+        totalProducts: products.length,
+        totalMembers: members.length,
+      });
+    } catch (error) {
+      res.status(500).json({ error: "대시보드 데이터 로딩 실패" });
+    }
+  });
+
+  app.delete("/api/admin/admins/:id", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteAdmin(id);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "관리자 삭제 실패" });
+    }
+  });
+
   return httpServer;
 }

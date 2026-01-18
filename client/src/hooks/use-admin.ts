@@ -1,0 +1,206 @@
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import type { 
+  Product, Category, Member, Subscription, SubscriptionPlan,
+  Event, Inquiry, Faq, Admin, Notice
+} from "@shared/schema";
+
+async function fetchWithAuth(url: string, options?: RequestInit) {
+  const res = await fetch(url, {
+    ...options,
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+      ...options?.headers,
+    },
+  });
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({ message: "요청 실패" }));
+    throw new Error(error.message || "요청 실패");
+  }
+  return res.json();
+}
+
+export function useAdminProducts() {
+  return useQuery<Product[]>({
+    queryKey: ["admin", "products"],
+    queryFn: () => fetchWithAuth("/api/products"),
+  });
+}
+
+export function useAdminCategories() {
+  return useQuery<Category[]>({
+    queryKey: ["admin", "categories"],
+    queryFn: () => fetchWithAuth("/api/categories"),
+  });
+}
+
+export function useAdminMembers() {
+  return useQuery<Member[]>({
+    queryKey: ["admin", "members"],
+    queryFn: () => fetchWithAuth("/api/admin/members"),
+  });
+}
+
+export function useAdminSubscriptions() {
+  return useQuery<(Subscription & { member?: Member; plan?: SubscriptionPlan })[]>({
+    queryKey: ["admin", "subscriptions"],
+    queryFn: () => fetchWithAuth("/api/admin/subscriptions"),
+  });
+}
+
+export function useAdminSubscriptionPlans() {
+  return useQuery<SubscriptionPlan[]>({
+    queryKey: ["admin", "subscription-plans"],
+    queryFn: () => fetchWithAuth("/api/subscription-plans"),
+  });
+}
+
+export function useAdminEvents() {
+  return useQuery<Event[]>({
+    queryKey: ["admin", "events"],
+    queryFn: () => fetchWithAuth("/api/events"),
+  });
+}
+
+export function useAdminInquiries() {
+  return useQuery<(Inquiry & { member?: Member })[]>({
+    queryKey: ["admin", "inquiries"],
+    queryFn: () => fetchWithAuth("/api/admin/inquiries"),
+  });
+}
+
+export function useAdminFaqs() {
+  return useQuery<Faq[]>({
+    queryKey: ["admin", "faqs"],
+    queryFn: () => fetchWithAuth("/api/faqs"),
+  });
+}
+
+export function useAdminNotices() {
+  return useQuery<Notice[]>({
+    queryKey: ["admin", "notices"],
+    queryFn: () => fetchWithAuth("/api/notices"),
+  });
+}
+
+export function useAdminList() {
+  return useQuery<Admin[]>({
+    queryKey: ["admin", "admins"],
+    queryFn: () => fetchWithAuth("/api/admin/admins"),
+  });
+}
+
+export function useCreateProduct() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: Partial<Product>) => 
+      fetchWithAuth("/api/products", { method: "POST", body: JSON.stringify(data) }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin", "products"] }),
+  });
+}
+
+export function useUpdateProduct() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...data }: Partial<Product> & { id: number }) => 
+      fetchWithAuth(`/api/products/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin", "products"] }),
+  });
+}
+
+export function useDeleteProduct() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => 
+      fetchWithAuth(`/api/products/${id}`, { method: "DELETE" }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin", "products"] }),
+  });
+}
+
+export function useCreateEvent() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: Partial<Event>) => 
+      fetchWithAuth("/api/events", { method: "POST", body: JSON.stringify(data) }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin", "events"] }),
+  });
+}
+
+export function useUpdateEvent() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...data }: Partial<Event> & { id: number }) => 
+      fetchWithAuth(`/api/events/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin", "events"] }),
+  });
+}
+
+export function useCreateFaq() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: Partial<Faq>) => 
+      fetchWithAuth("/api/faqs", { method: "POST", body: JSON.stringify(data) }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin", "faqs"] }),
+  });
+}
+
+export function useUpdateFaq() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...data }: Partial<Faq> & { id: number }) => 
+      fetchWithAuth(`/api/faqs/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin", "faqs"] }),
+  });
+}
+
+export function useDeleteFaq() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => 
+      fetchWithAuth(`/api/faqs/${id}`, { method: "DELETE" }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin", "faqs"] }),
+  });
+}
+
+export function useReplyInquiry() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, reply }: { id: number; reply: string }) => 
+      fetchWithAuth(`/api/inquiries/${id}/reply`, { method: "POST", body: JSON.stringify({ reply }) }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin", "inquiries"] }),
+  });
+}
+
+export function useCreateAdmin() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: Partial<Admin>) => 
+      fetchWithAuth("/api/admin/admins", { method: "POST", body: JSON.stringify(data) }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin", "admins"] }),
+  });
+}
+
+export function useUpdateAdmin() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...data }: Partial<Admin> & { id: number }) => 
+      fetchWithAuth(`/api/admin/admins/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin", "admins"] }),
+  });
+}
+
+export function useDeleteAdmin() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => 
+      fetchWithAuth(`/api/admin/admins/${id}`, { method: "DELETE" }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin", "admins"] }),
+  });
+}
+
+export function useDashboardStats() {
+  return useQuery({
+    queryKey: ["admin", "dashboard"],
+    queryFn: () => fetchWithAuth("/api/admin/dashboard"),
+  });
+}

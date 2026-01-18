@@ -4,6 +4,7 @@ import {
   ChevronRight, Search, Bell, Settings, LogOut, Menu, X,
   TrendingUp, ShoppingBag, UserCheck, Clock, HelpCircle, Star, ShieldCheck
 } from "lucide-react";
+import { useAdminProducts, useAdminCategories, useAdminMembers, useAdminSubscriptions, useAdminEvents, useAdminInquiries, useAdminFaqs, useAdminList, useDashboardStats } from "@/hooks/use-admin";
 import {
   Dialog,
   DialogContent,
@@ -169,12 +170,66 @@ const mockMemberHistory = {
 export default function AdminPage() {
   const [activeMenu, setActiveMenu] = useState("products");
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [selectedEvent, setSelectedEvent] = useState<typeof mockEvents[0] | null>(null);
-  const [selectedMember, setSelectedMember] = useState<typeof mockMembers[0] | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<any>(null);
+  const [selectedMember, setSelectedMember] = useState<any>(null);
+
+  const { data: products = [], isLoading: productsLoading } = useAdminProducts();
+  const { data: categories = [] } = useAdminCategories();
+  const { data: members = [], isLoading: membersLoading } = useAdminMembers();
+  const { data: subscriptions = [], isLoading: subscriptionsLoading } = useAdminSubscriptions();
+  const { data: events = [], isLoading: eventsLoading } = useAdminEvents();
+  const { data: inquiriesData = [], isLoading: inquiriesLoading } = useAdminInquiries();
+  const { data: faqsData = [], isLoading: faqsLoading } = useAdminFaqs();
+  const { data: adminsData = [], isLoading: adminsLoading } = useAdminList();
+  const { data: dashboardStats } = useDashboardStats();
+
+  const getCategoryName = (categoryId: number | null | undefined) => {
+    if (!categoryId) return "-";
+    const category = categories.find(c => c.id === categoryId);
+    return category?.name || "-";
+  };
+
+  const formatDate = (date: string | Date | null | undefined) => {
+    if (!date) return "-";
+    const d = new Date(date);
+    return d.toLocaleDateString("ko-KR");
+  };
+
+  const getProductStatus = (status: string | null | undefined) => {
+    if (status === "active") return "판매중";
+    if (status === "inactive" || status === "out_of_stock") return "품절";
+    return status || "-";
+  };
+
+  const getMemberStatus = (status: string | null | undefined) => {
+    if (status === "active") return "활성";
+    if (status === "inactive" || status === "dormant") return "휴면";
+    return status || "-";
+  };
+
+  const getSubscriptionStatus = (status: string | null | undefined) => {
+    if (status === "active") return "활성";
+    if (status === "cancelled" || status === "inactive") return "해지";
+    return status || "-";
+  };
+
+  const getEventStatus = (status: string | null | undefined) => {
+    if (status === "recruiting") return "모집중";
+    if (status === "closed" || status === "completed") return "마감";
+    return status || "-";
+  };
+
+  const getInquiryStatus = (status: string | null | undefined) => {
+    if (status === "pending") return "답변대기";
+    if (status === "answered" || status === "completed") return "답변완료";
+    if (status === "processing") return "처리중";
+    return status || "-";
+  };
 
   const renderContent = () => {
     switch (activeMenu) {
       case "products":
+        if (productsLoading) return <div className="text-center py-8 text-gray-500">로딩중...</div>;
         return (
           <div>
             <div className="flex items-center justify-between mb-6">
@@ -196,24 +251,27 @@ export default function AdminPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {mockProducts.map((product) => (
-                    <tr key={product.id} className="border-b border-gray-100 hover:bg-gray-50">
-                      <td className="px-4 py-3 text-sm text-gray-900">{product.name}</td>
-                      <td className="px-4 py-3 text-sm text-gray-600">{product.category}</td>
-                      <td className="px-4 py-3 text-sm text-gray-900">{product.price.toLocaleString()}원</td>
-                      <td className="px-4 py-3 text-sm text-gray-600">{product.stock}개</td>
-                      <td className="px-4 py-3">
-                        <span className={`text-xs px-2 py-1 rounded-full ${
-                          product.status === "판매중" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
-                        }`}>
-                          {product.status}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <button className="text-sm text-primary hover:underline">수정</button>
-                      </td>
-                    </tr>
-                  ))}
+                  {products.map((product) => {
+                    const statusText = getProductStatus(product.status);
+                    return (
+                      <tr key={product.id} className="border-b border-gray-100 hover:bg-gray-50">
+                        <td className="px-4 py-3 text-sm text-gray-900">{product.name}</td>
+                        <td className="px-4 py-3 text-sm text-gray-600">{getCategoryName(product.categoryId)}</td>
+                        <td className="px-4 py-3 text-sm text-gray-900">{product.price.toLocaleString()}원</td>
+                        <td className="px-4 py-3 text-sm text-gray-600">{product.stock ?? 0}개</td>
+                        <td className="px-4 py-3">
+                          <span className={`text-xs px-2 py-1 rounded-full ${
+                            statusText === "판매중" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+                          }`}>
+                            {statusText}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3">
+                          <button className="text-sm text-primary hover:underline">수정</button>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -221,6 +279,7 @@ export default function AdminPage() {
         );
 
       case "members":
+        if (membersLoading) return <div className="text-center py-8 text-gray-500">로딩중...</div>;
         return (
           <div>
             <div className="flex items-center justify-between mb-6">
@@ -250,30 +309,32 @@ export default function AdminPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {mockMembers.map((member) => (
-                    <tr key={member.id} className="border-b border-gray-100 hover:bg-gray-50">
-                      <td className="px-4 py-3 text-sm text-gray-900">{member.name}</td>
-                      <td className="px-4 py-3 text-sm text-gray-600">{member.email}</td>
-                      <td className="px-4 py-3 text-sm text-gray-600">{member.phone}</td>
-                      <td className="px-4 py-3 text-sm text-gray-600">{member.joinDate}</td>
-                      <td className="px-4 py-3 text-sm text-gray-600">{member.subscription}</td>
-                      <td className="px-4 py-3">
-                        <span className={`text-xs px-2 py-1 rounded-full ${
-                          member.status === "활성" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600"
-                        }`}>
-                          {member.status}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <button 
-                              className="text-sm text-primary hover:underline"
-                              onClick={() => setSelectedMember(member)}
-                            >
-                              상세
-                            </button>
-                          </DialogTrigger>
+                  {members.map((member) => {
+                    const statusText = getMemberStatus(member.status);
+                    return (
+                      <tr key={member.id} className="border-b border-gray-100 hover:bg-gray-50">
+                        <td className="px-4 py-3 text-sm text-gray-900">{member.name}</td>
+                        <td className="px-4 py-3 text-sm text-gray-600">{member.email}</td>
+                        <td className="px-4 py-3 text-sm text-gray-600">{member.phone || "-"}</td>
+                        <td className="px-4 py-3 text-sm text-gray-600">{formatDate(member.createdAt)}</td>
+                        <td className="px-4 py-3 text-sm text-gray-600">{member.membershipLevel || "-"}</td>
+                        <td className="px-4 py-3">
+                          <span className={`text-xs px-2 py-1 rounded-full ${
+                            statusText === "활성" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600"
+                          }`}>
+                            {statusText}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3">
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <button 
+                                className="text-sm text-primary hover:underline"
+                                onClick={() => setSelectedMember(member)}
+                              >
+                                상세
+                              </button>
+                            </DialogTrigger>
                           <DialogContent className="sm:max-w-[700px] bg-white h-[600px] flex flex-col p-0 gap-0 overflow-hidden">
                             <DialogHeader className="p-6 pb-2">
                               <DialogTitle className="text-xl font-bold text-gray-900 flex items-center gap-3">
@@ -430,7 +491,8 @@ export default function AdminPage() {
                         </Dialog>
                       </td>
                     </tr>
-                  ))}
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -438,6 +500,7 @@ export default function AdminPage() {
         );
 
       case "subscription":
+        if (subscriptionsLoading) return <div className="text-center py-8 text-gray-500">로딩중...</div>;
         return (
           <div>
             <div className="flex items-center justify-between mb-6">
@@ -465,25 +528,28 @@ export default function AdminPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {mockSubscriptions.map((sub) => (
-                    <tr key={sub.id} className="border-b border-gray-100 hover:bg-gray-50">
-                      <td className="px-4 py-3 text-sm text-gray-900">{sub.member}</td>
-                      <td className="px-4 py-3 text-sm text-gray-600">{sub.plan}</td>
-                      <td className="px-4 py-3 text-sm text-gray-600">{sub.startDate}</td>
-                      <td className="px-4 py-3 text-sm text-gray-600">{sub.nextDelivery}</td>
-                      <td className="px-4 py-3 text-sm text-gray-900">{sub.amount.toLocaleString()}원</td>
-                      <td className="px-4 py-3">
-                        <span className={`text-xs px-2 py-1 rounded-full ${
-                          sub.status === "활성" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
-                        }`}>
-                          {sub.status}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <button className="text-sm text-primary hover:underline">관리</button>
-                      </td>
-                    </tr>
-                  ))}
+                  {subscriptions.map((sub) => {
+                    const statusText = getSubscriptionStatus(sub.status);
+                    return (
+                      <tr key={sub.id} className="border-b border-gray-100 hover:bg-gray-50">
+                        <td className="px-4 py-3 text-sm text-gray-900">{sub.member?.name || "-"}</td>
+                        <td className="px-4 py-3 text-sm text-gray-600">{sub.plan?.name || "-"}</td>
+                        <td className="px-4 py-3 text-sm text-gray-600">{formatDate(sub.startDate)}</td>
+                        <td className="px-4 py-3 text-sm text-gray-600">{formatDate(sub.nextDeliveryDate)}</td>
+                        <td className="px-4 py-3 text-sm text-gray-900">{(sub.plan?.price || 0).toLocaleString()}원</td>
+                        <td className="px-4 py-3">
+                          <span className={`text-xs px-2 py-1 rounded-full ${
+                            statusText === "활성" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+                          }`}>
+                            {statusText}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3">
+                          <button className="text-sm text-primary hover:underline">관리</button>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -491,6 +557,7 @@ export default function AdminPage() {
         );
 
       case "events":
+        if (eventsLoading) return <div className="text-center py-8 text-gray-500">로딩중...</div>;
         return (
           <div>
             <div className="flex items-center justify-between mb-6">
@@ -512,29 +579,31 @@ export default function AdminPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {mockEvents.map((event) => (
-                    <tr key={event.id} className="border-b border-gray-100 hover:bg-gray-50">
-                      <td className="px-4 py-3 text-sm text-gray-900">{event.title}</td>
-                      <td className="px-4 py-3 text-sm text-gray-600">{event.date}</td>
-                      <td className="px-4 py-3 text-sm text-gray-600">{event.location}</td>
-                      <td className="px-4 py-3 text-sm text-gray-600">{event.participants}/{event.max}</td>
-                      <td className="px-4 py-3">
-                        <span className={`text-xs px-2 py-1 rounded-full ${
-                          event.status === "모집중" ? "bg-amber-100 text-amber-700" : "bg-gray-100 text-gray-600"
-                        }`}>
-                          {event.status}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <button 
-                              className="text-sm text-primary hover:underline"
-                              onClick={() => setSelectedEvent(event)}
-                            >
-                              상세보기
-                            </button>
-                          </DialogTrigger>
+                  {events.map((event) => {
+                    const statusText = getEventStatus(event.status);
+                    return (
+                      <tr key={event.id} className="border-b border-gray-100 hover:bg-gray-50">
+                        <td className="px-4 py-3 text-sm text-gray-900">{event.title}</td>
+                        <td className="px-4 py-3 text-sm text-gray-600">{formatDate(event.date)}</td>
+                        <td className="px-4 py-3 text-sm text-gray-600">{event.location || "-"}</td>
+                        <td className="px-4 py-3 text-sm text-gray-600">{event.currentParticipants || 0}/{event.maxParticipants || 0}</td>
+                        <td className="px-4 py-3">
+                          <span className={`text-xs px-2 py-1 rounded-full ${
+                            statusText === "모집중" ? "bg-amber-100 text-amber-700" : "bg-gray-100 text-gray-600"
+                          }`}>
+                            {statusText}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3">
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <button 
+                                className="text-sm text-primary hover:underline"
+                                onClick={() => setSelectedEvent(event)}
+                              >
+                                상세보기
+                              </button>
+                            </DialogTrigger>
                           <DialogContent className="sm:max-w-[600px] bg-white">
                             <DialogHeader>
                               <DialogTitle className="text-xl font-bold text-gray-900">{selectedEvent?.title}</DialogTitle>
@@ -574,7 +643,7 @@ export default function AdminPage() {
                                           </td>
                                         </tr>
                                       ) : (
-                                        selectedEvent?.participantList.map((participant, i) => (
+                                        selectedEvent?.participantList.map((participant: any, i: number) => (
                                           <tr key={i}>
                                             <td className="px-4 py-2 text-sm text-gray-900">{participant.name}</td>
                                             <td className="px-4 py-2 text-sm text-gray-600">{participant.phone}</td>
@@ -597,7 +666,8 @@ export default function AdminPage() {
                         </Dialog>
                       </td>
                     </tr>
-                  ))}
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -713,6 +783,7 @@ export default function AdminPage() {
         );
 
       case "inquiries":
+        if (inquiriesLoading) return <div className="text-center py-8 text-gray-500">로딩중...</div>;
         return (
           <div>
             <div className="flex items-center justify-between mb-6">
@@ -739,26 +810,29 @@ export default function AdminPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {mockInquiries.map((inquiry) => (
-                    <tr key={inquiry.id} className="border-b border-gray-100 hover:bg-gray-50">
-                      <td className="px-4 py-3 text-sm text-gray-900">{inquiry.member}</td>
-                      <td className="px-4 py-3 text-sm text-gray-600">{inquiry.subject}</td>
-                      <td className="px-4 py-3 text-sm text-gray-600">{inquiry.category}</td>
-                      <td className="px-4 py-3 text-sm text-gray-600">{inquiry.date}</td>
-                      <td className="px-4 py-3">
-                        <span className={`text-xs px-2 py-1 rounded-full ${
-                          inquiry.status === "답변완료" ? "bg-green-100 text-green-700" 
-                          : inquiry.status === "답변대기" ? "bg-red-100 text-red-700"
-                          : "bg-amber-100 text-amber-700"
-                        }`}>
-                          {inquiry.status}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <button className="text-sm text-primary hover:underline">답변</button>
-                      </td>
-                    </tr>
-                  ))}
+                  {inquiriesData.map((inquiry) => {
+                    const statusText = getInquiryStatus(inquiry.status);
+                    return (
+                      <tr key={inquiry.id} className="border-b border-gray-100 hover:bg-gray-50">
+                        <td className="px-4 py-3 text-sm text-gray-900">{inquiry.member?.name || "-"}</td>
+                        <td className="px-4 py-3 text-sm text-gray-600">{inquiry.subject || "-"}</td>
+                        <td className="px-4 py-3 text-sm text-gray-600">{inquiry.category || "-"}</td>
+                        <td className="px-4 py-3 text-sm text-gray-600">{formatDate(inquiry.createdAt)}</td>
+                        <td className="px-4 py-3">
+                          <span className={`text-xs px-2 py-1 rounded-full ${
+                            statusText === "답변완료" ? "bg-green-100 text-green-700" 
+                            : statusText === "답변대기" ? "bg-red-100 text-red-700"
+                            : "bg-amber-100 text-amber-700"
+                          }`}>
+                            {statusText}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3">
+                          <button className="text-sm text-primary hover:underline">답변</button>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -824,41 +898,49 @@ export default function AdminPage() {
                 </DialogContent>
               </Dialog>
             </div>
-            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-              <table className="w-full">
-                <thead className="bg-gray-50 border-b border-gray-200">
-                  <tr>
-                    <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">카테고리</th>
-                    <th className="text-left px-4 py-3 text-sm font-medium text-gray-600 w-1/2">질문</th>
-                    <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">상태</th>
-                    <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">관리</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {mockFAQs.map((faq) => (
-                    <tr key={faq.id} className="border-b border-gray-100 hover:bg-gray-50">
-                      <td className="px-4 py-3 text-sm text-gray-600">{faq.category}</td>
-                      <td className="px-4 py-3 text-sm text-gray-900 font-medium">{faq.question}</td>
-                      <td className="px-4 py-3">
-                        <span className={`text-xs px-2 py-1 rounded-full ${
-                          faq.status === "게시중" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600"
-                        }`}>
-                          {faq.status}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <button className="text-sm text-primary hover:underline mr-3">수정</button>
-                        <button className="text-sm text-red-500 hover:underline">삭제</button>
-                      </td>
+            {faqsLoading ? (
+              <div className="text-center py-8 text-gray-500">로딩중...</div>
+            ) : (
+              <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                <table className="w-full">
+                  <thead className="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                      <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">카테고리</th>
+                      <th className="text-left px-4 py-3 text-sm font-medium text-gray-600 w-1/2">질문</th>
+                      <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">상태</th>
+                      <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">관리</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {faqsData.map((faq) => {
+                      const statusText = faq.isActive ? "게시중" : "숨김";
+                      return (
+                        <tr key={faq.id} className="border-b border-gray-100 hover:bg-gray-50">
+                          <td className="px-4 py-3 text-sm text-gray-600">{faq.category || "-"}</td>
+                          <td className="px-4 py-3 text-sm text-gray-900 font-medium">{faq.question}</td>
+                          <td className="px-4 py-3">
+                            <span className={`text-xs px-2 py-1 rounded-full ${
+                              statusText === "게시중" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600"
+                            }`}>
+                              {statusText}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3">
+                            <button className="text-sm text-primary hover:underline mr-3">수정</button>
+                            <button className="text-sm text-red-500 hover:underline">삭제</button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         );
 
       case "settings":
+        if (adminsLoading) return <div className="text-center py-8 text-gray-500">로딩중...</div>;
         return (
           <div>
             <div className="flex items-center justify-between mb-6">
@@ -951,43 +1033,47 @@ export default function AdminPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {mockAdmins.map((admin) => (
-                    <tr key={admin.id} className="border-b border-gray-100 hover:bg-gray-50">
-                      <td className="px-4 py-3 text-sm font-medium text-gray-900">{admin.name}</td>
-                      <td className="px-4 py-3 text-sm text-gray-600">{admin.email}</td>
-                      <td className="px-4 py-3 text-sm text-gray-600">{admin.role}</td>
-                      <td className="px-4 py-3 text-sm text-gray-600">
-                        <div className="flex gap-1 flex-wrap max-w-[200px]">
-                          {admin.permissions.includes("all") ? (
-                            <span className="bg-gray-100 text-gray-700 px-1.5 py-0.5 rounded text-xs">전체 권한</span>
-                          ) : (
-                            admin.permissions.map(perm => {
-                              const label = menuItems.find(m => m.id === perm)?.label || perm;
-                              return (
-                                <span key={perm} className="bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded text-xs">
-                                  {label.replace(" 관리", "")}
-                                </span>
-                              );
-                            })
+                  {adminsData.map((admin) => {
+                    const statusText = admin.status === "active" ? "활성" : "비활성";
+                    const permissions = admin.permissions || [];
+                    return (
+                      <tr key={admin.id} className="border-b border-gray-100 hover:bg-gray-50">
+                        <td className="px-4 py-3 text-sm font-medium text-gray-900">{admin.name}</td>
+                        <td className="px-4 py-3 text-sm text-gray-600">{admin.email}</td>
+                        <td className="px-4 py-3 text-sm text-gray-600">{admin.role}</td>
+                        <td className="px-4 py-3 text-sm text-gray-600">
+                          <div className="flex gap-1 flex-wrap max-w-[200px]">
+                            {permissions.includes("all") ? (
+                              <span className="bg-gray-100 text-gray-700 px-1.5 py-0.5 rounded text-xs">전체 권한</span>
+                            ) : (
+                              permissions.map((perm: string) => {
+                                const label = menuItems.find(m => m.id === perm)?.label || perm;
+                                return (
+                                  <span key={perm} className="bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded text-xs">
+                                    {label.replace(" 관리", "")}
+                                  </span>
+                                );
+                              })
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-600">{formatDate(admin.lastLogin)}</td>
+                        <td className="px-4 py-3">
+                          <span className={`text-xs px-2 py-1 rounded-full ${
+                            statusText === "활성" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600"
+                          }`}>
+                            {statusText}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3">
+                          <button className="text-sm text-primary hover:underline mr-3">수정</button>
+                          {admin.role !== "슈퍼 관리자" && (
+                            <button className="text-sm text-red-500 hover:underline">삭제</button>
                           )}
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-600">{admin.lastLogin}</td>
-                      <td className="px-4 py-3">
-                        <span className={`text-xs px-2 py-1 rounded-full ${
-                          admin.status === "활성" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600"
-                        }`}>
-                          {admin.status}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <button className="text-sm text-primary hover:underline mr-3">수정</button>
-                        {admin.role !== "슈퍼 관리자" && (
-                          <button className="text-sm text-red-500 hover:underline">삭제</button>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -1074,10 +1160,10 @@ export default function AdminPage() {
           {/* Dashboard Stats (Visible on all pages for now, or could be separate dashboard) */}
           <div className="grid grid-cols-4 gap-4 mb-8">
             {[
-              { label: "오늘 매출", value: "₩2,450,000", icon: TrendingUp, color: "bg-blue-50 text-blue-600" },
-              { label: "오늘 주문", value: "23건", icon: ShoppingBag, color: "bg-green-50 text-green-600" },
-              { label: "신규 회원", value: "8명", icon: UserCheck, color: "bg-amber-50 text-amber-600" },
-              { label: "답변 대기", value: "2건", icon: Clock, color: "bg-red-50 text-red-600" },
+              { label: "오늘 매출", value: dashboardStats?.todaySales ? `₩${dashboardStats.todaySales.toLocaleString()}` : "₩0", icon: TrendingUp, color: "bg-blue-50 text-blue-600" },
+              { label: "오늘 주문", value: `${dashboardStats?.todayOrders ?? 0}건`, icon: ShoppingBag, color: "bg-green-50 text-green-600" },
+              { label: "신규 회원", value: `${dashboardStats?.newMembers ?? 0}명`, icon: UserCheck, color: "bg-amber-50 text-amber-600" },
+              { label: "답변 대기", value: `${dashboardStats?.pendingInquiries ?? 0}건`, icon: Clock, color: "bg-red-50 text-red-600" },
             ].map((stat) => (
               <div key={stat.label} className="bg-white p-4 rounded-xl border border-gray-100 flex items-center gap-4">
                 <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${stat.color}`}>
