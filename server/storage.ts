@@ -25,6 +25,7 @@ import {
   type Inquiry, type InsertInquiry, inquiries,
   type Address, type InsertAddress, addresses,
   type SiteBranding, type InsertSiteBranding, siteBranding,
+  type MainPageSettings, type InsertMainPageSettings, mainPageSettings,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -189,6 +190,10 @@ export interface IStorage {
   getSiteBranding(key: string): Promise<SiteBranding | undefined>;
   getAllSiteBranding(): Promise<SiteBranding[]>;
   upsertSiteBranding(key: string, data: Partial<InsertSiteBranding>): Promise<SiteBranding>;
+
+  // Main Page Settings
+  getMainPageSettings(): Promise<MainPageSettings | undefined>;
+  upsertMainPageSettings(data: Partial<InsertMainPageSettings>): Promise<MainPageSettings>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -801,6 +806,28 @@ export class DatabaseStorage implements IStorage {
     } else {
       const [created] = await db.insert(siteBranding)
         .values({ ...data, key } as InsertSiteBranding)
+        .returning();
+      return created;
+    }
+  }
+
+  // Main Page Settings
+  async getMainPageSettings(): Promise<MainPageSettings | undefined> {
+    const [settings] = await db.select().from(mainPageSettings).limit(1);
+    return settings;
+  }
+
+  async upsertMainPageSettings(data: Partial<InsertMainPageSettings>): Promise<MainPageSettings> {
+    const existing = await this.getMainPageSettings();
+    if (existing) {
+      const [updated] = await db.update(mainPageSettings)
+        .set({ ...data, updatedAt: new Date() })
+        .where(eq(mainPageSettings.id, existing.id))
+        .returning();
+      return updated;
+    } else {
+      const [created] = await db.insert(mainPageSettings)
+        .values(data as InsertMainPageSettings)
         .returning();
       return created;
     }

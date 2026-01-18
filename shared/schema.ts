@@ -678,6 +678,47 @@ export type InsertSiteBranding = z.infer<typeof insertSiteBrandingSchema>;
 export type SiteBranding = typeof siteBranding.$inferSelect;
 
 // ============================================================================
+// 메인 페이지 설정 (Main Page Settings)
+// ============================================================================
+
+export const mainPageSettings = pgTable("main_page_settings", {
+  id: serial("id").primaryKey(),
+  
+  // 베스트 상품 설정
+  bestProductsCriteria: varchar("best_products_criteria", { length: 20 }).default("sales"), // "sales" | "manual"
+  bestProductsManualIds: jsonb("best_products_manual_ids").$type<number[]>().default([]),
+  bestProductsLimit: integer("best_products_limit").default(6),
+  
+  // 중간 광고 배너 설정
+  adBannerImage: text("ad_banner_image"),
+  adBannerLink: text("ad_banner_link"),
+  adBannerEnabled: boolean("ad_banner_enabled").default(true),
+  
+  // 신상품 설정
+  newProductsCriteria: varchar("new_products_criteria", { length: 20 }).default("recent"), // "recent" | "manual"
+  newProductsManualIds: jsonb("new_products_manual_ids").$type<number[]>().default([]),
+  newProductsLimit: integer("new_products_limit").default(6),
+  newProductsDaysThreshold: integer("new_products_days_threshold").default(30),
+  
+  // 건강 행사 설정
+  eventsCriteria: varchar("events_criteria", { length: 20 }).default("active"), // "active" | "manual"
+  eventsManualIds: jsonb("events_manual_ids").$type<number[]>().default([]),
+  eventsLimit: integer("events_limit").default(4),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertMainPageSettingsSchema = createInsertSchema(mainPageSettings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertMainPageSettings = z.infer<typeof insertMainPageSettingsSchema>;
+export type MainPageSettings = typeof mainPageSettings.$inferSelect;
+
+// ============================================================================
 // Relations
 // ============================================================================
 
