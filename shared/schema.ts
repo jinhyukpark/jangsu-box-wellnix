@@ -109,6 +109,11 @@ export const products = pgTable("products", {
   storageMethod: text("storage_method").default("직사광선을 피해 서늘한 곳에 보관"),
   shippingInfo: text("shipping_info"),
   refundInfo: text("refund_info"),
+  // 배송 설정
+  dawnDeliveryEnabled: boolean("dawn_delivery_enabled").default(false),
+  dawnDeliveryDays: integer("dawn_delivery_days").default(2),
+  regularDeliveryEnabled: boolean("regular_delivery_enabled").default(true),
+  regularDeliveryDays: integer("regular_delivery_days").default(3),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

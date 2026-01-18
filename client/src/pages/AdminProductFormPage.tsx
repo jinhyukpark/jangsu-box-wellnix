@@ -583,6 +583,79 @@ export default function AdminProductFormPage() {
               </div>
             </div>
 
+            {/* 배송 설정 */}
+            <div className="bg-white rounded-xl border border-gray-200 p-6">
+              <h3 className="text-lg font-bold text-gray-900 mb-4">배송 설정</h3>
+              <p className="text-sm text-gray-500 mb-4">
+                상품의 배송 옵션을 설정합니다. 배송 가능일은 주문일 기준으로 계산됩니다.
+              </p>
+              <div className="space-y-4">
+                {/* 새벽 배송 */}
+                <div className="flex items-start gap-4 p-4 border rounded-lg">
+                  <div className="flex items-center gap-2 min-w-[140px]">
+                    <Switch
+                      id="dawnDeliveryEnabled"
+                      checked={product.dawnDeliveryEnabled || false}
+                      onCheckedChange={(checked) => setProduct({ ...product, dawnDeliveryEnabled: checked })}
+                    />
+                    <Label htmlFor="dawnDeliveryEnabled" className="flex items-center gap-1">
+                      <span>🌙</span> 새벽 배송
+                    </Label>
+                  </div>
+                  <div className="flex items-center gap-2 flex-1">
+                    <Label className="text-sm text-gray-600 whitespace-nowrap">주문일 +</Label>
+                    <Select
+                      value={(product.dawnDeliveryDays || 2).toString()}
+                      onValueChange={(value) => setProduct({ ...product, dawnDeliveryDays: parseInt(value) })}
+                      disabled={!product.dawnDeliveryEnabled}
+                    >
+                      <SelectTrigger className="w-20" data-testid="select-dawn-delivery-days">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {[1, 2, 3, 4, 5, 6, 7].map((day) => (
+                          <SelectItem key={day} value={day.toString()}>{day}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <span className="text-sm text-gray-600">일 후 배송 가능</span>
+                  </div>
+                </div>
+
+                {/* 일반 배송 */}
+                <div className="flex items-start gap-4 p-4 border rounded-lg">
+                  <div className="flex items-center gap-2 min-w-[140px]">
+                    <Switch
+                      id="regularDeliveryEnabled"
+                      checked={product.regularDeliveryEnabled !== false}
+                      onCheckedChange={(checked) => setProduct({ ...product, regularDeliveryEnabled: checked })}
+                    />
+                    <Label htmlFor="regularDeliveryEnabled" className="flex items-center gap-1">
+                      <span>🚚</span> 일반 배송
+                    </Label>
+                  </div>
+                  <div className="flex items-center gap-2 flex-1">
+                    <Label className="text-sm text-gray-600 whitespace-nowrap">주문일 +</Label>
+                    <Select
+                      value={(product.regularDeliveryDays || 3).toString()}
+                      onValueChange={(value) => setProduct({ ...product, regularDeliveryDays: parseInt(value) })}
+                      disabled={product.regularDeliveryEnabled === false}
+                    >
+                      <SelectTrigger className="w-20" data-testid="select-regular-delivery-days">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {[1, 2, 3, 4, 5, 6, 7].map((day) => (
+                          <SelectItem key={day} value={day.toString()}>{day}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <span className="text-sm text-gray-600">일 후 배송 가능</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="bg-white rounded-xl border border-gray-200 p-6">
               <h3 className="text-lg font-bold text-gray-900 mb-4">상품 상세 설명 (마크다운)</h3>
               <p className="text-sm text-gray-500 mb-4">
