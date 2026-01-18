@@ -45,8 +45,10 @@ export default function AdminEventFormPage() {
     description: "",
     date: "",
     endDate: "",
+    time: "",
     location: "",
     detailedAddress: "",
+    locationType: "offline",
     tag: "",
     category: "",
     maxParticipants: 0,
@@ -83,8 +85,10 @@ export default function AdminEventFormPage() {
         description: existingEvent.description || "",
         date: dateStr,
         endDate: endDateStr,
+        time: existingEvent.time || "",
         location: existingEvent.location || "",
         detailedAddress: existingEvent.detailedAddress || "",
+        locationType: existingEvent.locationType || "offline",
         tag: existingEvent.tag || "",
         category: existingEvent.category || "",
         maxParticipants: existingEvent.maxParticipants || 0,
@@ -153,8 +157,10 @@ export default function AdminEventFormPage() {
       description: eventForm.description || undefined,
       date: new Date(eventForm.date).toISOString(),
       endDate: eventForm.endDate ? new Date(eventForm.endDate).toISOString() : undefined,
+      time: eventForm.time || undefined,
       location: eventForm.location || undefined,
       detailedAddress: eventForm.detailedAddress || undefined,
+      locationType: eventForm.locationType,
       tag: eventForm.tag || undefined,
       category: eventForm.category || undefined,
       maxParticipants: eventForm.maxParticipants || undefined,
@@ -268,6 +274,14 @@ export default function AdminEventFormPage() {
               />
             </div>
             <div>
+              <Label>진행 시간</Label>
+              <Input 
+                value={eventForm.time}
+                onChange={(e) => setEventForm({ ...eventForm, time: e.target.value })}
+                placeholder="예: 14:00~17:00"
+              />
+            </div>
+            <div>
               <Label>장소명</Label>
               <Input 
                 value={eventForm.location}
@@ -282,6 +296,17 @@ export default function AdminEventFormPage() {
                 onChange={(e) => setEventForm({ ...eventForm, detailedAddress: e.target.value })}
                 placeholder="예: 서울특별시 강남구 테헤란로 123 웰닉스빌딩 3층"
               />
+            </div>
+            <div>
+              <Label>행사 유형</Label>
+              <select 
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary"
+                value={eventForm.locationType}
+                onChange={(e) => setEventForm({ ...eventForm, locationType: e.target.value })}
+              >
+                <option value="offline">오프라인</option>
+                <option value="online">온라인</option>
+              </select>
             </div>
             <div>
               <Label>태그</Label>
