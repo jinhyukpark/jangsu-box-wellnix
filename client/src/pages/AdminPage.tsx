@@ -3,7 +3,8 @@ import { useLocation } from "wouter";
 import { 
   Package, Users, Gift, Calendar, CreditCard, Truck, MessageSquare, 
   ChevronRight, Search, Bell, Settings, LogOut, Menu, X,
-  TrendingUp, ShoppingBag, UserCheck, Clock, HelpCircle, Star, ShieldCheck, Loader2, ShieldX, Award
+  TrendingUp, ShoppingBag, UserCheck, Clock, HelpCircle, Star, ShieldCheck, Loader2, ShieldX, Award,
+  ArrowUpDown, ArrowUp, ArrowDown
 } from "lucide-react";
 import { useAdminProducts, useAdminCategories, useAdminMembers, useAdminSubscriptions, useAdminEvents, useAdminInquiries, useAdminFaqs, useAdminList, useDashboardStats, useCreateProduct, useUpdateProduct, useCreateCategory, useUpdateCategory, useDeleteCategory, useCreateFaq, useUpdateFaq, useDeleteFaq } from "@/hooks/use-admin";
 import { useAdminAuth, useAdminLogout } from "@/hooks/use-admin-auth";
@@ -197,6 +198,8 @@ export default function AdminPage() {
   const [productSearchQuery, setProductSearchQuery] = useState("");
   const [productStatusFilter, setProductStatusFilter] = useState("all");
   const [productCategoryFilter, setProductCategoryFilter] = useState("all");
+  const [productSortField, setProductSortField] = useState<string>("createdAt");
+  const [productSortOrder, setProductSortOrder] = useState<"asc" | "desc">("desc");
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any>(null);
   const [productForm, setProductForm] = useState({
@@ -579,14 +582,45 @@ export default function AdminPage() {
           return "bg-gray-100 text-gray-600";
         };
 
-        const filteredProducts = products.filter((product) => {
-          const matchesSearch = productSearchQuery === "" || 
-            product.name.toLowerCase().includes(productSearchQuery.toLowerCase());
-          const matchesStatus = productStatusFilter === "all" || product.status === productStatusFilter;
-          const matchesCategory = productCategoryFilter === "all" || 
-            product.categoryId?.toString() === productCategoryFilter;
-          return matchesSearch && matchesStatus && matchesCategory;
-        });
+        const handleProductSort = (field: string) => {
+          if (productSortField === field) {
+            setProductSortOrder(productSortOrder === "asc" ? "desc" : "asc");
+          } else {
+            setProductSortField(field);
+            setProductSortOrder("desc");
+          }
+        };
+
+        const filteredProducts = products
+          .filter((product) => {
+            const matchesSearch = productSearchQuery === "" || 
+              product.name.toLowerCase().includes(productSearchQuery.toLowerCase());
+            const matchesStatus = productStatusFilter === "all" || product.status === productStatusFilter;
+            const matchesCategory = productCategoryFilter === "all" || 
+              product.categoryId?.toString() === productCategoryFilter;
+            return matchesSearch && matchesStatus && matchesCategory;
+          })
+          .sort((a, b) => {
+            let aVal: any = a[productSortField as keyof typeof a];
+            let bVal: any = b[productSortField as keyof typeof b];
+            
+            if (productSortField === "createdAt" || productSortField === "updatedAt") {
+              aVal = aVal ? new Date(aVal).getTime() : 0;
+              bVal = bVal ? new Date(bVal).getTime() : 0;
+            } else if (productSortField === "price" || productSortField === "stock") {
+              aVal = aVal || 0;
+              bVal = bVal || 0;
+            } else if (productSortField === "name") {
+              aVal = aVal?.toLowerCase() || "";
+              bVal = bVal?.toLowerCase() || "";
+            }
+            
+            if (productSortOrder === "asc") {
+              return aVal > bVal ? 1 : -1;
+            } else {
+              return aVal < bVal ? 1 : -1;
+            }
+          });
 
         const resetProductForm = () => {
           setProductForm({
@@ -769,15 +803,67 @@ export default function AdminPage() {
                   </div>
                 </div>
 
-                <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-                  <table className="w-full">
+                <div className="bg-white rounded-lg border border-gray-200 overflow-hidden overflow-x-auto">
+                  <table className="w-full min-w-[900px]">
                     <thead className="bg-gray-50 border-b border-gray-200">
                       <tr>
-                        <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">상품명</th>
+                        <th 
+                          className="text-left px-4 py-3 text-sm font-medium text-gray-600 cursor-pointer hover:bg-gray-100 select-none"
+                          onClick={() => handleProductSort("name")}
+                        >
+                          <div className="flex items-center gap-1">
+                            상품명
+                            {productSortField === "name" ? (
+                              productSortOrder === "asc" ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />
+                            ) : <ArrowUpDown className="w-3 h-3 text-gray-400" />}
+                          </div>
+                        </th>
                         <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">카테고리</th>
-                        <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">가격</th>
-                        <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">재고</th>
+                        <th 
+                          className="text-left px-4 py-3 text-sm font-medium text-gray-600 cursor-pointer hover:bg-gray-100 select-none"
+                          onClick={() => handleProductSort("price")}
+                        >
+                          <div className="flex items-center gap-1">
+                            가격
+                            {productSortField === "price" ? (
+                              productSortOrder === "asc" ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />
+                            ) : <ArrowUpDown className="w-3 h-3 text-gray-400" />}
+                          </div>
+                        </th>
+                        <th 
+                          className="text-left px-4 py-3 text-sm font-medium text-gray-600 cursor-pointer hover:bg-gray-100 select-none"
+                          onClick={() => handleProductSort("stock")}
+                        >
+                          <div className="flex items-center gap-1">
+                            재고
+                            {productSortField === "stock" ? (
+                              productSortOrder === "asc" ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />
+                            ) : <ArrowUpDown className="w-3 h-3 text-gray-400" />}
+                          </div>
+                        </th>
                         <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">상태</th>
+                        <th 
+                          className="text-left px-4 py-3 text-sm font-medium text-gray-600 cursor-pointer hover:bg-gray-100 select-none"
+                          onClick={() => handleProductSort("createdAt")}
+                        >
+                          <div className="flex items-center gap-1">
+                            작성일
+                            {productSortField === "createdAt" ? (
+                              productSortOrder === "asc" ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />
+                            ) : <ArrowUpDown className="w-3 h-3 text-gray-400" />}
+                          </div>
+                        </th>
+                        <th 
+                          className="text-left px-4 py-3 text-sm font-medium text-gray-600 cursor-pointer hover:bg-gray-100 select-none"
+                          onClick={() => handleProductSort("updatedAt")}
+                        >
+                          <div className="flex items-center gap-1">
+                            수정일
+                            {productSortField === "updatedAt" ? (
+                              productSortOrder === "asc" ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />
+                            ) : <ArrowUpDown className="w-3 h-3 text-gray-400" />}
+                          </div>
+                        </th>
                         <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">관리</th>
                       </tr>
                     </thead>
@@ -823,6 +909,12 @@ export default function AdminPage() {
                             </DropdownMenuContent>
                           </DropdownMenu>
                         </td>
+                        <td className="px-4 py-3 text-sm text-gray-500">
+                          {product.createdAt ? new Date(product.createdAt).toLocaleDateString('ko-KR') : '-'}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-500">
+                          {product.updatedAt ? new Date(product.updatedAt).toLocaleDateString('ko-KR') : '-'}
+                        </td>
                         <td className="px-4 py-3">
                           <button 
                             onClick={() => setLocation(`/admin/products/${product.id}`)}
@@ -837,7 +929,7 @@ export default function AdminPage() {
                   })}
                   {filteredProducts.length === 0 && (
                     <tr>
-                      <td colSpan={6} className="px-4 py-8 text-center text-gray-500">
+                      <td colSpan={8} className="px-4 py-8 text-center text-gray-500">
                         검색 결과가 없습니다.
                       </td>
                     </tr>
