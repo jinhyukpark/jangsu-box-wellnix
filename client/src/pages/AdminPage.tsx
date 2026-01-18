@@ -219,6 +219,8 @@ export default function AdminPage() {
   });
   const [isFaqModalOpen, setIsFaqModalOpen] = useState(false);
   const [editingFaq, setEditingFaq] = useState<any>(null);
+  const [faqCategoryFilter, setFaqCategoryFilter] = useState("전체");
+  const faqCategories = ["전체", "주문/결제", "배송", "장수박스", "교환/반품", "회원", "적립/쿠폰", "행사/이벤트", "기타"];
   const [faqForm, setFaqForm] = useState({
     category: "",
     question: "",
@@ -1737,11 +1739,9 @@ export default function AdminPage() {
                         className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary"
                       >
                         <option value="">선택하세요</option>
-                        <option value="장수박스">장수박스</option>
-                        <option value="배송">배송</option>
-                        <option value="행사/이벤트">행사/이벤트</option>
-                        <option value="교환/환불">교환/환불</option>
-                        <option value="기타">기타</option>
+                        {faqCategories.filter(c => c !== "전체").map(cat => (
+                          <option key={cat} value={cat}>{cat}</option>
+                        ))}
                       </select>
                     </div>
                     <div>
@@ -1799,9 +1799,29 @@ export default function AdminPage() {
                 </DialogContent>
               </Dialog>
             </div>
+            {/* Category Filter Carousel */}
+            <div className="mb-4 overflow-x-auto">
+              <div className="flex gap-2 pb-2">
+                {faqCategories.map((cat) => (
+                  <button
+                    key={cat}
+                    onClick={() => setFaqCategoryFilter(cat)}
+                    className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
+                      faqCategoryFilter === cat
+                        ? "bg-primary text-white"
+                        : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    }`}
+                    data-testid={`faq-category-filter-${cat}`}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {faqsLoading ? (
               <div className="text-center py-8 text-gray-500">로딩중...</div>
-            ) : faqsData.length === 0 ? (
+            ) : faqsData.filter(faq => faqCategoryFilter === "전체" || faq.category === faqCategoryFilter).length === 0 ? (
               <div className="text-center py-16 text-gray-400">
                 <HelpCircle className="w-12 h-12 mx-auto mb-4 text-gray-300" />
                 <p>등록된 FAQ가 없습니다.</p>
@@ -1819,7 +1839,9 @@ export default function AdminPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {faqsData.map((faq) => {
+                    {faqsData
+                      .filter(faq => faqCategoryFilter === "전체" || faq.category === faqCategoryFilter)
+                      .map((faq) => {
                       const statusText = faq.isActive ? "게시중" : "숨김";
                       return (
                         <tr key={faq.id} className="border-b border-gray-100 hover:bg-gray-50">
