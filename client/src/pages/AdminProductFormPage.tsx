@@ -179,10 +179,13 @@ export default function AdminProductFormPage() {
       const res = await apiRequest(method, url, data);
       return res;
     },
-    onSuccess: () => {
+    onSuccess: (response) => {
       toast({ title: isEdit ? "상품이 수정되었습니다" : "상품이 등록되었습니다" });
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
-      setLocation("/admin");
+      queryClient.invalidateQueries({ queryKey: ["/api/products", id] });
+      if (!isEdit && response?.id) {
+        setLocation(`/admin/products/${response.id}`);
+      }
     },
     onError: (error: any) => {
       toast({ title: "오류가 발생했습니다", description: error.message, variant: "destructive" });
