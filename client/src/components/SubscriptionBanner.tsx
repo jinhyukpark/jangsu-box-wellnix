@@ -1,10 +1,34 @@
+import { useQuery } from "@tanstack/react-query";
+import { Link } from "wouter";
 import { images } from "@/lib/images";
 
+interface MainPageSettings {
+  adBannerImage: string | null;
+  adBannerLink: string | null;
+  adBannerEnabled: boolean;
+}
+
 export function SubscriptionBanner() {
-  return (
-    <div className="mx-4 my-5 rounded overflow-hidden relative">
+  const { data: settings } = useQuery<MainPageSettings>({
+    queryKey: ["/api/main-page-settings"],
+    queryFn: async () => {
+      const res = await fetch("/api/main-page-settings");
+      if (!res.ok) throw new Error("Failed to fetch settings");
+      return res.json();
+    },
+  });
+
+  if (settings?.adBannerEnabled === false) {
+    return null;
+  }
+
+  const bannerImage = settings?.adBannerImage || images.happySeniorsOpeningGiftBox;
+  const bannerLink = settings?.adBannerLink || "/subscription";
+
+  const content = (
+    <div className="mx-4 my-5 rounded overflow-hidden relative cursor-pointer hover:opacity-95 transition-opacity">
       <img 
-        src={images.happySeniorsOpeningGiftBox} 
+        src={bannerImage} 
         alt="장수박스를 받은 행복한 부모님"
         className="w-full h-64 object-cover"
       />
@@ -20,4 +44,10 @@ export function SubscriptionBanner() {
       </div>
     </div>
   );
+
+  if (bannerLink) {
+    return <Link href={bannerLink}>{content}</Link>;
+  }
+
+  return content;
 }
