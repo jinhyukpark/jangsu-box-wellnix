@@ -179,7 +179,7 @@ export default function AdminPage() {
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
   const [selectedMember, setSelectedMember] = useState<any>(null);
 
-  const { data: authData, isLoading: authLoading } = useAdminAuth();
+  const { data: authData, isLoading: authLoading, isFetching: authFetching } = useAdminAuth();
   const logoutMutation = useAdminLogout();
 
   const { data: products = [], isLoading: productsLoading } = useAdminProducts();
@@ -209,7 +209,7 @@ export default function AdminPage() {
     }
   };
 
-  if (authLoading) {
+  if (authLoading || authFetching) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
