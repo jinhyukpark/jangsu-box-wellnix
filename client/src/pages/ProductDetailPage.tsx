@@ -5,6 +5,7 @@ import { ChevronLeft, Home, ShoppingCart, Star, Heart, Gift, ChevronDown, Chevro
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
+import { AppLayout } from "@/components/AppLayout";
 
 export default function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -58,18 +59,22 @@ export default function ProductDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
-      </div>
+      <AppLayout hideNav>
+        <div className="min-h-screen bg-white flex items-center justify-center">
+          <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+        </div>
+      </AppLayout>
     );
   }
 
   if (!product) {
     return (
-      <div className="min-h-screen bg-white flex flex-col items-center justify-center p-4">
-        <p className="text-gray-500 mb-4">상품을 찾을 수 없습니다</p>
-        <Button onClick={() => setLocation("/gifts")}>상품 목록으로</Button>
-      </div>
+      <AppLayout hideNav>
+        <div className="min-h-screen bg-white flex flex-col items-center justify-center p-4">
+          <p className="text-gray-500 mb-4">상품을 찾을 수 없습니다</p>
+          <Button onClick={() => setLocation("/gifts")}>상품 목록으로</Button>
+        </div>
+      </AppLayout>
     );
   }
 
@@ -89,8 +94,9 @@ export default function ProductDetailPage() {
   });
 
   return (
-    <div className="min-h-screen bg-white pb-24">
-      <div className="sticky top-0 z-50 bg-white border-b border-gray-100">
+    <AppLayout hideNav>
+      <div className="min-h-screen bg-white pb-24">
+        <div className="sticky top-0 z-50 bg-white border-b border-gray-100">
         <div className="flex items-center justify-between px-4 py-3">
           <button onClick={() => window.history.back()} className="p-1" data-testid="button-back">
             <ChevronLeft className="w-6 h-6 text-gray-700" />
@@ -348,26 +354,27 @@ export default function ProductDetailPage() {
         </TabsContent>
       </Tabs>
 
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 z-50">
-        <div className="max-w-[430px] mx-auto flex gap-3">
-          <Button 
-            variant="outline" 
-            className="flex-1 h-12 text-base font-medium"
-            onClick={handleGift}
-            data-testid="button-gift"
-          >
-            <Gift className="w-5 h-5 mr-2" />
-            선물하기
-          </Button>
-          <Button 
-            className="flex-1 h-12 text-base font-medium bg-orange-500 hover:bg-orange-600"
-            onClick={handleBuyNow}
-            data-testid="button-buy"
-          >
-            바로 구매하기
-          </Button>
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 z-50">
+          <div className="max-w-[430px] mx-auto flex gap-3">
+            <Button 
+              variant="outline" 
+              className="flex-1 h-12 text-base font-medium"
+              onClick={handleGift}
+              data-testid="button-gift"
+            >
+              <Gift className="w-5 h-5 mr-2" />
+              선물하기
+            </Button>
+            <Button 
+              className="flex-1 h-12 text-base font-medium bg-orange-500 hover:bg-orange-600"
+              onClick={handleBuyNow}
+              data-testid="button-buy"
+            >
+              바로 구매하기
+            </Button>
+          </div>
         </div>
       </div>
-    </div>
+    </AppLayout>
   );
 }
