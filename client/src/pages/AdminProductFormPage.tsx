@@ -183,6 +183,7 @@ export default function AdminProductFormPage() {
       toast({ title: isEdit ? "상품이 수정되었습니다" : "상품이 등록되었습니다" });
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
       queryClient.invalidateQueries({ queryKey: ["/api/products", id] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "products"] });
       if (!isEdit && response?.id) {
         setLocation(`/admin/products/${response.id}`);
       }
