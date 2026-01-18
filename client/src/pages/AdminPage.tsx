@@ -5,7 +5,7 @@ import {
   ChevronRight, Search, Bell, Settings, LogOut, Menu, X,
   TrendingUp, ShoppingBag, UserCheck, Clock, HelpCircle, Star, ShieldCheck, Loader2, ShieldX
 } from "lucide-react";
-import { useAdminProducts, useAdminCategories, useAdminMembers, useAdminSubscriptions, useAdminEvents, useAdminInquiries, useAdminFaqs, useAdminList, useDashboardStats, useCreateProduct, useUpdateProduct } from "@/hooks/use-admin";
+import { useAdminProducts, useAdminCategories, useAdminMembers, useAdminSubscriptions, useAdminEvents, useAdminInquiries, useAdminFaqs, useAdminList, useDashboardStats, useCreateProduct, useUpdateProduct, useCreateCategory, useUpdateCategory, useDeleteCategory } from "@/hooks/use-admin";
 import { useAdminAuth, useAdminLogout } from "@/hooks/use-admin-auth";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -207,6 +207,16 @@ export default function AdminPage() {
     description: "",
     image: ""
   });
+  const [productTab, setProductTab] = useState("products");
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [editingCategory, setEditingCategory] = useState<any>(null);
+  const [categoryForm, setCategoryForm] = useState({
+    name: "",
+    slug: "",
+    displayOrder: 0,
+    isActive: true,
+    image: ""
+  });
 
   const { data: authData, isLoading: authLoading, isFetching: authFetching } = useAdminAuth();
   const logoutMutation = useAdminLogout();
@@ -223,6 +233,9 @@ export default function AdminPage() {
 
   const createProductMutation = useCreateProduct();
   const updateProductMutation = useUpdateProduct();
+  const createCategoryMutation = useCreateCategory();
+  const updateCategoryMutation = useUpdateCategory();
+  const deleteCategoryMutation = useDeleteCategory();
 
   const handleLogout = async () => {
     try {
@@ -239,6 +252,114 @@ export default function AdminPage() {
         description: "다시 시도해주세요.",
       });
     }
+  };
+
+  const resetCategoryForm = () => {
+    setCategoryForm({
+      name: "",
+      slug: "",
+      displayOrder: 0,
+      isActive: true,
+      image: ""
+    });
+    setEditingCategory(null);
+  };
+
+  const handleCreateCategory = async () => {
+    if (!categoryForm.name.trim()) {
+      toast({
+        variant: "destructive",
+        title: "입력 오류",
+        description: "카테고리명을 입력해주세요.",
+      });
+      return;
+    }
+    const slug = categoryForm.slug.trim() || categoryForm.name.toLowerCase().replace(/[^a-z0-9가-힣]/gi, '-').replace(/-+/g, '-');
+    try {
+      await createCategoryMutation.mutateAsync({
+        name: categoryForm.name.trim(),
+        slug: slug,
+        displayOrder: categoryForm.displayOrder,
+        isActive: categoryForm.isActive,
+        ...(categoryForm.image.trim() ? { image: categoryForm.image.trim() } : {}),
+      });
+      toast({
+        title: "카테고리 등록 완료",
+        description: "새 카테고리가 등록되었습니다.",
+      });
+      setIsCategoryModalOpen(false);
+      resetCategoryForm();
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "카테고리 등록 실패",
+        description: "다시 시도해주세요.",
+      });
+    }
+  };
+
+  const handleUpdateCategory = async () => {
+    if (!editingCategory) return;
+    if (!categoryForm.name.trim()) {
+      toast({
+        variant: "destructive",
+        title: "입력 오류",
+        description: "카테고리명을 입력해주세요.",
+      });
+      return;
+    }
+    const slug = categoryForm.slug.trim() || categoryForm.name.toLowerCase().replace(/[^a-z0-9가-힣]/gi, '-').replace(/-+/g, '-');
+    try {
+      await updateCategoryMutation.mutateAsync({
+        id: editingCategory.id,
+        name: categoryForm.name.trim(),
+        slug: slug,
+        displayOrder: categoryForm.displayOrder,
+        isActive: categoryForm.isActive,
+        ...(categoryForm.image.trim() ? { image: categoryForm.image.trim() } : {}),
+      });
+      toast({
+        title: "카테고리 수정 완료",
+        description: "카테고리 정보가 수정되었습니다.",
+      });
+      setIsCategoryModalOpen(false);
+      resetCategoryForm();
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "카테고리 수정 실패",
+        description: "다시 시도해주세요.",
+      });
+    }
+  };
+
+  const handleDeleteCategory = async (categoryId: number) => {
+    if (!confirm("이 카테고리를 삭제하시겠습니까?")) return;
+    try {
+      await deleteCategoryMutation.mutateAsync(categoryId);
+      toast({
+        title: "카테고리 삭제 완료",
+        description: "카테고리가 삭제되었습니다.",
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "카테고리 삭제 실패",
+        description: "해당 카테고리에 연결된 상품이 있을 수 있습니다.",
+      });
+    }
+  };
+
+  const openEditCategoryModal = (category: any) => {
+    setEditingCategory(category);
+    setCategoryForm({
+      name: category.name || "",
+      slug: category.slug || "",
+      displayOrder: category.displayOrder || 0,
+      isActive: category.isActive ?? true,
+      image: category.image || ""
+    });
+    setIsCategoryModalOpen(true);
   };
 
   if (authLoading || authFetching) {
@@ -454,88 +575,97 @@ export default function AdminPage() {
           <div>
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-bold text-gray-900">상품 관리</h2>
-              <Button 
-                onClick={() => {
-                  resetProductForm();
-                  setIsProductModalOpen(true);
-                }}
-                className="bg-primary text-white"
-                data-testid="button-add-product"
-              >
-                + 상품 등록
-              </Button>
             </div>
 
-            <div className="flex flex-wrap gap-3 mb-4">
-              <div className="relative flex-1 min-w-[200px]">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <Input
-                  type="text"
-                  placeholder="상품명 검색..."
-                  value={productSearchQuery}
-                  onChange={(e) => setProductSearchQuery(e.target.value)}
-                  className="pl-9"
-                  data-testid="input-product-search"
-                />
-              </div>
-              <Select value={productStatusFilter} onValueChange={setProductStatusFilter}>
-                <SelectTrigger className="w-[140px]" data-testid="select-product-status">
-                  <SelectValue placeholder="상태 필터" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">전체</SelectItem>
-                  <SelectItem value="active">판매중</SelectItem>
-                  <SelectItem value="pending">검수중</SelectItem>
-                  <SelectItem value="inactive">대기중</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select value={productCategoryFilter} onValueChange={setProductCategoryFilter}>
-                <SelectTrigger className="w-[160px]" data-testid="select-product-category">
-                  <SelectValue placeholder="카테고리 필터" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">전체 카테고리</SelectItem>
-                  {categories.map((category) => (
-                    <SelectItem key={category.id} value={category.id.toString()}>
-                      {category.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            <Tabs value={productTab} onValueChange={setProductTab} className="mb-4">
+              <TabsList className="bg-gray-100">
+                <TabsTrigger value="products" className="data-[state=active]:bg-white">상품 목록</TabsTrigger>
+                <TabsTrigger value="categories" className="data-[state=active]:bg-white">카테고리 관리</TabsTrigger>
+              </TabsList>
 
-            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-              <table className="w-full">
-                <thead className="bg-gray-50 border-b border-gray-200">
-                  <tr>
-                    <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">상품명</th>
-                    <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">카테고리</th>
-                    <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">가격</th>
-                    <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">재고</th>
-                    <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">상태</th>
-                    <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">관리</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredProducts.map((product) => {
-                    const statusLabel = getProductStatusLabel(product.status);
-                    const statusStyle = getProductStatusStyle(product.status);
-                    return (
-                      <tr key={product.id} className="border-b border-gray-100 hover:bg-gray-50">
-                        <td className="px-4 py-3 text-sm text-gray-900">{product.name}</td>
-                        <td className="px-4 py-3 text-sm text-gray-600">{getCategoryName(product.categoryId)}</td>
-                        <td className="px-4 py-3 text-sm text-gray-900">{product.price.toLocaleString()}원</td>
-                        <td className="px-4 py-3 text-sm text-gray-600">{product.stock ?? 0}개</td>
-                        <td className="px-4 py-3">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <button 
-                                className={`text-xs px-2 py-1 rounded-full cursor-pointer hover:opacity-80 ${statusStyle}`}
-                                data-testid={`status-badge-${product.id}`}
-                              >
-                                {statusLabel}
-                              </button>
-                            </DropdownMenuTrigger>
+              <TabsContent value="products" className="mt-4">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex flex-wrap gap-3 flex-1">
+                    <div className="relative flex-1 min-w-[200px]">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <Input
+                        type="text"
+                        placeholder="상품명 검색..."
+                        value={productSearchQuery}
+                        onChange={(e) => setProductSearchQuery(e.target.value)}
+                        className="pl-9"
+                        data-testid="input-product-search"
+                      />
+                    </div>
+                    <Select value={productStatusFilter} onValueChange={setProductStatusFilter}>
+                      <SelectTrigger className="w-[140px]" data-testid="select-product-status">
+                        <SelectValue placeholder="상태 필터" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">전체</SelectItem>
+                        <SelectItem value="active">판매중</SelectItem>
+                        <SelectItem value="pending">검수중</SelectItem>
+                        <SelectItem value="inactive">대기중</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Select value={productCategoryFilter} onValueChange={setProductCategoryFilter}>
+                      <SelectTrigger className="w-[160px]" data-testid="select-product-category">
+                        <SelectValue placeholder="카테고리 필터" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">전체 카테고리</SelectItem>
+                        {categories.map((category) => (
+                          <SelectItem key={category.id} value={category.id.toString()}>
+                            {category.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Button 
+                    onClick={() => {
+                      resetProductForm();
+                      setIsProductModalOpen(true);
+                    }}
+                    className="bg-primary text-white ml-3"
+                    data-testid="button-add-product"
+                  >
+                    + 상품 등록
+                  </Button>
+                </div>
+
+                <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                  <table className="w-full">
+                    <thead className="bg-gray-50 border-b border-gray-200">
+                      <tr>
+                        <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">상품명</th>
+                        <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">카테고리</th>
+                        <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">가격</th>
+                        <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">재고</th>
+                        <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">상태</th>
+                        <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">관리</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredProducts.map((product) => {
+                        const statusLabel = getProductStatusLabel(product.status);
+                        const statusStyle = getProductStatusStyle(product.status);
+                        return (
+                          <tr key={product.id} className="border-b border-gray-100 hover:bg-gray-50">
+                            <td className="px-4 py-3 text-sm text-gray-900">{product.name}</td>
+                            <td className="px-4 py-3 text-sm text-gray-600">{getCategoryName(product.categoryId)}</td>
+                            <td className="px-4 py-3 text-sm text-gray-900">{product.price.toLocaleString()}원</td>
+                            <td className="px-4 py-3 text-sm text-gray-600">{product.stock ?? 0}개</td>
+                            <td className="px-4 py-3">
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <button 
+                                    className={`text-xs px-2 py-1 rounded-full cursor-pointer hover:opacity-80 ${statusStyle}`}
+                                    data-testid={`status-badge-${product.id}`}
+                                  >
+                                    {statusLabel}
+                                  </button>
+                                </DropdownMenuTrigger>
                             <DropdownMenuContent>
                               <DropdownMenuItem 
                                 onClick={() => handleStatusChange(product.id, "active")}
@@ -717,6 +847,171 @@ export default function AdminPage() {
                 </div>
               </DialogContent>
             </Dialog>
+              </TabsContent>
+
+              <TabsContent value="categories" className="mt-4">
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-sm text-gray-500">{categories.length}개의 카테고리</span>
+                  <Button 
+                    onClick={() => {
+                      resetCategoryForm();
+                      setIsCategoryModalOpen(true);
+                    }}
+                    className="bg-primary text-white"
+                    data-testid="button-add-category"
+                  >
+                    + 카테고리 추가
+                  </Button>
+                </div>
+
+                <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                  <table className="w-full">
+                    <thead className="bg-gray-50 border-b border-gray-200">
+                      <tr>
+                        <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">순서</th>
+                        <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">카테고리명</th>
+                        <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">슬러그</th>
+                        <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">상품 수</th>
+                        <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">상태</th>
+                        <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">관리</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {categories.map((category) => {
+                        const productCount = products.filter(p => p.categoryId === category.id).length;
+                        return (
+                          <tr key={category.id} className="border-b border-gray-100 hover:bg-gray-50">
+                            <td className="px-4 py-3 text-sm text-gray-600">{category.displayOrder || 0}</td>
+                            <td className="px-4 py-3 text-sm text-gray-900 font-medium">{category.name}</td>
+                            <td className="px-4 py-3 text-sm text-gray-500">{category.slug}</td>
+                            <td className="px-4 py-3 text-sm text-gray-600">{productCount}개</td>
+                            <td className="px-4 py-3">
+                              <span className={`text-xs px-2 py-1 rounded-full ${
+                                category.isActive ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600"
+                              }`}>
+                                {category.isActive ? "활성" : "비활성"}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3">
+                              <div className="flex gap-2">
+                                <button 
+                                  onClick={() => openEditCategoryModal(category)}
+                                  className="text-sm text-primary hover:underline"
+                                  data-testid={`button-edit-category-${category.id}`}
+                                >
+                                  수정
+                                </button>
+                                <button 
+                                  onClick={() => handleDeleteCategory(category.id)}
+                                  className="text-sm text-red-500 hover:underline"
+                                  data-testid={`button-delete-category-${category.id}`}
+                                >
+                                  삭제
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                      {categories.length === 0 && (
+                        <tr>
+                          <td colSpan={6} className="px-4 py-8 text-center text-gray-500">
+                            등록된 카테고리가 없습니다.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+
+                <Dialog open={isCategoryModalOpen} onOpenChange={setIsCategoryModalOpen}>
+                  <DialogContent className="sm:max-w-[400px] bg-white">
+                    <DialogHeader>
+                      <DialogTitle>{editingCategory ? "카테고리 수정" : "카테고리 추가"}</DialogTitle>
+                      <DialogDescription>
+                        {editingCategory ? "카테고리 정보를 수정합니다." : "새로운 카테고리를 추가합니다."}
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                      <div className="grid gap-2">
+                        <Label htmlFor="category-name">카테고리명</Label>
+                        <Input
+                          id="category-name"
+                          value={categoryForm.name}
+                          onChange={(e) => setCategoryForm({ ...categoryForm, name: e.target.value })}
+                          placeholder="예: 홍삼/인삼"
+                          data-testid="input-category-name"
+                        />
+                      </div>
+                      <div className="grid gap-2">
+                        <Label htmlFor="category-slug">슬러그</Label>
+                        <Input
+                          id="category-slug"
+                          value={categoryForm.slug}
+                          onChange={(e) => setCategoryForm({ ...categoryForm, slug: e.target.value })}
+                          placeholder="예: ginseng"
+                          data-testid="input-category-slug"
+                        />
+                      </div>
+                      <div className="grid gap-2">
+                        <Label htmlFor="category-order">표시 순서</Label>
+                        <Input
+                          id="category-order"
+                          type="number"
+                          value={categoryForm.displayOrder}
+                          onChange={(e) => setCategoryForm({ ...categoryForm, displayOrder: parseInt(e.target.value) || 0 })}
+                          placeholder="0"
+                          data-testid="input-category-order"
+                        />
+                      </div>
+                      <div className="grid gap-2">
+                        <Label htmlFor="category-image">이미지 URL (선택)</Label>
+                        <Input
+                          id="category-image"
+                          value={categoryForm.image}
+                          onChange={(e) => setCategoryForm({ ...categoryForm, image: e.target.value })}
+                          placeholder="이미지 URL"
+                          data-testid="input-category-image"
+                        />
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Checkbox 
+                          id="category-active"
+                          checked={categoryForm.isActive}
+                          onCheckedChange={(checked) => setCategoryForm({ ...categoryForm, isActive: !!checked })}
+                          data-testid="checkbox-category-active"
+                        />
+                        <Label htmlFor="category-active" className="text-sm font-normal">
+                          활성화 (사용자에게 표시)
+                        </Label>
+                      </div>
+                    </div>
+                    <div className="flex justify-end gap-2">
+                      <Button 
+                        variant="outline" 
+                        onClick={() => {
+                          setIsCategoryModalOpen(false);
+                          resetCategoryForm();
+                        }}
+                        data-testid="button-cancel-category"
+                      >
+                        취소
+                      </Button>
+                      <Button 
+                        onClick={editingCategory ? handleUpdateCategory : handleCreateCategory}
+                        disabled={createCategoryMutation.isPending || updateCategoryMutation.isPending}
+                        data-testid="button-save-category"
+                      >
+                        {(createCategoryMutation.isPending || updateCategoryMutation.isPending) && (
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        )}
+                        {editingCategory ? "수정" : "추가"}
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </TabsContent>
+            </Tabs>
           </div>
         );
 
