@@ -42,8 +42,8 @@ const menuItems = [
   { id: "events", label: "행사 관리", icon: Calendar },
   { id: "payments", label: "결제 관리", icon: CreditCard },
   { id: "shipping", label: "배송 관리", icon: Truck },
-  { id: "inquiries", label: "고객 문의", icon: MessageSquare },
-  { id: "faq", label: "FAQ 관리", icon: HelpCircle },
+  { id: "inquiries", label: "1:1 문의", icon: MessageSquare },
+  { id: "faq", label: "자주묻는질문", icon: HelpCircle },
   { id: "settings", label: "관리자 설정", icon: ShieldCheck },
 ];
 
@@ -1524,7 +1524,7 @@ export default function AdminPage() {
         return (
           <div>
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-gray-900">고객 문의</h2>
+              <h2 className="text-xl font-bold text-gray-900">1:1 문의</h2>
               <div className="flex gap-2">
                 <select className="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary">
                   <option>전체 상태</option>
@@ -1580,7 +1580,7 @@ export default function AdminPage() {
         return (
           <div>
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-gray-900">FAQ 관리</h2>
+              <h2 className="text-xl font-bold text-gray-900">자주묻는질문</h2>
               <Dialog>
                 <DialogTrigger asChild>
                   <button className="bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary/90 flex items-center gap-2">
