@@ -1,8 +1,9 @@
+const SUPABASE_URL = "https://iquuynjyrvsnpvpijbql.supabase.co";
 const BUCKET = "_public";
 const FOLDER = "images";
 
 function getImageUrl(filename: string): string {
-  return `/storage/${BUCKET}/${FOLDER}/${filename}`;
+  return `${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${FOLDER}/${filename}`;
 }
 
 export const images = {
