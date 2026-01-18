@@ -1,10 +1,14 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import { 
   Package, Users, Gift, Calendar, CreditCard, Truck, MessageSquare, 
   ChevronRight, Search, Bell, Settings, LogOut, Menu, X,
-  TrendingUp, ShoppingBag, UserCheck, Clock, HelpCircle, Star, ShieldCheck
+  TrendingUp, ShoppingBag, UserCheck, Clock, HelpCircle, Star, ShieldCheck, Loader2, ShieldX
 } from "lucide-react";
 import { useAdminProducts, useAdminCategories, useAdminMembers, useAdminSubscriptions, useAdminEvents, useAdminInquiries, useAdminFaqs, useAdminList, useDashboardStats } from "@/hooks/use-admin";
+import { useAdminAuth, useAdminLogout } from "@/hooks/use-admin-auth";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 import {
   Dialog,
   DialogContent,
@@ -168,10 +172,15 @@ const mockMemberHistory = {
 };
 
 export default function AdminPage() {
+  const [, setLocation] = useLocation();
+  const { toast } = useToast();
   const [activeMenu, setActiveMenu] = useState("products");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
   const [selectedMember, setSelectedMember] = useState<any>(null);
+
+  const { data: authData, isLoading: authLoading } = useAdminAuth();
+  const logoutMutation = useAdminLogout();
 
   const { data: products = [], isLoading: productsLoading } = useAdminProducts();
   const { data: categories = [] } = useAdminCategories();
@@ -182,6 +191,57 @@ export default function AdminPage() {
   const { data: faqsData = [], isLoading: faqsLoading } = useAdminFaqs();
   const { data: adminsData = [], isLoading: adminsLoading } = useAdminList();
   const { data: dashboardStats } = useDashboardStats();
+
+  const handleLogout = async () => {
+    try {
+      await logoutMutation.mutateAsync();
+      toast({
+        title: "로그아웃 완료",
+        description: "관리자 로그인 페이지로 이동합니다.",
+      });
+      setLocation("/admin/login");
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "로그아웃 실패",
+        description: "다시 시도해주세요.",
+      });
+    }
+  };
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!authData?.admin) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+        <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-8 max-w-md w-full text-center">
+          <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+            <ShieldX className="w-8 h-8 text-red-500" />
+          </div>
+          <h1 className="text-xl font-bold text-gray-900 mb-2">접근 권한이 없습니다</h1>
+          <p className="text-gray-500 mb-6">
+            이 페이지는 관리자만 접근할 수 있습니다.<br />
+            관리자 계정으로 로그인해주세요.
+          </p>
+          <Button 
+            onClick={() => setLocation("/admin/login")}
+            className="w-full bg-primary hover:bg-primary/90 text-white"
+            data-testid="button-go-admin-login"
+          >
+            관리자 로그인
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  const currentAdmin = authData.admin;
 
   const getCategoryName = (categoryId: number | null | undefined) => {
     if (!categoryId) return "-";
@@ -1120,13 +1180,30 @@ export default function AdminPage() {
         </nav>
 
         <div className="absolute bottom-4 left-4 right-4">
+          {sidebarOpen && (
+            <div className="mb-3 px-3 py-2 bg-gray-50 rounded-lg">
+              <p className="text-xs text-gray-500">로그인됨</p>
+              <p className="text-sm font-medium text-gray-900 truncate">{currentAdmin.name}</p>
+              <p className="text-xs text-gray-500 truncate">{currentAdmin.email}</p>
+            </div>
+          )}
           {sidebarOpen ? (
-            <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 hover:bg-gray-100">
+            <button 
+              onClick={handleLogout}
+              disabled={logoutMutation.isPending}
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 hover:bg-gray-100 disabled:opacity-50"
+              data-testid="button-admin-logout"
+            >
               <LogOut className="w-5 h-5 flex-shrink-0" />
-              <span className="font-medium">로그아웃</span>
+              <span className="font-medium">{logoutMutation.isPending ? "로그아웃 중..." : "로그아웃"}</span>
             </button>
           ) : (
-            <button className="w-full flex justify-center py-2.5 rounded-lg text-gray-600 hover:bg-gray-100">
+            <button 
+              onClick={handleLogout}
+              disabled={logoutMutation.isPending}
+              className="w-full flex justify-center py-2.5 rounded-lg text-gray-600 hover:bg-gray-100 disabled:opacity-50"
+              data-testid="button-admin-logout-small"
+            >
               <LogOut className="w-5 h-5" />
             </button>
           )}

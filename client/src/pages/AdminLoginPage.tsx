@@ -1,38 +1,68 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { Eye, EyeOff, Shield } from "lucide-react";
+import { Eye, EyeOff, Shield, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { useAdminAuth, useAdminLogin } from "@/hooks/use-admin-auth";
 
 export default function AdminLoginPage() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
-    username: "",
+    email: "",
     password: ""
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const { data: authData, isLoading: authLoading } = useAdminAuth();
+  const loginMutation = useAdminLogin();
+
+  useEffect(() => {
+    if (authData?.admin) {
+      setLocation("/admin");
+    }
+  }, [authData, setLocation]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Mock login logic
-    if (formData.username && formData.password) {
+    if (!formData.email || !formData.password) {
+      toast({
+        variant: "destructive",
+        title: "입력 오류",
+        description: "이메일과 비밀번호를 입력해주세요.",
+      });
+      return;
+    }
+
+    try {
+      await loginMutation.mutateAsync({
+        email: formData.email,
+        password: formData.password,
+      });
       toast({
         title: "로그인 성공",
         description: "관리자 페이지로 이동합니다.",
       });
       setLocation("/admin");
-    } else {
+    } catch (error: any) {
       toast({
         variant: "destructive",
         title: "로그인 실패",
-        description: "아이디와 비밀번호를 확인해주세요.",
+        description: error.message || "이메일과 비밀번호를 확인해주세요.",
       });
     }
   };
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
@@ -47,14 +77,15 @@ export default function AdminLoginPage() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="username">아이디</Label>
+            <Label htmlFor="email">이메일</Label>
             <Input 
-              id="username"
-              type="text"
-              placeholder="admin"
-              value={formData.username}
-              onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+              id="email"
+              type="email"
+              placeholder="admin@wellnix.kr"
+              value={formData.email}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               className="bg-gray-50"
+              data-testid="input-admin-email"
             />
           </div>
           
@@ -68,6 +99,7 @@ export default function AdminLoginPage() {
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 className="bg-gray-50 pr-10"
+                data-testid="input-admin-password"
               />
               <button
                 type="button"
@@ -79,8 +111,20 @@ export default function AdminLoginPage() {
             </div>
           </div>
 
-          <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-white py-6 text-lg font-bold mt-4">
-            로그인
+          <Button 
+            type="submit" 
+            className="w-full bg-primary hover:bg-primary/90 text-white py-6 text-lg font-bold mt-4"
+            disabled={loginMutation.isPending}
+            data-testid="button-admin-login"
+          >
+            {loginMutation.isPending ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                로그인 중...
+              </>
+            ) : (
+              "로그인"
+            )}
           </Button>
 
           <div className="text-center text-xs text-gray-400 mt-6">
