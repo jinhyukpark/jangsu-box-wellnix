@@ -189,6 +189,15 @@ export function useUpdateEvent() {
   });
 }
 
+export function useDeleteEvent() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => 
+      fetchWithAuth(`/api/events/${id}`, { method: "DELETE" }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin", "events"] }),
+  });
+}
+
 export function useCreateFaq() {
   const queryClient = useQueryClient();
   return useMutation({

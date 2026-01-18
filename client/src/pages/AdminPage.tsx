@@ -7,7 +7,7 @@ import {
   TrendingUp, ShoppingBag, UserCheck, Clock, HelpCircle, Star, ShieldCheck, Loader2, ShieldX, Award,
   ArrowUpDown, ArrowUp, ArrowDown
 } from "lucide-react";
-import { useAdminProducts, useAdminCategories, useAdminMembers, useAdminSubscriptions, useAdminSubscriptionPlans, useAdminEvents, useAdminInquiries, useAdminFaqs, useAdminList, useDashboardStats, useCreateProduct, useUpdateProduct, useCreateCategory, useUpdateCategory, useDeleteCategory, useCreateFaq, useUpdateFaq, useDeleteFaq, useCreateSubscriptionPlan, useUpdateSubscriptionPlan, useDeleteSubscriptionPlan } from "@/hooks/use-admin";
+import { useAdminProducts, useAdminCategories, useAdminMembers, useAdminSubscriptions, useAdminSubscriptionPlans, useAdminEvents, useAdminInquiries, useAdminFaqs, useAdminList, useDashboardStats, useCreateProduct, useUpdateProduct, useCreateCategory, useUpdateCategory, useDeleteCategory, useCreateFaq, useUpdateFaq, useDeleteFaq, useCreateSubscriptionPlan, useUpdateSubscriptionPlan, useDeleteSubscriptionPlan, useCreateEvent, useUpdateEvent, useDeleteEvent } from "@/hooks/use-admin";
 import { useAdminAuth, useAdminLogout } from "@/hooks/use-admin-auth";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -261,7 +261,37 @@ export default function AdminPage() {
     isActive: true,
   });
   const [newFeature, setNewFeature] = useState("");
+  
   const { data: events = [], isLoading: eventsLoading } = useAdminEvents();
+  const createEventMutation = useCreateEvent();
+  const updateEventMutation = useUpdateEvent();
+  const deleteEventMutation = useDeleteEvent();
+  const [isEventModalOpen, setIsEventModalOpen] = useState(false);
+  const [editingEvent, setEditingEvent] = useState<any>(null);
+  const [eventForm, setEventForm] = useState({
+    title: "",
+    description: "",
+    date: "",
+    endDate: "",
+    time: "",
+    location: "",
+    detailedAddress: "",
+    locationType: "offline",
+    image: "",
+    tag: "",
+    category: "",
+    maxParticipants: 0,
+    status: "recruiting",
+    programSchedule: [] as {time: string; description: string}[],
+    benefits: [] as {icon: string; title: string; description: string}[],
+    promotions: [] as {title: string; description: string}[],
+    organizerInfo: { company: "", contact: "", phone: "", email: "" },
+    notices: [] as string[],
+  });
+  const [newScheduleItem, setNewScheduleItem] = useState({ time: "", description: "" });
+  const [newBenefit, setNewBenefit] = useState({ icon: "gift", title: "", description: "" });
+  const [newPromotion, setNewPromotion] = useState({ title: "", description: "" });
+  const [newNotice, setNewNotice] = useState("");
   const { data: inquiriesData = [], isLoading: inquiriesLoading } = useAdminInquiries();
   const { data: faqsData = [], isLoading: faqsLoading } = useAdminFaqs();
   const { data: adminsData = [], isLoading: adminsLoading } = useAdminList();
@@ -394,6 +424,142 @@ export default function AdminPage() {
 
   const removeFeature = (index: number) => {
     setPlanForm({ ...planForm, features: planForm.features.filter((_, i) => i !== index) });
+  };
+
+  const resetEventForm = () => {
+    setEventForm({
+      title: "",
+      description: "",
+      date: "",
+      endDate: "",
+      time: "",
+      location: "",
+      detailedAddress: "",
+      locationType: "offline",
+      image: "",
+      tag: "",
+      category: "",
+      maxParticipants: 0,
+      status: "recruiting",
+      programSchedule: [],
+      benefits: [],
+      promotions: [],
+      organizerInfo: { company: "", contact: "", phone: "", email: "" },
+      notices: [],
+    });
+    setEditingEvent(null);
+    setNewScheduleItem({ time: "", description: "" });
+    setNewBenefit({ icon: "gift", title: "", description: "" });
+    setNewPromotion({ title: "", description: "" });
+    setNewNotice("");
+  };
+
+  const openEditEventModal = (event: any) => {
+    setEditingEvent(event);
+    setEventForm({
+      title: event.title || "",
+      description: event.description || "",
+      date: event.date ? new Date(event.date).toISOString().slice(0, 16) : "",
+      endDate: event.endDate ? new Date(event.endDate).toISOString().slice(0, 16) : "",
+      time: event.time || "",
+      location: event.location || "",
+      detailedAddress: event.detailedAddress || "",
+      locationType: event.locationType || "offline",
+      image: event.image || "",
+      tag: event.tag || "",
+      category: event.category || "",
+      maxParticipants: event.maxParticipants || 0,
+      status: event.status || "recruiting",
+      programSchedule: event.programSchedule || [],
+      benefits: event.benefits || [],
+      promotions: event.promotions || [],
+      organizerInfo: event.organizerInfo || { company: "", contact: "", phone: "", email: "" },
+      notices: event.notices || [],
+    });
+    setIsEventModalOpen(true);
+  };
+
+  const handleSaveEvent = async () => {
+    if (!eventForm.title.trim()) {
+      toast({ variant: "destructive", title: "입력 오류", description: "행사명을 입력해주세요." });
+      return;
+    }
+    if (!eventForm.date) {
+      toast({ variant: "destructive", title: "입력 오류", description: "행사 일시를 입력해주세요." });
+      return;
+    }
+    try {
+      const eventData = {
+        ...eventForm,
+        date: new Date(eventForm.date),
+        endDate: eventForm.endDate ? new Date(eventForm.endDate) : null,
+      };
+      if (editingEvent) {
+        await updateEventMutation.mutateAsync({ id: editingEvent.id, ...eventData });
+        toast({ title: "수정 완료", description: "행사가 수정되었습니다." });
+      } else {
+        await createEventMutation.mutateAsync(eventData);
+        toast({ title: "등록 완료", description: "행사가 등록되었습니다." });
+      }
+      setIsEventModalOpen(false);
+      resetEventForm();
+    } catch (error) {
+      toast({ variant: "destructive", title: "저장 실패", description: "다시 시도해주세요." });
+    }
+  };
+
+  const handleDeleteEvent = async (id: number) => {
+    if (!confirm("정말 이 행사를 삭제하시겠습니까?")) return;
+    try {
+      await deleteEventMutation.mutateAsync(id);
+      toast({ title: "삭제 완료", description: "행사가 삭제되었습니다." });
+    } catch (error) {
+      toast({ variant: "destructive", title: "삭제 실패", description: "다시 시도해주세요." });
+    }
+  };
+
+  const addScheduleItem = () => {
+    if (newScheduleItem.time.trim() && newScheduleItem.description.trim()) {
+      setEventForm({ ...eventForm, programSchedule: [...eventForm.programSchedule, { ...newScheduleItem }] });
+      setNewScheduleItem({ time: "", description: "" });
+    }
+  };
+
+  const removeScheduleItem = (index: number) => {
+    setEventForm({ ...eventForm, programSchedule: eventForm.programSchedule.filter((_, i) => i !== index) });
+  };
+
+  const addBenefit = () => {
+    if (newBenefit.title.trim()) {
+      setEventForm({ ...eventForm, benefits: [...eventForm.benefits, { ...newBenefit }] });
+      setNewBenefit({ icon: "gift", title: "", description: "" });
+    }
+  };
+
+  const removeBenefit = (index: number) => {
+    setEventForm({ ...eventForm, benefits: eventForm.benefits.filter((_, i) => i !== index) });
+  };
+
+  const addPromotion = () => {
+    if (newPromotion.title.trim()) {
+      setEventForm({ ...eventForm, promotions: [...eventForm.promotions, { ...newPromotion }] });
+      setNewPromotion({ title: "", description: "" });
+    }
+  };
+
+  const removePromotion = (index: number) => {
+    setEventForm({ ...eventForm, promotions: eventForm.promotions.filter((_, i) => i !== index) });
+  };
+
+  const addNotice = () => {
+    if (newNotice.trim()) {
+      setEventForm({ ...eventForm, notices: [...eventForm.notices, newNotice.trim()] });
+      setNewNotice("");
+    }
+  };
+
+  const removeNotice = (index: number) => {
+    setEventForm({ ...eventForm, notices: eventForm.notices.filter((_, i) => i !== index) });
   };
 
   const resetCategoryForm = () => {
@@ -1941,9 +2107,21 @@ export default function AdminPage() {
           <div>
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-bold text-gray-900">행사 관리</h2>
-              <button className="bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary/90">
-                + 행사 등록
-              </button>
+              <div className="flex gap-2">
+                <select className="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary">
+                  <option value="">전체 상태</option>
+                  <option value="recruiting">모집중</option>
+                  <option value="closed">모집마감</option>
+                  <option value="ongoing">진행중</option>
+                  <option value="completed">종료</option>
+                </select>
+                <Button 
+                  onClick={() => { resetEventForm(); setIsEventModalOpen(true); }}
+                  className="bg-primary text-white hover:bg-primary/90"
+                >
+                  + 행사 등록
+                </Button>
+              </div>
             </div>
             <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
               <table className="w-full">
@@ -1960,96 +2138,345 @@ export default function AdminPage() {
                 <tbody>
                   {events.map((event) => {
                     const statusText = getEventStatus(event.status);
+                    const participantRatio = event.maxParticipants ? Math.round(((event.currentParticipants || 0) / event.maxParticipants) * 100) : 0;
                     return (
                       <tr key={event.id} className="border-b border-gray-100 hover:bg-gray-50">
-                        <td className="px-4 py-3 text-sm text-gray-900">{event.title}</td>
+                        <td className="px-4 py-3">
+                          <div>
+                            <p className="text-sm font-medium text-gray-900">{event.title}</p>
+                            {event.tag && <span className="text-xs text-primary">{event.tag}</span>}
+                          </div>
+                        </td>
                         <td className="px-4 py-3 text-sm text-gray-600">{formatDate(event.date)}</td>
                         <td className="px-4 py-3 text-sm text-gray-600">{event.location || "-"}</td>
-                        <td className="px-4 py-3 text-sm text-gray-600">{event.currentParticipants || 0}/{event.maxParticipants || 0}</td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm text-gray-900">{event.currentParticipants || 0}/{event.maxParticipants || 0}</span>
+                            <div className="w-16 h-2 bg-gray-200 rounded-full overflow-hidden">
+                              <div 
+                                className={`h-full rounded-full ${participantRatio >= 80 ? 'bg-red-500' : participantRatio >= 50 ? 'bg-amber-500' : 'bg-green-500'}`}
+                                style={{ width: `${Math.min(participantRatio, 100)}%` }}
+                              />
+                            </div>
+                          </div>
+                        </td>
                         <td className="px-4 py-3">
                           <span className={`text-xs px-2 py-1 rounded-full ${
-                            statusText === "모집중" ? "bg-amber-100 text-amber-700" : "bg-gray-100 text-gray-600"
+                            statusText === "모집중" ? "bg-amber-100 text-amber-700" : 
+                            statusText === "진행중" ? "bg-blue-100 text-blue-700" :
+                            statusText === "종료" ? "bg-gray-100 text-gray-600" :
+                            "bg-red-100 text-red-700"
                           }`}>
                             {statusText}
                           </span>
                         </td>
                         <td className="px-4 py-3">
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <button 
-                                className="text-sm text-primary hover:underline"
-                                onClick={() => setSelectedEvent(event)}
-                              >
-                                상세보기
-                              </button>
-                            </DialogTrigger>
-                          <DialogContent className="sm:max-w-[600px] bg-white">
-                            <DialogHeader>
-                              <DialogTitle className="text-xl font-bold text-gray-900">{selectedEvent?.title}</DialogTitle>
-                              <DialogDescription className="text-gray-500">
-                                행사 상세 정보와 참여자 명단을 확인하세요.
-                              </DialogDescription>
-                            </DialogHeader>
-                            <div className="space-y-6 pt-4">
-                              <div className="bg-gray-50 p-4 rounded-lg">
-                                <h4 className="font-bold text-sm text-gray-900 mb-2">행사 소개</h4>
-                                <p className="text-sm text-gray-600 leading-relaxed">
-                                  {selectedEvent?.description}
-                                </p>
-                              </div>
-
-                              <div>
-                                <h4 className="font-bold text-sm text-gray-900 mb-3 flex items-center justify-between">
-                                  <span>참여자 명단</span>
-                                  <span className="text-xs font-normal text-gray-500">
-                                    총 {selectedEvent?.participantList.length}명
-                                  </span>
-                                </h4>
-                                <div className="border rounded-lg overflow-hidden">
-                                  <table className="w-full">
-                                    <thead className="bg-gray-50 border-b">
-                                      <tr>
-                                        <th className="text-left text-xs font-medium text-gray-500 px-4 py-2">이름</th>
-                                        <th className="text-left text-xs font-medium text-gray-500 px-4 py-2">연락처</th>
-                                        <th className="text-right text-xs font-medium text-gray-500 px-4 py-2">상태</th>
-                                      </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-gray-100">
-                                      {selectedEvent?.participantList.length === 0 ? (
-                                        <tr>
-                                          <td colSpan={3} className="text-center py-4 text-xs text-gray-400">
-                                            참여자가 없습니다.
-                                          </td>
-                                        </tr>
-                                      ) : (
-                                        selectedEvent?.participantList.map((participant: any, i: number) => (
-                                          <tr key={i}>
-                                            <td className="px-4 py-2 text-sm text-gray-900">{participant.name}</td>
-                                            <td className="px-4 py-2 text-sm text-gray-600">{participant.phone}</td>
-                                            <td className="px-4 py-2 text-right">
-                                              <span className={`text-xs px-1.5 py-0.5 rounded ${
-                                                participant.status === "신청완료" ? "bg-green-50 text-green-600" : "bg-red-50 text-red-600"
-                                              }`}>
-                                                {participant.status}
-                                              </span>
-                                            </td>
-                                          </tr>
-                                        ))
-                                      )}
-                                    </tbody>
-                                  </table>
-                                </div>
-                              </div>
-                            </div>
-                          </DialogContent>
-                        </Dialog>
-                      </td>
-                    </tr>
+                          <div className="flex gap-2">
+                            <button 
+                              onClick={() => openEditEventModal(event)}
+                              className="text-sm text-primary hover:underline"
+                            >
+                              수정
+                            </button>
+                            <button 
+                              onClick={() => handleDeleteEvent(event.id)}
+                              className="text-sm text-red-500 hover:underline"
+                            >
+                              삭제
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
                     );
                   })}
+                  {events.length === 0 && (
+                    <tr>
+                      <td colSpan={6} className="px-4 py-12 text-center text-gray-500">
+                        등록된 행사가 없습니다.
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
+
+            <Dialog open={isEventModalOpen} onOpenChange={(open) => { if (!open) { setIsEventModalOpen(false); resetEventForm(); } }}>
+              <DialogContent className="sm:max-w-[800px] bg-white max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle className="text-xl font-bold text-gray-900">
+                    {editingEvent ? '행사 수정' : '새 행사 등록'}
+                  </DialogTitle>
+                  <DialogDescription className="text-gray-500">
+                    행사 정보를 입력하세요.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-6 pt-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="col-span-2">
+                      <Label>행사명 *</Label>
+                      <Input 
+                        value={eventForm.title}
+                        onChange={(e) => setEventForm({ ...eventForm, title: e.target.value })}
+                        placeholder="예: 2026 건강한 설맞이 특별 세미나"
+                      />
+                    </div>
+                    <div className="col-span-2">
+                      <Label>행사 소개</Label>
+                      <textarea 
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary min-h-[80px]"
+                        value={eventForm.description}
+                        onChange={(e) => setEventForm({ ...eventForm, description: e.target.value })}
+                        placeholder="행사 소개를 입력하세요"
+                      />
+                    </div>
+                    <div>
+                      <Label>시작 일시 *</Label>
+                      <Input 
+                        type="datetime-local"
+                        value={eventForm.date}
+                        onChange={(e) => setEventForm({ ...eventForm, date: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <Label>종료 일시</Label>
+                      <Input 
+                        type="datetime-local"
+                        value={eventForm.endDate}
+                        onChange={(e) => setEventForm({ ...eventForm, endDate: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <Label>장소명</Label>
+                      <Input 
+                        value={eventForm.location}
+                        onChange={(e) => setEventForm({ ...eventForm, location: e.target.value })}
+                        placeholder="예: 서울 강남구 웰닉스홀"
+                      />
+                    </div>
+                    <div>
+                      <Label>상세 주소</Label>
+                      <Input 
+                        value={eventForm.detailedAddress}
+                        onChange={(e) => setEventForm({ ...eventForm, detailedAddress: e.target.value })}
+                        placeholder="예: 서울특별시 강남구 테헤란로 123 웰닉스빌딩 3층"
+                      />
+                    </div>
+                    <div>
+                      <Label>태그</Label>
+                      <Input 
+                        value={eventForm.tag}
+                        onChange={(e) => setEventForm({ ...eventForm, tag: e.target.value })}
+                        placeholder="예: 무료 세미나"
+                      />
+                    </div>
+                    <div>
+                      <Label>카테고리</Label>
+                      <Input 
+                        value={eventForm.category}
+                        onChange={(e) => setEventForm({ ...eventForm, category: e.target.value })}
+                        placeholder="예: 건강 세미나"
+                      />
+                    </div>
+                    <div>
+                      <Label>최대 참가 인원</Label>
+                      <Input 
+                        type="number"
+                        value={eventForm.maxParticipants}
+                        onChange={(e) => setEventForm({ ...eventForm, maxParticipants: parseInt(e.target.value) || 0 })}
+                        placeholder="150"
+                      />
+                    </div>
+                    <div>
+                      <Label>상태</Label>
+                      <select 
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary"
+                        value={eventForm.status}
+                        onChange={(e) => setEventForm({ ...eventForm, status: e.target.value })}
+                      >
+                        <option value="recruiting">모집중</option>
+                        <option value="closed">모집마감</option>
+                        <option value="ongoing">진행중</option>
+                        <option value="completed">종료</option>
+                      </select>
+                    </div>
+                    <div className="col-span-2">
+                      <Label>행사 이미지 URL</Label>
+                      <Input 
+                        value={eventForm.image}
+                        onChange={(e) => setEventForm({ ...eventForm, image: e.target.value })}
+                        placeholder="이미지 URL을 입력하세요"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="border-t pt-4">
+                    <Label className="text-base font-bold">프로그램 일정</Label>
+                    <div className="flex gap-2 mt-2 mb-2">
+                      <Input 
+                        value={newScheduleItem.time}
+                        onChange={(e) => setNewScheduleItem({ ...newScheduleItem, time: e.target.value })}
+                        placeholder="시간 (예: 14:00)"
+                        className="w-24"
+                      />
+                      <Input 
+                        value={newScheduleItem.description}
+                        onChange={(e) => setNewScheduleItem({ ...newScheduleItem, description: e.target.value })}
+                        placeholder="프로그램 내용"
+                        className="flex-1"
+                      />
+                      <Button type="button" variant="outline" onClick={addScheduleItem}>추가</Button>
+                    </div>
+                    <div className="space-y-2">
+                      {eventForm.programSchedule.map((item, i) => (
+                        <div key={i} className="flex items-center gap-2 bg-gray-50 p-2 rounded">
+                          <span className="text-sm font-medium text-primary w-16">{item.time}</span>
+                          <span className="text-sm text-gray-700 flex-1">{item.description}</span>
+                          <button onClick={() => removeScheduleItem(i)} className="text-red-500 hover:text-red-700">×</button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="border-t pt-4">
+                    <Label className="text-base font-bold">참가자 혜택</Label>
+                    <div className="flex gap-2 mt-2 mb-2">
+                      <select 
+                        className="px-3 py-2 border border-gray-200 rounded-lg text-sm w-24"
+                        value={newBenefit.icon}
+                        onChange={(e) => setNewBenefit({ ...newBenefit, icon: e.target.value })}
+                      >
+                        <option value="gift">선물</option>
+                        <option value="food">간식</option>
+                        <option value="parking">주차</option>
+                        <option value="ticket">티켓</option>
+                      </select>
+                      <Input 
+                        value={newBenefit.title}
+                        onChange={(e) => setNewBenefit({ ...newBenefit, title: e.target.value })}
+                        placeholder="혜택명"
+                        className="w-32"
+                      />
+                      <Input 
+                        value={newBenefit.description}
+                        onChange={(e) => setNewBenefit({ ...newBenefit, description: e.target.value })}
+                        placeholder="설명"
+                        className="flex-1"
+                      />
+                      <Button type="button" variant="outline" onClick={addBenefit}>추가</Button>
+                    </div>
+                    <div className="space-y-2">
+                      {eventForm.benefits.map((item, i) => (
+                        <div key={i} className="flex items-center gap-2 bg-gray-50 p-2 rounded">
+                          <span className="text-sm font-medium text-gray-700">{item.title}</span>
+                          <span className="text-sm text-gray-500">- {item.description}</span>
+                          <button onClick={() => removeBenefit(i)} className="ml-auto text-red-500 hover:text-red-700">×</button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="border-t pt-4">
+                    <Label className="text-base font-bold">특별 프로모션</Label>
+                    <div className="flex gap-2 mt-2 mb-2">
+                      <Input 
+                        value={newPromotion.title}
+                        onChange={(e) => setNewPromotion({ ...newPromotion, title: e.target.value })}
+                        placeholder="프로모션명"
+                        className="w-48"
+                      />
+                      <Input 
+                        value={newPromotion.description}
+                        onChange={(e) => setNewPromotion({ ...newPromotion, description: e.target.value })}
+                        placeholder="설명"
+                        className="flex-1"
+                      />
+                      <Button type="button" variant="outline" onClick={addPromotion}>추가</Button>
+                    </div>
+                    <div className="space-y-2">
+                      {eventForm.promotions.map((item, i) => (
+                        <div key={i} className="flex items-center gap-2 bg-amber-50 p-2 rounded border border-amber-200">
+                          <span className="text-sm font-medium text-amber-800">{item.title}</span>
+                          <span className="text-sm text-amber-600">- {item.description}</span>
+                          <button onClick={() => removePromotion(i)} className="ml-auto text-red-500 hover:text-red-700">×</button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="border-t pt-4">
+                    <Label className="text-base font-bold">주최측 정보</Label>
+                    <div className="grid grid-cols-2 gap-4 mt-2">
+                      <div>
+                        <Label className="text-sm">회사/단체명</Label>
+                        <Input 
+                          value={eventForm.organizerInfo.company}
+                          onChange={(e) => setEventForm({ ...eventForm, organizerInfo: { ...eventForm.organizerInfo, company: e.target.value } })}
+                          placeholder="예: 웰닉스 헬스케어"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-sm">담당자</Label>
+                        <Input 
+                          value={eventForm.organizerInfo.contact}
+                          onChange={(e) => setEventForm({ ...eventForm, organizerInfo: { ...eventForm.organizerInfo, contact: e.target.value } })}
+                          placeholder="예: 김건강 매니저"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-sm">연락처</Label>
+                        <Input 
+                          value={eventForm.organizerInfo.phone}
+                          onChange={(e) => setEventForm({ ...eventForm, organizerInfo: { ...eventForm.organizerInfo, phone: e.target.value } })}
+                          placeholder="예: 02-1234-5678"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-sm">이메일</Label>
+                        <Input 
+                          value={eventForm.organizerInfo.email}
+                          onChange={(e) => setEventForm({ ...eventForm, organizerInfo: { ...eventForm.organizerInfo, email: e.target.value } })}
+                          placeholder="예: event@wellnix.co.kr"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="border-t pt-4">
+                    <Label className="text-base font-bold">안내사항</Label>
+                    <div className="flex gap-2 mt-2 mb-2">
+                      <Input 
+                        value={newNotice}
+                        onChange={(e) => setNewNotice(e.target.value)}
+                        placeholder="안내사항 내용"
+                        className="flex-1"
+                        onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addNotice())}
+                      />
+                      <Button type="button" variant="outline" onClick={addNotice}>추가</Button>
+                    </div>
+                    <ul className="space-y-1">
+                      {eventForm.notices.map((notice, i) => (
+                        <li key={i} className="flex items-center gap-2 text-sm text-gray-700">
+                          <span>•</span>
+                          <span className="flex-1">{notice}</span>
+                          <button onClick={() => removeNotice(i)} className="text-red-500 hover:text-red-700">×</button>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div className="flex justify-end gap-2 pt-4 border-t">
+                    <Button variant="outline" onClick={() => { setIsEventModalOpen(false); resetEventForm(); }}>취소</Button>
+                    <Button 
+                      onClick={handleSaveEvent}
+                      disabled={createEventMutation.isPending || updateEventMutation.isPending}
+                      className="bg-primary text-white hover:bg-primary/90"
+                    >
+                      {(createEventMutation.isPending || updateEventMutation.isPending) ? '저장 중...' : '저장'}
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
         );
 
