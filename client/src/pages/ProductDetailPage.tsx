@@ -135,17 +135,18 @@ export default function ProductDetailPage() {
           <p className="text-sm text-gray-500 mt-1">{product.description.substring(0, 50)}...</p>
         )}
         
-        <div className="flex items-baseline gap-2 mt-3">
-          <span className="text-2xl font-bold text-gray-900">{product.price.toLocaleString()}원</span>
-          {product.originalPrice && product.originalPrice > product.price && (
-            <span className="text-sm text-gray-400 line-through">{product.originalPrice.toLocaleString()}원</span>
-          )}
-        </div>
-
-        <div className="flex items-center gap-1 mt-2">
-          <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-          <span className="text-sm font-medium text-gray-900">{avgRating}</span>
-          <span className="text-sm text-gray-400">({reviews.length.toLocaleString()})</span>
+        <div className="flex items-center justify-between mt-3">
+          <div className="flex items-baseline gap-2">
+            <span className="text-2xl font-bold text-gray-900">{product.price.toLocaleString()}원</span>
+            {product.originalPrice && product.originalPrice > product.price && (
+              <span className="text-sm text-gray-400 line-through">{product.originalPrice.toLocaleString()}원</span>
+            )}
+          </div>
+          <div className="flex items-center gap-1">
+            <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+            <span className="text-sm font-medium text-gray-900">{avgRating}</span>
+            <span className="text-sm text-gray-400">({reviews.length.toLocaleString()})</span>
+          </div>
         </div>
       </div>
 
