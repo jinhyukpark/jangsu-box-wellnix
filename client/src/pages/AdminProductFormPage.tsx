@@ -248,11 +248,71 @@ export default function AdminProductFormPage() {
           </TabsList>
 
           <TabsContent value="description" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2 space-y-6">
-                <div className="bg-white rounded-xl border border-gray-200 p-6">
-                  <h3 className="text-lg font-bold text-gray-900 mb-4">기본 정보</h3>
-                  <div className="space-y-4">
+            {/* 이미지 섹션 - 상단 1열 배치 */}
+            <div className="bg-white rounded-xl border border-gray-200 p-6">
+              <h3 className="text-lg font-bold text-gray-900 mb-4">상품 이미지</h3>
+              <p className="text-sm text-gray-500 mb-4">이미지를 추가하고, 클릭하여 대표 이미지로 설정하세요. (대표 이미지는 파란 테두리로 표시됩니다)</p>
+              <div className="flex gap-3 flex-wrap mb-4">
+                {/* 대표 이미지 */}
+                {product.image && (
+                  <div 
+                    className="relative cursor-pointer group"
+                    onClick={() => {}}
+                  >
+                    <img 
+                      src={product.image} 
+                      alt="대표 이미지" 
+                      className="w-24 h-24 object-cover rounded-lg ring-2 ring-primary ring-offset-2"
+                    />
+                    <span className="absolute -top-2 -left-2 bg-primary text-white text-xs px-2 py-0.5 rounded-full">대표</span>
+                  </div>
+                )}
+                {/* 추가 이미지들 */}
+                {product.images.map((img, index) => (
+                  <div 
+                    key={index} 
+                    className="relative cursor-pointer group"
+                    onClick={() => {
+                      // 클릭하면 대표 이미지로 설정
+                      const newImages = product.images.filter((_, i) => i !== index);
+                      if (product.image) {
+                        newImages.unshift(product.image);
+                      }
+                      setProduct({ ...product, image: img, images: newImages });
+                    }}
+                  >
+                    <img 
+                      src={img} 
+                      alt={`추가 이미지 ${index + 1}`} 
+                      className="w-24 h-24 object-cover rounded-lg border-2 border-gray-200 hover:border-primary transition-colors"
+                    />
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); handleRemoveImage(index); }}
+                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <div className="flex gap-2">
+                <Input
+                  value={newImageUrl}
+                  onChange={(e) => setNewImageUrl(e.target.value)}
+                  placeholder="이미지 URL 입력"
+                  className="flex-1"
+                  data-testid="input-new-image"
+                />
+                <Button variant="outline" onClick={handleAddImage}>
+                  <Plus className="w-4 h-4 mr-1" /> 이미지 추가
+                </Button>
+              </div>
+            </div>
+
+            {/* 기본 정보 */}
+            <div className="bg-white rounded-xl border border-gray-200 p-6">
+              <h3 className="text-lg font-bold text-gray-900 mb-4">기본 정보</h3>
+              <div className="space-y-4">
                     <div>
                       <Label htmlFor="name">상품명 *</Label>
                       <Input
@@ -353,108 +413,59 @@ export default function AdminProductFormPage() {
                         />
                         <Label htmlFor="isFeatured">추천 상품으로 설정</Label>
                       </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-white rounded-xl border border-gray-200 p-6">
-                  <h3 className="text-lg font-bold text-gray-900 mb-4">상품 상세 설명 (마크다운)</h3>
-                  <p className="text-sm text-gray-500 mb-4">
-                    이미지, 동영상, 링크를 포함한 상세 설명을 작성하세요. 마크다운 문법을 지원합니다.
-                  </p>
-                  <div className="mb-3 flex gap-2 flex-wrap">
-                    <Button variant="outline" size="sm" onClick={() => {
-                      const url = prompt("이미지 URL을 입력하세요:");
-                      if (url) {
-                        setProduct({
-                          ...product,
-                          descriptionMarkdown: (product.descriptionMarkdown || "") + `\n\n![이미지 설명](${url})\n`
-                        });
-                      }
-                    }}>
-                      <Image className="w-4 h-4 mr-1" /> 이미지 추가
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={() => {
-                      const url = prompt("동영상 URL을 입력하세요 (YouTube 등):");
-                      if (url) {
-                        setProduct({
-                          ...product,
-                          descriptionMarkdown: (product.descriptionMarkdown || "") + `\n\n<video src="${url}" controls width="100%"></video>\n`
-                        });
-                      }
-                    }}>
-                      <Video className="w-4 h-4 mr-1" /> 동영상 추가
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={() => {
-                      const url = prompt("링크 URL을 입력하세요:");
-                      const text = prompt("링크 텍스트를 입력하세요:");
-                      if (url && text) {
-                        setProduct({
-                          ...product,
-                          descriptionMarkdown: (product.descriptionMarkdown || "") + `\n[${text}](${url})\n`
-                        });
-                      }
-                    }}>
-                      <Link className="w-4 h-4 mr-1" /> 링크 추가
-                    </Button>
-                  </div>
-                  <div data-color-mode="light">
-                    <MDEditor
-                      value={product.descriptionMarkdown || ""}
-                      onChange={(value) => setProduct({ ...product, descriptionMarkdown: value || "" })}
-                      height={400}
-                      preview="live"
-                      data-testid="markdown-editor"
-                    />
-                  </div>
                 </div>
               </div>
+            </div>
 
-              <div className="space-y-6">
-                <div className="bg-white rounded-xl border border-gray-200 p-6">
-                  <h3 className="text-lg font-bold text-gray-900 mb-4">대표 이미지</h3>
-                  <div className="space-y-4">
-                    {product.image && (
-                      <img 
-                        src={product.image} 
-                        alt="대표 이미지" 
-                        className="w-full aspect-square object-cover rounded-lg"
-                      />
-                    )}
-                    <Input
-                      value={product.image || ""}
-                      onChange={(e) => setProduct({ ...product, image: e.target.value })}
-                      placeholder="이미지 URL 입력"
-                      data-testid="input-main-image"
-                    />
-                  </div>
-                </div>
-
-                <div className="bg-white rounded-xl border border-gray-200 p-6">
-                  <h3 className="text-lg font-bold text-gray-900 mb-4">추가 이미지</h3>
-                  <div className="space-y-3">
-                    {product.images.map((img, index) => (
-                      <div key={index} className="flex items-center gap-2">
-                        <img src={img} alt={`추가 이미지 ${index + 1}`} className="w-16 h-16 object-cover rounded" />
-                        <span className="flex-1 text-sm text-gray-600 truncate">{img}</span>
-                        <button onClick={() => handleRemoveImage(index)} className="p-1 hover:bg-red-50 rounded">
-                          <Trash2 className="w-4 h-4 text-red-500" />
-                        </button>
-                      </div>
-                    ))}
-                    <div className="flex gap-2">
-                      <Input
-                        value={newImageUrl}
-                        onChange={(e) => setNewImageUrl(e.target.value)}
-                        placeholder="이미지 URL"
-                        className="flex-1"
-                      />
-                      <Button variant="outline" size="sm" onClick={handleAddImage}>
-                        <Plus className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </div>
+            <div className="bg-white rounded-xl border border-gray-200 p-6">
+              <h3 className="text-lg font-bold text-gray-900 mb-4">상품 상세 설명 (마크다운)</h3>
+              <p className="text-sm text-gray-500 mb-4">
+                이미지, 동영상, 링크를 포함한 상세 설명을 작성하세요. 마크다운 문법을 지원합니다.
+              </p>
+              <div className="mb-3 flex gap-2 flex-wrap">
+                <Button variant="outline" size="sm" onClick={() => {
+                  const url = prompt("이미지 URL을 입력하세요:");
+                  if (url) {
+                    setProduct({
+                      ...product,
+                      descriptionMarkdown: (product.descriptionMarkdown || "") + `\n\n![이미지 설명](${url})\n`
+                    });
+                  }
+                }}>
+                  <Image className="w-4 h-4 mr-1" /> 이미지 추가
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => {
+                  const url = prompt("동영상 URL을 입력하세요 (YouTube 등):");
+                  if (url) {
+                    setProduct({
+                      ...product,
+                      descriptionMarkdown: (product.descriptionMarkdown || "") + `\n\n<video src="${url}" controls width="100%"></video>\n`
+                    });
+                  }
+                }}>
+                  <Video className="w-4 h-4 mr-1" /> 동영상 추가
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => {
+                  const url = prompt("링크 URL을 입력하세요:");
+                  const text = prompt("링크 텍스트를 입력하세요:");
+                  if (url && text) {
+                    setProduct({
+                      ...product,
+                      descriptionMarkdown: (product.descriptionMarkdown || "") + `\n[${text}](${url})\n`
+                    });
+                  }
+                }}>
+                  <Link className="w-4 h-4 mr-1" /> 링크 추가
+                </Button>
+              </div>
+              <div data-color-mode="light">
+                <MDEditor
+                  value={product.descriptionMarkdown || ""}
+                  onChange={(value) => setProduct({ ...product, descriptionMarkdown: value || "" })}
+                  height={400}
+                  preview="live"
+                  data-testid="markdown-editor"
+                />
               </div>
             </div>
           </TabsContent>
