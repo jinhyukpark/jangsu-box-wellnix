@@ -3,7 +3,7 @@ import { useLocation } from "wouter";
 import { 
   Package, Users, Gift, Calendar, CreditCard, Truck, MessageSquare, 
   ChevronRight, Search, Bell, Settings, LogOut, Menu, X,
-  TrendingUp, ShoppingBag, UserCheck, Clock, HelpCircle, Star, ShieldCheck, Loader2, ShieldX
+  TrendingUp, ShoppingBag, UserCheck, Clock, HelpCircle, Star, ShieldCheck, Loader2, ShieldX, Award
 } from "lucide-react";
 import { useAdminProducts, useAdminCategories, useAdminMembers, useAdminSubscriptions, useAdminEvents, useAdminInquiries, useAdminFaqs, useAdminList, useDashboardStats, useCreateProduct, useUpdateProduct, useCreateCategory, useUpdateCategory, useDeleteCategory, useCreateFaq, useUpdateFaq, useDeleteFaq } from "@/hooks/use-admin";
 import { useAdminAuth, useAdminLogout } from "@/hooks/use-admin-auth";
@@ -37,6 +37,7 @@ import {
 
 const menuItems = [
   { id: "products", label: "상품 관리", icon: Package },
+  { id: "brands", label: "브랜드 관리", icon: Award },
   { id: "members", label: "회원 관리", icon: Users },
   { id: "subscription", label: "장수박스 관리", icon: Gift },
   { id: "events", label: "행사 관리", icon: Calendar },
@@ -1146,6 +1147,63 @@ export default function AdminPage() {
                 </Dialog>
               </TabsContent>
             </Tabs>
+          </div>
+        );
+
+      case "brands":
+        return (
+          <div>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-gray-900">브랜드 관리</h2>
+              <button className="bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary/90 flex items-center gap-2">
+                + 브랜드 등록
+              </button>
+            </div>
+
+            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b border-gray-200">
+                  <tr>
+                    <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">로고</th>
+                    <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">브랜드명</th>
+                    <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">설명</th>
+                    <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">상품 수</th>
+                    <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">상태</th>
+                    <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">관리</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    { id: 1, name: "정관장", logo: "https://via.placeholder.com/40", description: "한국 대표 홍삼 브랜드", productCount: 12, status: "active" },
+                    { id: 2, name: "고려홍삼", logo: "https://via.placeholder.com/40", description: "전통 방식 홍삼 전문", productCount: 8, status: "active" },
+                    { id: 3, name: "웰닉스 뉴트리션", logo: "https://via.placeholder.com/40", description: "시니어 맞춤 영양제", productCount: 15, status: "active" },
+                    { id: 4, name: "바이오헬스코리아", logo: "https://via.placeholder.com/40", description: "프로바이오틱스 전문", productCount: 5, status: "inactive" },
+                  ].map((brand) => (
+                    <tr key={brand.id} className="border-b border-gray-100 hover:bg-gray-50">
+                      <td className="px-4 py-3">
+                        <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                          <Award className="w-5 h-5 text-gray-400" />
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-sm font-medium text-gray-900">{brand.name}</td>
+                      <td className="px-4 py-3 text-sm text-gray-600">{brand.description}</td>
+                      <td className="px-4 py-3 text-sm text-gray-600">{brand.productCount}개</td>
+                      <td className="px-4 py-3">
+                        <span className={`text-xs px-2 py-1 rounded-full ${
+                          brand.status === "active" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600"
+                        }`}>
+                          {brand.status === "active" ? "활성" : "비활성"}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <button className="text-sm text-primary hover:underline mr-3">수정</button>
+                        <button className="text-sm text-red-500 hover:underline">삭제</button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         );
 
