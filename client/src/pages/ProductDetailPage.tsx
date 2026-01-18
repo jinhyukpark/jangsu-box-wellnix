@@ -369,7 +369,7 @@ export default function ProductDetailPage() {
             선물하기
           </Button>
           <Button 
-            className="flex-1 h-12 text-base font-medium bg-orange-500 hover:bg-orange-600"
+            className="flex-1 h-12 text-base font-medium bg-primary hover:bg-primary/90"
             onClick={handleBuyNow}
             data-testid="button-buy"
           >
