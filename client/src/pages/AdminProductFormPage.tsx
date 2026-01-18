@@ -204,7 +204,12 @@ export default function AdminProductFormPage() {
 
   const handleAddImage = () => {
     if (newImageUrl.trim()) {
-      setProduct({ ...product, images: [...product.images, newImageUrl.trim()] });
+      const trimmedUrl = newImageUrl.trim();
+      if (!product.image) {
+        setProduct({ ...product, image: trimmedUrl });
+      } else {
+        setProduct({ ...product, images: [...product.images, trimmedUrl] });
+      }
       setNewImageUrl("");
     }
   };
