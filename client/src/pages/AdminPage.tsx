@@ -1412,7 +1412,7 @@ export default function AdminPage() {
                                       </div>
                                       <div>
                                         <p className="text-xs text-gray-500 mb-1">가입일</p>
-                                        <p className="text-sm text-gray-900">{selectedMember?.joinDate}</p>
+                                        <p className="text-sm text-gray-900">{selectedMember?.createdAt ? new Date(selectedMember.createdAt).toLocaleString('ko-KR') : '-'}</p>
                                       </div>
                                       <div className="col-span-2">
                                         <p className="text-xs text-gray-500 mb-1">주소</p>
