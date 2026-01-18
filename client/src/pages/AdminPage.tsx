@@ -211,6 +211,9 @@ function MainPageSettingsPanel({ products, events }: { products: any[], events: 
     eventsLimit: 4,
   });
 
+  const [bestProductSearch, setBestProductSearch] = useState("");
+  const [newProductSearch, setNewProductSearch] = useState("");
+
   useEffect(() => {
     if (settings) {
       setLocalSettings(settings);
@@ -289,8 +292,32 @@ function MainPageSettingsPanel({ products, events }: { products: any[], events: 
             {localSettings.bestProductsCriteria === "manual" && (
               <div>
                 <Label className="mb-2 block">상품 선택</Label>
+                <Input 
+                  placeholder="상품명으로 검색..."
+                  value={bestProductSearch}
+                  onChange={(e) => setBestProductSearch(e.target.value)}
+                  className="mb-2"
+                />
+                {localSettings.bestProductsManualIds?.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mb-2">
+                    {localSettings.bestProductsManualIds.map(id => {
+                      const product = products?.find((p: any) => p.id === id);
+                      return product ? (
+                        <span key={id} className="inline-flex items-center gap-1 bg-primary/10 text-primary text-xs px-2 py-1 rounded">
+                          {product.name}
+                          <button 
+                            onClick={() => toggleProductSelection(id, "bestProductsManualIds")}
+                            className="hover:text-red-500"
+                          >×</button>
+                        </span>
+                      ) : null;
+                    })}
+                  </div>
+                )}
                 <div className="grid grid-cols-3 gap-2 max-h-48 overflow-y-auto border rounded p-2">
-                  {products?.map((product: any) => (
+                  {products?.filter((p: any) => 
+                    p.name.toLowerCase().includes(bestProductSearch.toLowerCase())
+                  ).map((product: any) => (
                     <label key={product.id} className="flex items-center gap-2 p-2 hover:bg-gray-50 rounded cursor-pointer">
                       <Checkbox 
                         checked={localSettings.bestProductsManualIds?.includes(product.id)}
@@ -394,8 +421,32 @@ function MainPageSettingsPanel({ products, events }: { products: any[], events: 
             {localSettings.newProductsCriteria === "manual" && (
               <div>
                 <Label className="mb-2 block">상품 선택</Label>
+                <Input 
+                  placeholder="상품명으로 검색..."
+                  value={newProductSearch}
+                  onChange={(e) => setNewProductSearch(e.target.value)}
+                  className="mb-2"
+                />
+                {localSettings.newProductsManualIds?.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mb-2">
+                    {localSettings.newProductsManualIds.map(id => {
+                      const product = products?.find((p: any) => p.id === id);
+                      return product ? (
+                        <span key={id} className="inline-flex items-center gap-1 bg-green-100 text-green-700 text-xs px-2 py-1 rounded">
+                          {product.name}
+                          <button 
+                            onClick={() => toggleProductSelection(id, "newProductsManualIds")}
+                            className="hover:text-red-500"
+                          >×</button>
+                        </span>
+                      ) : null;
+                    })}
+                  </div>
+                )}
                 <div className="grid grid-cols-3 gap-2 max-h-48 overflow-y-auto border rounded p-2">
-                  {products?.map((product: any) => (
+                  {products?.filter((p: any) => 
+                    p.name.toLowerCase().includes(newProductSearch.toLowerCase())
+                  ).map((product: any) => (
                     <label key={product.id} className="flex items-center gap-2 p-2 hover:bg-gray-50 rounded cursor-pointer">
                       <Checkbox 
                         checked={localSettings.newProductsManualIds?.includes(product.id)}
