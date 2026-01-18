@@ -302,49 +302,114 @@ export default function AdminProductFormPage() {
             {/* 이미지 섹션 - 상단 1열 배치 */}
             <div className="bg-white rounded-xl border border-gray-200 p-6">
               <h3 className="text-lg font-bold text-gray-900 mb-4">상품 이미지</h3>
-              <p className="text-sm text-gray-500 mb-4">이미지를 추가하고, 클릭하여 대표 이미지로 설정하세요. (대표 이미지는 파란 테두리로 표시됩니다)</p>
+              <p className="text-sm text-gray-500 mb-4">
+                이미지를 추가하고, 클릭하여 대표 이미지로 설정하세요. 드래그하여 순서를 변경할 수 있습니다.
+                <br /><span className="text-primary">(대표 이미지는 파란 테두리로 표시됩니다)</span>
+              </p>
               <div className="flex gap-3 flex-wrap mb-4">
-                {/* 대표 이미지 */}
-                {product.image && (
-                  <div 
-                    className="relative cursor-pointer group"
-                    onClick={() => {}}
-                  >
-                    <img 
-                      src={product.image} 
-                      alt="대표 이미지" 
-                      className="w-24 h-24 object-cover rounded-lg ring-2 ring-primary ring-offset-2"
-                    />
-                    <span className="absolute -top-2 -left-2 bg-primary text-white text-xs px-2 py-0.5 rounded-full">대표</span>
-                  </div>
-                )}
-                {/* 추가 이미지들 */}
-                {product.images.map((img, index) => (
-                  <div 
-                    key={index} 
-                    className="relative cursor-pointer group"
-                    onClick={() => {
-                      // 클릭하면 대표 이미지로 설정
-                      const newImages = product.images.filter((_, i) => i !== index);
-                      if (product.image) {
-                        newImages.unshift(product.image);
-                      }
-                      setProduct({ ...product, image: img, images: newImages });
-                    }}
-                  >
-                    <img 
-                      src={img} 
-                      alt={`추가 이미지 ${index + 1}`} 
-                      className="w-24 h-24 object-cover rounded-lg border-2 border-gray-200 hover:border-primary transition-colors"
-                    />
-                    <button 
-                      onClick={(e) => { e.stopPropagation(); handleRemoveImage(index); }}
-                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
-                  </div>
-                ))}
+                {/* 모든 이미지를 하나의 배열로 관리 */}
+                {(() => {
+                  const allImages = product.image ? [product.image, ...product.images] : [...product.images];
+                  return allImages.map((img, index) => {
+                    const isPrimary = index === 0;
+                    return (
+                      <div 
+                        key={`img-${index}`}
+                        className={`relative cursor-move group ${isPrimary ? '' : ''}`}
+                        draggable
+                        onDragStart={(e) => {
+                          e.dataTransfer.setData('text/plain', index.toString());
+                          e.currentTarget.classList.add('opacity-50');
+                        }}
+                        onDragEnd={(e) => {
+                          e.currentTarget.classList.remove('opacity-50');
+                        }}
+                        onDragOver={(e) => {
+                          e.preventDefault();
+                          e.currentTarget.classList.add('ring-2', 'ring-primary');
+                        }}
+                        onDragLeave={(e) => {
+                          e.currentTarget.classList.remove('ring-2', 'ring-primary');
+                        }}
+                        onDrop={(e) => {
+                          e.preventDefault();
+                          e.currentTarget.classList.remove('ring-2', 'ring-primary');
+                          const fromIndex = parseInt(e.dataTransfer.getData('text/plain'));
+                          const toIndex = index;
+                          if (fromIndex !== toIndex) {
+                            const newAllImages = [...allImages];
+                            const [movedImage] = newAllImages.splice(fromIndex, 1);
+                            newAllImages.splice(toIndex, 0, movedImage);
+                            setProduct({ 
+                              ...product, 
+                              image: newAllImages[0] || '', 
+                              images: newAllImages.slice(1) 
+                            });
+                          }
+                        }}
+                        onClick={() => {
+                          if (!isPrimary) {
+                            const newAllImages = [...allImages];
+                            const [clickedImage] = newAllImages.splice(index, 1);
+                            newAllImages.unshift(clickedImage);
+                            setProduct({ 
+                              ...product, 
+                              image: newAllImages[0], 
+                              images: newAllImages.slice(1) 
+                            });
+                          }
+                        }}
+                      >
+                        <img 
+                          src={img} 
+                          alt={isPrimary ? "대표 이미지" : `추가 이미지 ${index}`} 
+                          className={`w-24 h-24 object-cover rounded-lg transition-all ${
+                            isPrimary 
+                              ? 'ring-2 ring-primary ring-offset-2' 
+                              : 'border-2 border-gray-200 hover:border-primary'
+                          }`}
+                        />
+                        {isPrimary && (
+                          <span className="absolute -top-2 -left-2 bg-primary text-white text-xs px-2 py-0.5 rounded-full">대표</span>
+                        )}
+                        <div className="absolute -top-2 -right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          {index > 0 && (
+                            <button 
+                              onClick={(e) => { 
+                                e.stopPropagation(); 
+                                const newAllImages = [...allImages];
+                                [newAllImages[index - 1], newAllImages[index]] = [newAllImages[index], newAllImages[index - 1]];
+                                setProduct({ ...product, image: newAllImages[0], images: newAllImages.slice(1) });
+                              }}
+                              className="bg-gray-600 text-white rounded-full p-1 hover:bg-gray-700"
+                              title="왼쪽으로 이동"
+                            >
+                              <ChevronLeft className="w-3 h-3" />
+                            </button>
+                          )}
+                          <button 
+                            onClick={(e) => { 
+                              e.stopPropagation(); 
+                              const newAllImages = allImages.filter((_, i) => i !== index);
+                              setProduct({ 
+                                ...product, 
+                                image: newAllImages[0] || '', 
+                                images: newAllImages.slice(1) 
+                              });
+                            }}
+                            className="bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                            title="삭제"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </div>
+                        <span className="absolute bottom-1 right-1 bg-black/50 text-white text-xs px-1.5 py-0.5 rounded">
+                          {index + 1}
+                        </span>
+                      </div>
+                    );
+                  });
+                })()}
               </div>
               <div className="flex gap-2">
                 <Input
