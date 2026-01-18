@@ -1,4 +1,5 @@
 import { Heart, Star } from "lucide-react";
+import { Link } from "wouter";
 
 interface ProductCardProps {
   id: string;
@@ -15,8 +16,9 @@ export function ProductCard({ id, name, price, originalPrice, image, rating, rev
   const discount = originalPrice ? Math.round((1 - price / originalPrice) * 100) : 0;
   
   return (
-    <div 
-      className="flex-shrink-0 w-40 group cursor-pointer"
+    <Link 
+      href={`/products/${id}`}
+      className="flex-shrink-0 w-40 group cursor-pointer block"
       data-testid={`product-card-${id}`}
     >
       <div className="relative mb-2 rounded overflow-hidden bg-gray-50">
@@ -58,6 +60,6 @@ export function ProductCard({ id, name, price, originalPrice, image, rating, rev
           <span>({reviewCount})</span>
         </div>
       </div>
-    </div>
+    </Link>
   );
 }
