@@ -96,22 +96,21 @@ export default function ProductDetailPage() {
   return (
     <AppLayout hideNav>
       <div className="min-h-screen bg-white pb-24">
-        <div className="sticky top-0 z-50 bg-white border-b border-gray-100">
-        <div className="flex items-center justify-between px-4 py-3">
-          <button onClick={() => window.history.back()} className="p-1" data-testid="button-back">
-            <ChevronLeft className="w-6 h-6 text-gray-700" />
-          </button>
-          <h1 className="text-base font-medium text-gray-900 truncate max-w-[200px]">{product.name}</h1>
-          <div className="flex items-center gap-2">
-            <button onClick={() => setLocation("/")} className="p-1" data-testid="button-home">
-              <Home className="w-5 h-5 text-gray-600" />
+        <div className="absolute top-0 left-0 right-0 z-50">
+          <div className="flex items-center justify-between px-4 py-3">
+            <button onClick={() => window.history.back()} className="p-2 bg-white/80 rounded-full" data-testid="button-back">
+              <ChevronLeft className="w-6 h-6 text-gray-700" />
             </button>
-            <button onClick={() => setLocation("/mypage")} className="p-1 relative" data-testid="button-cart">
-              <ShoppingCart className="w-5 h-5 text-gray-600" />
-            </button>
+            <div className="flex items-center gap-2">
+              <button onClick={() => setLocation("/")} className="p-2 bg-white/80 rounded-full" data-testid="button-home">
+                <Home className="w-5 h-5 text-gray-600" />
+              </button>
+              <button onClick={() => setLocation("/mypage")} className="p-2 bg-white/80 rounded-full" data-testid="button-cart">
+                <ShoppingCart className="w-5 h-5 text-gray-600" />
+              </button>
+            </div>
           </div>
         </div>
-      </div>
 
       <div className="relative">
         <div className="aspect-square bg-gray-100">
