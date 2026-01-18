@@ -131,14 +131,26 @@ router.put("/api/admin/products/:id", requireAdmin, async (req: Request, res: Re
         updateData[field] = req.body[field];
       }
     }
+    if (typeof updateData.price === 'string') {
+      updateData.price = parseInt(updateData.price) || 0;
+    }
+    if (typeof updateData.originalPrice === 'string') {
+      updateData.originalPrice = updateData.originalPrice ? parseInt(updateData.originalPrice) : null;
+    }
+    if (typeof updateData.stock === 'string') {
+      updateData.stock = parseInt(updateData.stock) || 0;
+    }
+    if (typeof updateData.categoryId === 'string') {
+      updateData.categoryId = updateData.categoryId ? parseInt(updateData.categoryId) : null;
+    }
     if (updateData.descriptionMarkdown && !updateData.description) {
       updateData.description = updateData.descriptionMarkdown.replace(/[#*`\[\]]/g, '').substring(0, 500);
     }
     const product = await storage.updateProduct(parseInt(req.params.id), updateData);
     res.json(product);
-  } catch (error) {
-    console.error("Product update error:", error);
-    res.status(400).json({ error: "상품 수정에 실패했습니다" });
+  } catch (error: any) {
+    console.error("Product update error:", error?.message || error);
+    res.status(400).json({ error: "상품 수정에 실패했습니다", details: error?.message });
   }
 });
 
