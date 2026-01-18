@@ -303,109 +303,100 @@ export default function AdminProductFormPage() {
             <div className="bg-white rounded-xl border border-gray-200 p-6">
               <h3 className="text-lg font-bold text-gray-900 mb-4">상품 이미지</h3>
               <p className="text-sm text-gray-500 mb-4">
-                이미지를 추가하고, 클릭하여 대표 이미지로 설정하세요. 드래그하여 순서를 변경할 수 있습니다.
+                드래그하여 순서를 변경하고, 체크박스로 대표 이미지를 선택하세요.
                 <br /><span className="text-primary">(대표 이미지는 파란 테두리로 표시됩니다)</span>
               </p>
-              <div className="flex gap-3 flex-wrap mb-4">
-                {/* 모든 이미지를 하나의 배열로 관리 */}
+              <div className="flex gap-4 flex-wrap mb-4">
                 {(() => {
                   const allImages = product.image ? [product.image, ...product.images] : [...product.images];
+                  const primaryImage = product.image || '';
                   return allImages.map((img, index) => {
-                    const isPrimary = index === 0;
+                    const isPrimary = img === primaryImage && primaryImage !== '';
                     return (
                       <div 
                         key={`img-${index}`}
-                        className={`relative cursor-move group ${isPrimary ? '' : ''}`}
+                        className="relative group"
                         draggable
                         onDragStart={(e) => {
                           e.dataTransfer.setData('text/plain', index.toString());
-                          e.currentTarget.classList.add('opacity-50');
+                          e.currentTarget.classList.add('opacity-50', 'scale-95');
                         }}
                         onDragEnd={(e) => {
-                          e.currentTarget.classList.remove('opacity-50');
+                          e.currentTarget.classList.remove('opacity-50', 'scale-95');
                         }}
                         onDragOver={(e) => {
                           e.preventDefault();
-                          e.currentTarget.classList.add('ring-2', 'ring-primary');
+                          e.currentTarget.classList.add('ring-2', 'ring-blue-400');
                         }}
                         onDragLeave={(e) => {
-                          e.currentTarget.classList.remove('ring-2', 'ring-primary');
+                          e.currentTarget.classList.remove('ring-2', 'ring-blue-400');
                         }}
                         onDrop={(e) => {
                           e.preventDefault();
-                          e.currentTarget.classList.remove('ring-2', 'ring-primary');
+                          e.currentTarget.classList.remove('ring-2', 'ring-blue-400');
                           const fromIndex = parseInt(e.dataTransfer.getData('text/plain'));
                           const toIndex = index;
                           if (fromIndex !== toIndex) {
                             const newAllImages = [...allImages];
                             const [movedImage] = newAllImages.splice(fromIndex, 1);
                             newAllImages.splice(toIndex, 0, movedImage);
+                            const newPrimary = newAllImages.includes(primaryImage) ? primaryImage : newAllImages[0] || '';
                             setProduct({ 
                               ...product, 
-                              image: newAllImages[0] || '', 
-                              images: newAllImages.slice(1) 
-                            });
-                          }
-                        }}
-                        onClick={() => {
-                          if (!isPrimary) {
-                            const newAllImages = [...allImages];
-                            const [clickedImage] = newAllImages.splice(index, 1);
-                            newAllImages.unshift(clickedImage);
-                            setProduct({ 
-                              ...product, 
-                              image: newAllImages[0], 
-                              images: newAllImages.slice(1) 
+                              image: newPrimary, 
+                              images: newAllImages.filter(i => i !== newPrimary)
                             });
                           }
                         }}
                       >
-                        <img 
-                          src={img} 
-                          alt={isPrimary ? "대표 이미지" : `추가 이미지 ${index}`} 
-                          className={`w-24 h-24 object-cover rounded-lg transition-all ${
-                            isPrimary 
-                              ? 'ring-2 ring-primary ring-offset-2' 
-                              : 'border-2 border-gray-200 hover:border-primary'
-                          }`}
-                        />
-                        {isPrimary && (
-                          <span className="absolute -top-2 -left-2 bg-primary text-white text-xs px-2 py-0.5 rounded-full">대표</span>
-                        )}
-                        <div className="absolute -top-2 -right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          {index > 0 && (
-                            <button 
-                              onClick={(e) => { 
-                                e.stopPropagation(); 
-                                const newAllImages = [...allImages];
-                                [newAllImages[index - 1], newAllImages[index]] = [newAllImages[index], newAllImages[index - 1]];
-                                setProduct({ ...product, image: newAllImages[0], images: newAllImages.slice(1) });
-                              }}
-                              className="bg-gray-600 text-white rounded-full p-1 hover:bg-gray-700"
-                              title="왼쪽으로 이동"
-                            >
-                              <ChevronLeft className="w-3 h-3" />
-                            </button>
-                          )}
-                          <button 
-                            onClick={(e) => { 
-                              e.stopPropagation(); 
-                              const newAllImages = allImages.filter((_, i) => i !== index);
-                              setProduct({ 
-                                ...product, 
-                                image: newAllImages[0] || '', 
-                                images: newAllImages.slice(1) 
-                              });
-                            }}
-                            className="bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
-                            title="삭제"
-                          >
-                            <X className="w-3 h-3" />
-                          </button>
+                        <div className="cursor-move">
+                          <img 
+                            src={img} 
+                            alt={isPrimary ? "대표 이미지" : `이미지 ${index + 1}`} 
+                            className={`w-24 h-24 object-cover rounded-lg transition-all ${
+                              isPrimary 
+                                ? 'ring-2 ring-primary ring-offset-2' 
+                                : 'border-2 border-gray-200'
+                            }`}
+                          />
                         </div>
+                        {isPrimary && (
+                          <span className="absolute -top-2 -left-2 bg-primary text-white text-xs px-2 py-0.5 rounded-full z-10">대표</span>
+                        )}
+                        <button 
+                          onClick={() => {
+                            const newAllImages = allImages.filter((_, i) => i !== index);
+                            const newPrimary = isPrimary ? (newAllImages[0] || '') : primaryImage;
+                            setProduct({ 
+                              ...product, 
+                              image: newPrimary, 
+                              images: newAllImages.filter(i => i !== newPrimary)
+                            });
+                          }}
+                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                          title="삭제"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
                         <span className="absolute bottom-1 right-1 bg-black/50 text-white text-xs px-1.5 py-0.5 rounded">
                           {index + 1}
                         </span>
+                        <label className="absolute bottom-1 left-1 flex items-center gap-1 bg-white/90 px-1.5 py-0.5 rounded cursor-pointer">
+                          <input 
+                            type="radio"
+                            name="primaryImage"
+                            checked={isPrimary}
+                            onChange={() => {
+                              setProduct({ 
+                                ...product, 
+                                image: img, 
+                                images: allImages.filter(i => i !== img)
+                              });
+                            }}
+                            className="w-3 h-3 accent-primary"
+                          />
+                          <span className="text-xs text-gray-700">대표</span>
+                        </label>
                       </div>
                     );
                   });
