@@ -98,14 +98,14 @@ export default function ProductDetailPage() {
       <div className="min-h-screen bg-white pb-24">
         <div className="absolute top-0 left-0 right-0 z-50">
           <div className="flex items-center justify-between px-4 py-3">
-            <button onClick={() => window.history.back()} className="p-2 bg-white/80 rounded-full" data-testid="button-back">
+            <button onClick={() => window.history.back()} className="p-1" data-testid="button-back">
               <ChevronLeft className="w-6 h-6 text-gray-700" />
             </button>
-            <div className="flex items-center gap-2">
-              <button onClick={() => setLocation("/")} className="p-2 bg-white/80 rounded-full" data-testid="button-home">
+            <div className="flex items-center gap-3">
+              <button onClick={() => setLocation("/")} className="p-1" data-testid="button-home">
                 <Home className="w-5 h-5 text-gray-600" />
               </button>
-              <button onClick={() => setLocation("/mypage")} className="p-2 bg-white/80 rounded-full" data-testid="button-cart">
+              <button onClick={() => setLocation("/mypage")} className="p-1" data-testid="button-cart">
                 <ShoppingCart className="w-5 h-5 text-gray-600" />
               </button>
             </div>
