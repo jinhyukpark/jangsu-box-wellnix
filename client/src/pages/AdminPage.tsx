@@ -1858,16 +1858,18 @@ export default function AdminPage() {
                   {subscriptionPlans.map((plan) => (
                     <div 
                       key={plan.id} 
-                      className={`bg-white rounded-lg border-2 p-6 relative ${plan.isPopular ? 'border-primary' : 'border-gray-200'}`}
+                      className={`bg-white rounded-lg border-2 p-6 ${plan.isPopular ? 'border-primary' : 'border-gray-200'}`}
                     >
-                      {plan.isPopular && (
-                        <span className="absolute top-4 left-4 bg-gray-900 text-white text-xs font-bold px-2 py-1 rounded">
-                          BEST
-                        </span>
-                      )}
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
-                          <h3 className="text-xl font-bold text-gray-900 mb-1">{plan.name}</h3>
+                          <h3 className="text-xl font-bold text-gray-900 mb-1 flex items-center gap-2">
+                            {plan.name}
+                            {plan.isPopular && (
+                              <span className="bg-gray-900 text-white text-xs font-bold px-2 py-1 rounded">
+                                BEST
+                              </span>
+                            )}
+                          </h3>
                           <p className="text-sm text-gray-600 mb-3">{plan.description}</p>
                           <div className="flex flex-wrap gap-2 mb-4">
                             {(plan.features || []).map((feature: string, i: number) => (
