@@ -1,45 +1,17 @@
 import { useRef } from "react";
 import { ArrowLeft, ShoppingCart, Gift, ChevronRight, Heart, Calendar, Users, Sparkles } from "lucide-react";
 import { useLocation } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import { AppLayout } from "@/components/AppLayout";
 import { SEO } from "@/components/SEO";
 import giftBoxImage from "@assets/generated_images/premium_korean_health_gift_box.png";
 import happySeniorsImage from "@assets/generated_images/happy_seniors_receiving_gift.png";
+import type { SubscriptionPlan } from "@shared/schema";
 
 const reviews = [
   { id: "1", name: "김**", rating: 5, date: "2026.01.10", content: "부모님이 정말 좋아하세요! 매달 기다리신대요. 포장도 고급스럽고 내용물도 알차요.", product: "프리미엄 박스" },
   { id: "2", name: "이**", rating: 5, date: "2026.01.08", content: "멀리 계신 시부모님께 효도하는 마음으로 구독했어요. 손편지 서비스가 특히 좋아요!", product: "베이직 박스" },
   { id: "3", name: "박**", rating: 5, date: "2026.01.05", content: "3개월째 구독 중인데 매번 다른 구성이라 좋습니다. 홍삼 품질이 최고예요.", product: "VIP 박스" },
-];
-
-const subscriptionPlans = [
-  { 
-    id: "basic", 
-    name: "효심 박스", 
-    price: 89000, 
-    originalPrice: 120000,
-    description: "매월 엄선된 건강식품 3~4종",
-    features: ["홍삼/건강즙 포함", "계절별 맞춤 구성", "무료 배송"],
-    popular: false
-  },
-  { 
-    id: "premium", 
-    name: "장수 박스", 
-    price: 159000, 
-    originalPrice: 200000,
-    description: "엄선된 건강식품 5~6종 + 추억상자",
-    features: ["고급 홍삼/녹용 포함", "시즌 한정 특별구성", "고급 포장 & 추억상자"],
-    popular: true
-  },
-  { 
-    id: "vip", 
-    name: "천수 박스", 
-    price: 289000, 
-    originalPrice: 350000,
-    description: "최상급 건강식품 8종 + 프리미엄 케어",
-    features: ["최상급 산삼/녹용", "1:1 건강상담", "명인 한정 상품"],
-    popular: false
-  },
 ];
 
 const monthlyStories = [
@@ -51,6 +23,15 @@ const monthlyStories = [
 export default function SubscriptionPage() {
   const [, setLocation] = useLocation();
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  const { data: subscriptionPlans = [], isLoading: plansLoading } = useQuery<SubscriptionPlan[]>({
+    queryKey: ["/api/subscription-plans"],
+    queryFn: async () => {
+      const res = await fetch("/api/subscription-plans");
+      if (!res.ok) throw new Error("Failed to fetch plans");
+      return res.json();
+    },
+  });
 
   const handleWheel = (e: React.WheelEvent) => {
     if (scrollRef.current) {
@@ -143,16 +124,18 @@ export default function SubscriptionPage() {
           </h3>
           
           <div className="space-y-3">
-            {subscriptionPlans.map((plan) => (
+            {plansLoading ? (
+              <div className="text-center py-8 text-gray-500">로딩중...</div>
+            ) : subscriptionPlans.filter(p => p.isActive).map((plan) => (
               <button
                 key={plan.id}
                 className={`w-full text-left p-4 rounded-lg border-2 transition-all ${
-                  plan.popular 
+                  plan.isPopular 
                     ? "border-primary bg-white shadow-lg" 
                     : "border-gray-200 bg-white hover:border-gray-300"
                 }`}
               >
-                {plan.popular && (
+                {plan.isPopular && (
                   <span className="inline-block bg-primary text-white text-xs font-bold px-2 py-0.5 rounded mb-2">
                     BEST
                   </span>
@@ -163,12 +146,14 @@ export default function SubscriptionPage() {
                     <p className="text-sm text-gray-500">{plan.description}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-xs text-gray-400 line-through">{plan.originalPrice.toLocaleString()}원</p>
+                    {plan.originalPrice && plan.originalPrice > plan.price && (
+                      <p className="text-xs text-gray-400 line-through">{plan.originalPrice.toLocaleString()}원</p>
+                    )}
                     <p className="text-lg font-bold text-primary">{plan.price.toLocaleString()}원<span className="text-sm font-normal text-gray-500">/월</span></p>
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-1">
-                  {plan.features.map((f) => (
+                  {(plan.features || []).map((f: string) => (
                     <span key={f} className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">{f}</span>
                   ))}
                 </div>
