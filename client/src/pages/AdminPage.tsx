@@ -489,11 +489,28 @@ export default function AdminPage() {
       return;
     }
     try {
-      const eventData = {
-        ...eventForm,
+      const eventData: any = {
+        title: eventForm.title,
+        description: eventForm.description || undefined,
         date: new Date(eventForm.date),
-        endDate: eventForm.endDate ? new Date(eventForm.endDate) : null,
+        time: eventForm.time || undefined,
+        location: eventForm.location || undefined,
+        detailedAddress: eventForm.detailedAddress || undefined,
+        locationType: eventForm.locationType,
+        image: eventForm.image || undefined,
+        tag: eventForm.tag || undefined,
+        category: eventForm.category || undefined,
+        maxParticipants: eventForm.maxParticipants || undefined,
+        status: eventForm.status,
+        programSchedule: eventForm.programSchedule.length > 0 ? eventForm.programSchedule : undefined,
+        benefits: eventForm.benefits.length > 0 ? eventForm.benefits : undefined,
+        promotions: eventForm.promotions.length > 0 ? eventForm.promotions : undefined,
+        organizerInfo: eventForm.organizerInfo.company ? eventForm.organizerInfo : undefined,
+        notices: eventForm.notices.length > 0 ? eventForm.notices : undefined,
       };
+      if (eventForm.endDate) {
+        eventData.endDate = new Date(eventForm.endDate);
+      }
       if (editingEvent) {
         await updateEventMutation.mutateAsync({ id: editingEvent.id, ...eventData });
         toast({ title: "수정 완료", description: "행사가 수정되었습니다." });

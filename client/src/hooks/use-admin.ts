@@ -175,7 +175,7 @@ export function useCreateEvent() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: Partial<Event>) => 
-      fetchWithAuth("/api/events", { method: "POST", body: JSON.stringify(data) }),
+      fetchWithAuth("/api/admin/events", { method: "POST", body: JSON.stringify(data) }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin", "events"] }),
   });
 }
@@ -184,7 +184,7 @@ export function useUpdateEvent() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id, ...data }: Partial<Event> & { id: number }) => 
-      fetchWithAuth(`/api/events/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+      fetchWithAuth(`/api/admin/events/${id}`, { method: "PUT", body: JSON.stringify(data) }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin", "events"] }),
   });
 }
@@ -193,7 +193,7 @@ export function useDeleteEvent() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: number) => 
-      fetchWithAuth(`/api/events/${id}`, { method: "DELETE" }),
+      fetchWithAuth(`/api/admin/events/${id}`, { method: "DELETE" }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin", "events"] }),
   });
 }
