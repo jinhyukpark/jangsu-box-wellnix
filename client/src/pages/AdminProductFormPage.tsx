@@ -375,6 +375,17 @@ export default function AdminProductFormPage() {
                       />
                     </div>
                     <div>
+                      <Label htmlFor="description">설명</Label>
+                      <Textarea
+                        id="description"
+                        value={product.description || ""}
+                        onChange={(e) => setProduct({ ...product, description: e.target.value })}
+                        placeholder="상품에 대한 상세 설명을 입력하세요"
+                        rows={3}
+                        data-testid="input-description"
+                      />
+                    </div>
+                    <div>
                       <Label htmlFor="shortDescription">짧은 설명</Label>
                       <Input
                         id="shortDescription"
