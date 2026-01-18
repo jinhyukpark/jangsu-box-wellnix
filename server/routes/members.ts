@@ -7,8 +7,19 @@ import { requireAuth, requireAdmin } from "../middleware";
 const router = Router();
 
 router.get("/api/products/:id/reviews", async (req: Request, res: Response) => {
-  const reviews = await storage.getReviewsByProduct(parseInt(req.params.id));
-  res.json(reviews);
+  const productReviews = await storage.getReviewsByProduct(parseInt(req.params.id));
+  const reviewsWithMember = await Promise.all(
+    productReviews.map(async (review) => {
+      const member = await storage.getMember(review.memberId);
+      const memberName = member?.name ? 
+        member.name.charAt(0) + "*" + member.name.slice(-1) : "익명";
+      return {
+        ...review,
+        memberName,
+      };
+    })
+  );
+  res.json(reviewsWithMember);
 });
 
 router.get("/api/reviews", requireAuth, async (req: Request, res: Response) => {
