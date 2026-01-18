@@ -1,6 +1,4 @@
-import officeWorkersImage from "@assets/generated_images/smiling_office_workers_team.png";
-import giftBoxImage from "@assets/generated_images/premium_korean_health_gift_box.png";
-import customerServiceImage from "@assets/generated_images/customer_service_representative_headset.png";
+import { images } from "@/lib/images";
 
 export function PromoBanner() {
   return (
@@ -15,7 +13,7 @@ export function PromoBanner() {
         </div>
         <div className="absolute right-0 top-0 h-full w-36">
           <img 
-            src={officeWorkersImage} 
+            src={images.smilingOfficeWorkersTeam} 
             alt="기업 구매" 
             className="w-full h-full object-cover object-top"
           />
@@ -33,7 +31,7 @@ export function PromoBanner() {
         </div>
         <div className="absolute right-0 top-0 h-full w-36">
           <img 
-            src={giftBoxImage} 
+            src={images.premiumKoreanHealthGiftBox} 
             alt="장수박스" 
             className="w-full h-full object-cover"
           />
@@ -51,7 +49,7 @@ export function PromoBanner() {
         </div>
         <div className="absolute right-0 top-0 h-full w-36">
           <img 
-            src={customerServiceImage} 
+            src={images.customerServiceRepresentativeHeadset} 
             alt="고객센터" 
             className="w-full h-full object-cover"
           />

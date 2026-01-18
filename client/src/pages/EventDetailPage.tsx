@@ -2,9 +2,11 @@ import { useParams, useLocation } from "wouter";
 import { ArrowLeft, Calendar, MapPin, Users, Clock, Gift, Utensils, Bus, CheckCircle, MessageCircle, Share2, Building2, Phone, User } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { SEO } from "@/components/SEO";
-import templeImage from "@assets/generated_images/korean_temple_autumn_travel.png";
-import hqImage from "@assets/generated_images/modern_wellness_company_hq.png";
-import rehabImage from "@assets/generated_images/senior_rehab_therapy_equipment.png";
+import { images } from "@/lib/images";
+
+const templeImage = images.koreanTempleAutumnTravel;
+const hqImage = images.modernWellnessCompanyHq;
+const rehabImage = images.seniorRehabTherapyEquipment;
 
 const eventsData: Record<string, {
   id: string;

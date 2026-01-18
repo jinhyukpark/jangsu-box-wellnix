@@ -4,7 +4,9 @@ import { ArrowLeft, Building2, Gift, Users, Calendar, CheckCircle, Send, Chevron
 import { AppLayout } from "@/components/AppLayout";
 import { SEO } from "@/components/SEO";
 import { toast } from "sonner";
-import hqImage from "@assets/generated_images/modern_wellness_company_hq.png";
+import { images } from "@/lib/images";
+
+const hqImage = images.modernWellnessCompanyHq;
 
 export default function CorporateInquiryPage() {
   const [, setLocation] = useLocation();

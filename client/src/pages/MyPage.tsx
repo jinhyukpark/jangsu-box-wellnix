@@ -2,10 +2,12 @@ import { useState } from "react";
 import { useLocation } from "wouter";
 import { Bell, ShoppingCart, ChevronRight, Gift, Package, Heart, Star, Truck, Award, Mail, User, Loader2 } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
-import giftBoxImage from "@assets/generated_images/premium_korean_health_gift_box.png";
-import happySeniorsImage from "@assets/generated_images/happy_seniors_receiving_gift.png";
+import { images } from "@/lib/images";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
+
+const giftBoxImage = images.premiumKoreanHealthGiftBox;
+const happySeniorsImage = images.happySeniorsReceivingGift;
 
 const recentOrders = [
   { image: giftBoxImage, name: "[2026] 설 프리미엄 홍삼 선물세트", status: "배송중", date: "01.12 도착예정" },

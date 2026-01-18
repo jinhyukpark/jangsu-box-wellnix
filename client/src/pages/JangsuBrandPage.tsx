@@ -3,11 +3,11 @@ import { useLocation } from "wouter";
 import { AppLayout } from "@/components/AppLayout";
 import { SEO } from "@/components/SEO";
 import { motion } from "framer-motion";
+import { images } from "@/lib/images";
 
-// Images (generated)
-import happySeniorsImage from "@assets/generated_images/happy_korean_seniors_opening_luxury_gift_box.png";
-import messageNotificationImage from "@assets/generated_images/smartphone_showing_caring_message_notification.png";
-import premiumBoxImage from "@assets/generated_images/premium_korean_health_gift_box_composition.png";
+const happySeniorsImage = images.happyKoreanSeniorsOpeningLuxuryGiftBox;
+const messageNotificationImage = images.smartphoneShowingCaringMessageNotification;
+const premiumBoxImage = images.premiumKoreanHealthGiftBoxComposition;
 
 export default function JangsuBrandPage() {
   const [, setLocation] = useLocation();

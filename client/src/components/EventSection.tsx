@@ -1,6 +1,6 @@
 import { ChevronRight, Calendar } from "lucide-react";
 import { useRef } from "react";
-import tourEventImage from "@assets/generated_images/seniors_health_tour_event.png";
+import { images } from "@/lib/images";
 
 const events = [
   {
@@ -15,7 +15,7 @@ const events = [
     arrivalTime: "10:30",
     price: 89000,
     originalPrice: 150000,
-    image: tourEventImage,
+    image: images.seniorsHealthTourEvent,
     included: ["왕복 버스", "점심 식사", "힐링 프로그램", "기념품"],
   },
   {
@@ -30,7 +30,7 @@ const events = [
     arrivalTime: "11:30",
     price: 29000,
     originalPrice: 50000,
-    image: tourEventImage,
+    image: images.seniorsHealthTourEvent,
     included: ["온라인 강의", "교재 제공", "수료증"],
   },
   {
@@ -45,7 +45,7 @@ const events = [
     arrivalTime: "14:30",
     price: 0,
     originalPrice: 30000,
-    image: tourEventImage,
+    image: images.seniorsHealthTourEvent,
     included: ["무료 세미나", "홍삼 시음", "선물 증정"],
   },
 ];

@@ -3,28 +3,19 @@ import { Filter, ChevronDown, ArrowLeft, ShoppingCart } from "lucide-react";
 import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { AppLayout } from "@/components/AppLayout";
-import ginsengImg from "@assets/generated_images/korean_red_ginseng_roots.png";
-import heartImg from "@assets/generated_images/heart_health_supplements.png";
-import vitaminImg from "@assets/generated_images/vitamin_supplements_pills.png";
-import fruitImg from "@assets/generated_images/fresh_fruit_gift_basket.png";
-import cosmeticsImg from "@assets/generated_images/luxury_cosmetics_skincare_set.png";
-import sleepImg from "@assets/generated_images/sleep_health_supplements.png";
-import teaImg from "@assets/generated_images/korean_tea_set.png";
-import jointImg from "@assets/generated_images/joint_health_supplements.png";
-import petImg from "@assets/generated_images/cute_dog_and_cat_together.png";
-import dailyImg from "@assets/generated_images/daily_toiletries_products.png";
+import { images } from "@/lib/images";
 
 const categoryImageMap: Record<string, string> = {
-  "ginseng": ginsengImg,
-  "vitamins": vitaminImg,
-  "juice": teaImg,
-  "probiotics": heartImg,
-  "joint": jointImg,
-  "blood": heartImg,
-  "cosmetics": cosmeticsImg,
-  "sleep": sleepImg,
-  "pet": petImg,
-  "daily": dailyImg,
+  "ginseng": images.koreanRedGinsengRoots,
+  "vitamins": images.vitaminSupplementsPills,
+  "juice": images.koreanTeaSet,
+  "probiotics": images.heartHealthSupplements,
+  "joint": images.jointHealthSupplements,
+  "blood": images.heartHealthSupplements,
+  "cosmetics": images.luxuryCosmeticsSkincareSet,
+  "sleep": images.sleepHealthSupplements,
+  "pet": images.cuteDogAndCatTogether,
+  "daily": images.dailyToiletriesProducts,
 };
 
 interface Product {
@@ -81,7 +72,7 @@ export default function GiftsPage() {
     : activeProducts;
 
   const getCategoryImage = (slug: string) => {
-    return categoryImageMap[slug] || ginsengImg;
+    return categoryImageMap[slug] || images.koreanRedGinsengRoots;
   };
 
   return (

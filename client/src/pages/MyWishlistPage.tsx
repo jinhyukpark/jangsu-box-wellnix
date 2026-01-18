@@ -4,9 +4,11 @@ import { ArrowLeft, Trash2, Calendar, Check, ShoppingCart, Heart } from "lucide-
 import { AppLayout } from "@/components/AppLayout";
 import { SEO } from "@/components/SEO";
 import { toast } from "sonner";
-import giftBoxImage from "@assets/generated_images/premium_korean_health_gift_box.png";
-import ginsengImage from "@assets/generated_images/korean_red_ginseng_jeonggwa.png";
-import walnutImage from "@assets/generated_images/organic_walnuts_in_bowl.png";
+import { images } from "@/lib/images";
+
+const giftBoxImage = images.premiumKoreanHealthGiftBox;
+const ginsengImage = images.koreanRedGinsengJeonggwa;
+const walnutImage = images.organicWalnutsInBowl;
 
 // Mock data for wishlist items
 const initialWishlist = [

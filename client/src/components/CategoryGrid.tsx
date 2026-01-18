@@ -1,26 +1,17 @@
 import { useLocation } from "wouter";
-import ginsengImg from "@assets/generated_images/korean_red_ginseng_roots.png";
-import heartImg from "@assets/generated_images/heart_health_supplements.png";
-import vitaminImg from "@assets/generated_images/vitamin_supplements_pills.png";
-import fruitImg from "@assets/generated_images/fresh_fruit_gift_basket.png";
-import cosmeticsImg from "@assets/generated_images/luxury_cosmetics_skincare_set.png";
-import sleepImg from "@assets/generated_images/sleep_health_supplements.png";
-import teaImg from "@assets/generated_images/korean_tea_set.png";
-import jointImg from "@assets/generated_images/joint_health_supplements.png";
-import petImg from "@assets/generated_images/cute_dog_and_cat_together.png";
-import dailyImg from "@assets/generated_images/daily_toiletries_products.png";
+import { images } from "@/lib/images";
 
 const categories = [
-  { image: ginsengImg, label: "홍삼" },
-  { image: heartImg, label: "혈압건강" },
-  { image: vitaminImg, label: "영양제" },
-  { image: fruitImg, label: "과일선물" },
-  { image: cosmeticsImg, label: "화장품" },
-  { image: sleepImg, label: "수면건강" },
-  { image: teaImg, label: "차/음료" },
-  { image: jointImg, label: "관절건강" },
-  { image: petImg, label: "반려동물" },
-  { image: dailyImg, label: "생활용품" },
+  { image: images.koreanRedGinsengRoots, label: "홍삼" },
+  { image: images.heartHealthSupplements, label: "혈압건강" },
+  { image: images.vitaminSupplementsPills, label: "영양제" },
+  { image: images.freshFruitGiftBasket, label: "과일선물" },
+  { image: images.luxuryCosmeticsSkincareSet, label: "화장품" },
+  { image: images.sleepHealthSupplements, label: "수면건강" },
+  { image: images.koreanTeaSet, label: "차/음료" },
+  { image: images.jointHealthSupplements, label: "관절건강" },
+  { image: images.cuteDogAndCatTogether, label: "반려동물" },
+  { image: images.dailyToiletriesProducts, label: "생활용품" },
 ];
 
 export function CategoryGrid() {

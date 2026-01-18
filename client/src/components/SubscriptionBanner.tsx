@@ -1,10 +1,10 @@
-import happySeniorsImage from "@assets/generated_images/happy_seniors_opening_gift_box.png";
+import { images } from "@/lib/images";
 
 export function SubscriptionBanner() {
   return (
     <div className="mx-4 my-5 rounded overflow-hidden relative">
       <img 
-        src={happySeniorsImage} 
+        src={images.happySeniorsOpeningGiftBox} 
         alt="장수박스를 받은 행복한 부모님"
         className="w-full h-64 object-cover"
       />

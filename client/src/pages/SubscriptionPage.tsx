@@ -4,9 +4,11 @@ import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { AppLayout } from "@/components/AppLayout";
 import { SEO } from "@/components/SEO";
-import giftBoxImage from "@assets/generated_images/premium_korean_health_gift_box.png";
-import happySeniorsImage from "@assets/generated_images/happy_seniors_receiving_gift.png";
+import { images } from "@/lib/images";
 import type { SubscriptionPlan } from "@shared/schema";
+
+const giftBoxImage = images.premiumKoreanHealthGiftBox;
+const happySeniorsImage = images.happySeniorsReceivingGift;
 
 const reviews = [
   { id: "1", name: "김**", rating: 5, date: "2026.01.10", content: "부모님이 정말 좋아하세요! 매달 기다리신대요. 포장도 고급스럽고 내용물도 알차요.", product: "프리미엄 박스" },

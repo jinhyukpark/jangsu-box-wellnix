@@ -4,7 +4,9 @@ import { ArrowLeft, Star, AlertCircle, Trash2, Calendar, Check } from "lucide-re
 import { AppLayout } from "@/components/AppLayout";
 import { SEO } from "@/components/SEO";
 import { toast } from "sonner";
-import giftBoxImage from "@assets/generated_images/premium_korean_health_gift_box.png";
+import { images } from "@/lib/images";
+
+const giftBoxImage = images.premiumKoreanHealthGiftBox;
 
 // Mock data for user reviews with time
 const initialReviews = [

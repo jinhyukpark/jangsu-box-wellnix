@@ -4,9 +4,11 @@ import { ArrowLeft, Trash2, Calendar, Check, ShoppingCart, Clock } from "lucide-
 import { AppLayout } from "@/components/AppLayout";
 import { SEO } from "@/components/SEO";
 import { toast } from "sonner";
-import giftBoxImage from "@assets/generated_images/premium_korean_health_gift_box.png";
-import ginsengImage from "@assets/generated_images/korean_red_ginseng_jeonggwa.png";
-import jujubeImage from "@assets/generated_images/korean_dried_jujube_chips.png";
+import { images } from "@/lib/images";
+
+const giftBoxImage = images.premiumKoreanHealthGiftBox;
+const ginsengImage = images.koreanRedGinsengJeonggwa;
+const jujubeImage = images.koreanDriedJujubeChips;
 
 // Mock data for recently viewed items
 const initialRecentList = [

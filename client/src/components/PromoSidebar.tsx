@@ -1,9 +1,6 @@
 import { Gift, Truck, Shield, Phone } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import happySeniorsImage from "@assets/generated_images/happy_seniors_receiving_gift.png";
-import officeTeamImage from "@assets/generated_images/smiling_office_workers_team.png";
-import giftSetImage from "@assets/generated_images/korean_health_gift_set.png";
-import customerServiceImage from "@assets/generated_images/customer_service_representative_headset.png";
+import { images } from "@/lib/images";
 import { Link } from "wouter";
 
 interface BrandingItem {
@@ -19,10 +16,10 @@ interface BrandingItem {
 }
 
 const defaultImages: Record<string, string> = {
-  hero: happySeniorsImage,
-  banner1: officeTeamImage,
-  banner2: giftSetImage,
-  banner3: customerServiceImage,
+  hero: images.happySeniorsReceivingGift,
+  banner1: images.smilingOfficeWorkersTeam,
+  banner2: images.koreanHealthGiftSet,
+  banner3: images.customerServiceRepresentativeHeadset,
 };
 
 const defaultData: Record<string, Partial<BrandingItem>> = {
@@ -75,7 +72,7 @@ export function PromoSidebar() {
       linkUrl: item?.linkUrl ?? defaults.linkUrl ?? null,
       linkText: item?.linkText ?? defaults.subtitle ?? null,
       isActive: item?.isActive ?? true,
-      displayImage: item?.image || defaultImages[key] || happySeniorsImage,
+      displayImage: item?.image || defaultImages[key] || images.happySeniorsReceivingGift,
     };
   };
 

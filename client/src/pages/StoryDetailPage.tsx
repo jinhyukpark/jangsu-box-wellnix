@@ -2,12 +2,14 @@ import { ArrowLeft, Share2, Heart, Calendar, Package, Gift, CheckCircle, Buildin
 import { useLocation, useParams } from "wouter";
 import { AppLayout } from "@/components/AppLayout";
 import { SEO } from "@/components/SEO";
-import giftBoxImage from "@assets/generated_images/premium_korean_health_gift_box.png";
-import luckyPouchImage from "@assets/generated_images/korean_lucky_pouch_bokjumeoni.png";
-import ginsengImage from "@assets/generated_images/korean_red_ginseng_jeonggwa.png";
-import jujubeImage from "@assets/generated_images/korean_dried_jujube_chips.png";
-import walnutImage from "@assets/generated_images/organic_walnuts_in_bowl.png";
-import hangwaImage from "@assets/generated_images/traditional_korean_hangwa_cookies.png";
+import { images } from "@/lib/images";
+
+const giftBoxImage = images.premiumKoreanHealthGiftBox;
+const luckyPouchImage = images.koreanLuckyPouchBokjumeoni;
+const ginsengImage = images.koreanRedGinsengJeonggwa;
+const jujubeImage = images.koreanDriedJujubeChips;
+const walnutImage = images.organicWalnutsInBowl;
+const hangwaImage = images.traditionalKoreanHangwaCookies;
 
 const storiesData: Record<string, {
   month: string;

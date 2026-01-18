@@ -1,6 +1,6 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
-import giftSetImage from "@assets/generated_images/luxury_korean_health_gift_set.png";
+import { images } from "@/lib/images";
 
 const banners = [
   {
@@ -8,21 +8,21 @@ const banners = [
     title: "2026 설 얼리버드",
     subtitle: "설 선물 웰닉스로\n감사의 인사를 전하세요",
     badge: "최대 40% 할인",
-    image: giftSetImage,
+    image: images.luxuryKoreanHealthGiftSet,
   },
   {
     id: 2,
     title: "매주 목요일은",
     subtitle: "웰닉스 구독자\n특별 할인의 날",
     badge: "구독 혜택",
-    image: giftSetImage,
+    image: images.luxuryKoreanHealthGiftSet,
   },
   {
     id: 3,
     title: "신규 가입 특별 혜택",
     subtitle: "첫 구독 시\n30% 할인 + 무료배송",
     badge: "신규 회원",
-    image: giftSetImage,
+    image: images.luxuryKoreanHealthGiftSet,
   },
 ];
 
