@@ -33,6 +33,27 @@ async function syncSchema() {
       `ALTER TABLE reviews ADD COLUMN IF NOT EXISTS admin_reply_at timestamp`,
       `ALTER TABLE reviews ADD COLUMN IF NOT EXISTS admin_reply_by integer`,
       `ALTER TABLE reviews ADD COLUMN IF NOT EXISTS is_visible boolean DEFAULT true`,
+      // Create main_page_settings table if not exists
+      `CREATE TABLE IF NOT EXISTS main_page_settings (
+        id SERIAL PRIMARY KEY,
+        best_products_criteria VARCHAR(20) DEFAULT 'sales',
+        best_products_manual_ids JSONB DEFAULT '[]',
+        best_products_limit INTEGER DEFAULT 6,
+        ad_banner_image TEXT,
+        ad_banner_link TEXT,
+        ad_banner_enabled BOOLEAN DEFAULT true,
+        new_products_criteria VARCHAR(20) DEFAULT 'recent',
+        new_products_manual_ids JSONB DEFAULT '[]',
+        new_products_limit INTEGER DEFAULT 6,
+        new_products_days_threshold INTEGER DEFAULT 30,
+        events_criteria VARCHAR(20) DEFAULT 'active',
+        events_manual_ids JSONB DEFAULT '[]',
+        events_limit INTEGER DEFAULT 4,
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP DEFAULT NOW()
+      )`,
+      // Add missing columns to main_page_settings if table exists
+      `ALTER TABLE main_page_settings ADD COLUMN IF NOT EXISTS ad_banner_enabled BOOLEAN DEFAULT true`,
     ];
 
     for (const sql of alterStatements) {
