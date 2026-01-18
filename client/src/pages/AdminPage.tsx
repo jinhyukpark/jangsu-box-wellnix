@@ -5,7 +5,7 @@ import {
   Package, Users, Gift, Calendar, CreditCard, Truck, MessageSquare, 
   ChevronRight, Search, Bell, Settings, LogOut, Menu, X,
   TrendingUp, ShoppingBag, UserCheck, Clock, HelpCircle, Star, ShieldCheck, Loader2, ShieldX, Award,
-  ArrowUpDown, ArrowUp, ArrowDown, Home, Image, Link2, GripVertical
+  ArrowUpDown, ArrowUp, ArrowDown, Home, Image, Link2, GripVertical, Upload
 } from "lucide-react";
 import { useAdminProducts, useAdminCategories, useAdminMembers, useAdminSubscriptions, useAdminSubscriptionPlans, useAdminEvents, useAdminInquiries, useAdminFaqs, useAdminList, useDashboardStats, useCreateProduct, useUpdateProduct, useCreateCategory, useUpdateCategory, useDeleteCategory, useCreateFaq, useUpdateFaq, useDeleteFaq, useCreateSubscriptionPlan, useUpdateSubscriptionPlan, useDeleteSubscriptionPlan, useReorderSubscriptionPlans, useDeleteEvent, useMainPageSettings, useUpdateMainPageSettings, type MainPageSettings } from "@/hooks/use-admin";
 import { useAdminAuth, useAdminLogout } from "@/hooks/use-admin-auth";
@@ -348,15 +348,45 @@ function MainPageSettingsPanel({ products, events }: { products: any[], events: 
               <Label htmlFor="adBannerEnabled">광고 배너 활성화</Label>
             </div>
             <div>
-              <Label>배너 이미지 URL</Label>
-              <Input 
-                value={localSettings.adBannerImage || ""} 
-                onChange={(e) => setLocalSettings({ ...localSettings, adBannerImage: e.target.value })}
-                placeholder="이미지 URL 입력 (예: /objects/public/...)"
-                className="mt-1"
-              />
+              <Label>배너 이미지</Label>
+              <div className="flex gap-2 mt-1">
+                <Input 
+                  value={localSettings.adBannerImage || ""} 
+                  onChange={(e) => setLocalSettings({ ...localSettings, adBannerImage: e.target.value })}
+                  placeholder="이미지 URL 입력"
+                  className="flex-1"
+                />
+                <label className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded cursor-pointer transition-colors text-sm">
+                  <Upload className="w-4 h-4" />
+                  업로드
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      const formData = new FormData();
+                      formData.append("file", file);
+                      try {
+                        const res = await fetch("/api/admin/upload", {
+                          method: "POST",
+                          body: formData,
+                          credentials: "include",
+                        });
+                        if (res.ok) {
+                          const { url } = await res.json();
+                          setLocalSettings({ ...localSettings, adBannerImage: url });
+                        }
+                      } catch (error) {
+                        console.error("Upload failed:", error);
+                      }
+                    }}
+                  />
+                </label>
+              </div>
               {localSettings.adBannerImage && (
-                <div className="mt-2 relative w-full h-32 bg-gray-100 rounded overflow-hidden">
+                <div className="mt-2 relative w-full max-w-md h-40 bg-gray-100 rounded overflow-hidden">
                   <img src={localSettings.adBannerImage} alt="Banner preview" className="w-full h-full object-cover" />
                 </div>
               )}
