@@ -45,6 +45,7 @@ const menuItems = [
   { id: "inquiries", label: "1:1 문의", icon: MessageSquare },
   { id: "faq", label: "자주묻는질문", icon: HelpCircle },
   { id: "settings", label: "관리자 설정", icon: ShieldCheck },
+  { id: "base-settings", label: "기준 정보 관리", icon: Settings },
 ];
 
 const mockProducts = [
@@ -2016,6 +2017,122 @@ export default function AdminPage() {
                 </tbody>
               </table>
             </div>
+          </div>
+        );
+
+      case "base-settings":
+        return (
+          <div>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-gray-900">기준 정보 관리</h2>
+            </div>
+
+            <Tabs defaultValue="business" className="space-y-6">
+              <TabsList className="bg-gray-100 p-1 rounded-lg">
+                <TabsTrigger value="business" className="data-[state=active]:bg-white rounded-md px-4 py-2">
+                  사업자 정보
+                </TabsTrigger>
+                <TabsTrigger value="site" className="data-[state=active]:bg-white rounded-md px-4 py-2">
+                  사이트 정보
+                </TabsTrigger>
+                <TabsTrigger value="delivery" className="data-[state=active]:bg-white rounded-md px-4 py-2">
+                  배송 정책
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="business">
+                <div className="bg-white rounded-lg border border-gray-200 p-6">
+                  <h3 className="text-lg font-bold text-gray-900 mb-6">사업자 정보</h3>
+                  <div className="grid grid-cols-2 gap-6">
+                    <div className="space-y-4">
+                      <div>
+                        <Label htmlFor="companyName">상호명</Label>
+                        <Input id="companyName" defaultValue="웰닉스 (주)" placeholder="상호명 입력" />
+                      </div>
+                      <div>
+                        <Label htmlFor="ceoName">대표자</Label>
+                        <Input id="ceoName" defaultValue="김건강" placeholder="대표자명 입력" />
+                      </div>
+                      <div>
+                        <Label htmlFor="privacyOfficer">개인정보 관리 책임자</Label>
+                        <Input id="privacyOfficer" defaultValue="이웰빙" placeholder="책임자명 입력" />
+                      </div>
+                      <div>
+                        <Label htmlFor="businessNumber">사업자 등록번호</Label>
+                        <Input id="businessNumber" defaultValue="123-45-67890" placeholder="000-00-00000" />
+                      </div>
+                    </div>
+                    <div className="space-y-4">
+                      <div>
+                        <Label htmlFor="mailOrderNumber">통신판매업 신고번호</Label>
+                        <Input id="mailOrderNumber" defaultValue="2024-서울강남-0001" placeholder="0000-지역명-0000" />
+                      </div>
+                      <div>
+                        <Label htmlFor="address">사업장 주소</Label>
+                        <Input id="address" defaultValue="서울시 강남구 테헤란로 123" placeholder="주소 입력" />
+                      </div>
+                      <div>
+                        <Label htmlFor="phone">대표전화</Label>
+                        <Input id="phone" defaultValue="1588-0000" placeholder="대표전화 입력" />
+                      </div>
+                      <div>
+                        <Label htmlFor="email">대표이메일</Label>
+                        <Input id="email" defaultValue="info@wellnix.co.kr" placeholder="이메일 입력" />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mt-6 pt-6 border-t border-gray-100 flex justify-end">
+                    <Button className="bg-primary text-white hover:bg-primary/90">저장하기</Button>
+                  </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="site">
+                <div className="bg-white rounded-lg border border-gray-200 p-6">
+                  <h3 className="text-lg font-bold text-gray-900 mb-6">사이트 정보</h3>
+                  <div className="space-y-4 max-w-xl">
+                    <div>
+                      <Label htmlFor="siteName">사이트명</Label>
+                      <Input id="siteName" defaultValue="웰닉스" placeholder="사이트명 입력" />
+                    </div>
+                    <div>
+                      <Label htmlFor="siteDescription">사이트 설명</Label>
+                      <Input id="siteDescription" defaultValue="시니어를 위한 프리미엄 건강식품 쇼핑몰" placeholder="사이트 설명 입력" />
+                    </div>
+                    <div>
+                      <Label htmlFor="copyrightText">저작권 문구</Label>
+                      <Input id="copyrightText" defaultValue="© 2026 웰닉스. All rights reserved." placeholder="저작권 문구 입력" />
+                    </div>
+                  </div>
+                  <div className="mt-6 pt-6 border-t border-gray-100 flex justify-end">
+                    <Button className="bg-primary text-white hover:bg-primary/90">저장하기</Button>
+                  </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="delivery">
+                <div className="bg-white rounded-lg border border-gray-200 p-6">
+                  <h3 className="text-lg font-bold text-gray-900 mb-6">배송 정책</h3>
+                  <div className="space-y-4 max-w-xl">
+                    <div>
+                      <Label htmlFor="shippingFee">기본 배송비</Label>
+                      <Input id="shippingFee" type="number" defaultValue="3500" placeholder="배송비 입력" />
+                    </div>
+                    <div>
+                      <Label htmlFor="freeShippingThreshold">무료배송 기준금액</Label>
+                      <Input id="freeShippingThreshold" type="number" defaultValue="70000" placeholder="기준금액 입력" />
+                    </div>
+                    <div>
+                      <Label htmlFor="remoteAreaFee">도서산간 추가 배송비</Label>
+                      <Input id="remoteAreaFee" type="number" defaultValue="3000" placeholder="추가 배송비 입력" />
+                    </div>
+                  </div>
+                  <div className="mt-6 pt-6 border-t border-gray-100 flex justify-end">
+                    <Button className="bg-primary text-white hover:bg-primary/90">저장하기</Button>
+                  </div>
+                </div>
+              </TabsContent>
+            </Tabs>
           </div>
         );
 
