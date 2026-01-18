@@ -74,8 +74,74 @@ export default function ProductDetailPage() {
   if (isLoading) {
     return (
       <AppLayout hideNav>
-        <div className="min-h-screen bg-white flex items-center justify-center">
-          <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+        <div className="min-h-screen bg-white pb-24">
+          {/* Header Skeleton */}
+          <div className="sticky top-0 left-0 right-0 z-50 bg-white border-b border-gray-100">
+            <div className="flex items-center justify-between px-4 py-3">
+              <div className="w-6 h-6 bg-gray-200 rounded animate-pulse" />
+              <div className="w-20 h-5 bg-gray-200 rounded animate-pulse" />
+              <div className="flex items-center gap-3">
+                <div className="w-5 h-5 bg-gray-200 rounded animate-pulse" />
+                <div className="w-5 h-5 bg-gray-200 rounded animate-pulse" />
+              </div>
+            </div>
+          </div>
+
+          {/* Image Skeleton */}
+          <div className="relative aspect-square bg-gray-200 animate-pulse" />
+
+          {/* Product Info Skeleton */}
+          <div className="p-4 space-y-4">
+            {/* Badge & Title */}
+            <div className="space-y-2">
+              <div className="w-24 h-5 bg-gray-200 rounded animate-pulse" />
+              <div className="w-full h-6 bg-gray-200 rounded animate-pulse" />
+              <div className="w-3/4 h-4 bg-gray-200 rounded animate-pulse" />
+            </div>
+
+            {/* Price */}
+            <div className="flex items-baseline gap-2">
+              <div className="w-28 h-8 bg-gray-200 rounded animate-pulse" />
+              <div className="w-16 h-4 bg-gray-200 rounded animate-pulse" />
+            </div>
+
+            {/* Rating */}
+            <div className="flex items-center gap-2">
+              <div className="w-20 h-4 bg-gray-200 rounded animate-pulse" />
+              <div className="w-12 h-4 bg-gray-200 rounded animate-pulse" />
+            </div>
+
+            {/* Shipping Info */}
+            <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+              <div className="w-48 h-4 bg-gray-200 rounded animate-pulse" />
+              <div className="w-36 h-4 bg-gray-200 rounded animate-pulse" />
+              <div className="w-40 h-4 bg-gray-200 rounded animate-pulse" />
+            </div>
+
+            {/* Tabs Skeleton */}
+            <div className="flex gap-4 border-b pt-4">
+              <div className="w-16 h-8 bg-gray-200 rounded animate-pulse" />
+              <div className="w-20 h-8 bg-gray-200 rounded animate-pulse" />
+              <div className="w-16 h-8 bg-gray-200 rounded animate-pulse" />
+            </div>
+
+            {/* Content Skeleton */}
+            <div className="space-y-3 pt-4">
+              <div className="w-full h-4 bg-gray-200 rounded animate-pulse" />
+              <div className="w-full h-4 bg-gray-200 rounded animate-pulse" />
+              <div className="w-3/4 h-4 bg-gray-200 rounded animate-pulse" />
+              <div className="w-full h-40 bg-gray-200 rounded animate-pulse mt-4" />
+            </div>
+          </div>
+
+          {/* Bottom Bar Skeleton */}
+          <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4">
+            <div className="max-w-[430px] mx-auto flex gap-3">
+              <div className="w-12 h-12 bg-gray-200 rounded animate-pulse" />
+              <div className="flex-1 h-12 bg-gray-200 rounded animate-pulse" />
+              <div className="flex-1 h-12 bg-gray-200 rounded animate-pulse" />
+            </div>
+          </div>
         </div>
       </AppLayout>
     );
