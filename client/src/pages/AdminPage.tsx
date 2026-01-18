@@ -909,11 +909,11 @@ export default function AdminPage() {
                             </DropdownMenuContent>
                           </DropdownMenu>
                         </td>
-                        <td className="px-4 py-3 text-sm text-gray-500">
-                          {product.createdAt ? new Date(product.createdAt).toLocaleDateString('ko-KR') : '-'}
+                        <td className="px-4 py-3 text-sm text-gray-500 whitespace-nowrap">
+                          {product.createdAt ? new Date(product.createdAt).toLocaleString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '-'}
                         </td>
-                        <td className="px-4 py-3 text-sm text-gray-500">
-                          {product.updatedAt ? new Date(product.updatedAt).toLocaleDateString('ko-KR') : '-'}
+                        <td className="px-4 py-3 text-sm text-gray-500 whitespace-nowrap">
+                          {product.updatedAt ? new Date(product.updatedAt).toLocaleString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '-'}
                         </td>
                         <td className="px-4 py-3">
                           <button 
