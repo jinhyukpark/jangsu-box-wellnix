@@ -2,9 +2,9 @@ import { createClient } from "@supabase/supabase-js";
 import { randomUUID } from "crypto";
 
 const supabaseUrl = process.env.SUPABASE_URL!;
-const supabaseAnonKey = process.env.SUPABASE_ANON_KEY!;
+const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
 
 const BUCKET_NAME = "wellnix-images";
 
@@ -16,7 +16,7 @@ export class SupabaseStorageService {
     
     const { data, error } = await supabase.storage
       .from(BUCKET_NAME)
-      .createSignedUploadUrl(`uploads/${objectName}`);
+      .createSignedUploadUrl(`uploads/${objectName}`, { upsert: false });
 
     if (error) {
       throw new Error(`Failed to create upload URL: ${error.message}`);
