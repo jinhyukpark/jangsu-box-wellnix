@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { AppLayout } from "@/components/AppLayout";
+import ReactMarkdown from "react-markdown";
 
 export default function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -199,81 +200,51 @@ export default function ProductDetailPage() {
 
         <TabsContent value="description" className="p-4">
           <div className={`relative ${!showFullDescription ? 'max-h-[600px] overflow-hidden' : ''}`}>
-            <h3 className="text-lg font-bold text-gray-900 mb-4">상품 구성 미리보기</h3>
-            <div className="bg-gray-50 rounded-lg p-4 mb-6">
-              <img
-                src={product.image || "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600"}
-                alt="상품 구성"
-                className="w-full rounded-lg mb-4"
-              />
-              <p className="text-sm text-gray-700 leading-relaxed">
-                {product.description || "건강을 생각하는 프리미엄 건강식품입니다. 엄선된 원재료로 만들어 안심하고 드실 수 있습니다."}
-              </p>
-            </div>
-            
-            <div className="mb-6">
-              <h4 className="font-bold text-gray-900 mb-3">이런 분께 추천해요</h4>
-              <ul className="text-sm text-gray-600 space-y-2">
-                <li>• 건강을 챙기고 싶은 분</li>
-                <li>• 부모님께 선물하고 싶은 분</li>
-                <li>• 명절 선물을 고민하시는 분</li>
-              </ul>
-            </div>
-
-            <div className="mb-6">
-              <h4 className="font-bold text-gray-900 mb-3">상품 상세 정보</h4>
-              <img
-                src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=600"
-                alt="상품 상세 1"
-                className="w-full rounded-lg mb-4"
-              />
-              <p className="text-sm text-gray-700 leading-relaxed mb-4">
-                최고급 원재료만을 엄선하여 정성껏 제조한 프리미엄 건강식품입니다. 
-                6년근 홍삼의 깊은 맛과 향을 그대로 담아 건강한 하루를 시작할 수 있도록 도와드립니다.
-              </p>
-            </div>
-
-            <div className="mb-6">
-              <h4 className="font-bold text-gray-900 mb-3">제조 과정</h4>
-              <img
-                src="https://images.unsplash.com/photo-1607619056574-7b8d3ee536b2?w=600"
-                alt="제조 과정"
-                className="w-full rounded-lg mb-4"
-              />
-              <p className="text-sm text-gray-700 leading-relaxed mb-4">
-                청정 지역에서 재배한 원재료를 수확 후 48시간 이내에 가공하여 
-                신선함을 그대로 담았습니다. 전통 방식과 현대 기술을 접목한 
-                특허 공법으로 영양소 손실을 최소화했습니다.
-              </p>
-            </div>
-
-            <div className="mb-6">
-              <h4 className="font-bold text-gray-900 mb-3">품질 인증</h4>
-              <img
-                src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=600"
-                alt="품질 인증"
-                className="w-full rounded-lg mb-4"
-              />
-              <p className="text-sm text-gray-700 leading-relaxed mb-4">
-                식품의약품안전처 HACCP 인증, ISO 22000 국제 식품안전 인증, 
-                유기농 인증을 획득한 믿을 수 있는 제품입니다. 
-                매 생산 단계마다 철저한 품질 관리를 거칩니다.
-              </p>
-            </div>
-
-            <div className="mb-6">
-              <h4 className="font-bold text-gray-900 mb-3">섭취 방법</h4>
-              <img
-                src="https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=600"
-                alt="섭취 방법"
-                className="w-full rounded-lg mb-4"
-              />
-              <p className="text-sm text-gray-700 leading-relaxed">
-                하루 1~2회, 식전 또는 식후에 물과 함께 섭취하시면 됩니다. 
-                아침 공복에 드시면 흡수율이 더욱 높아집니다. 
-                냉장 보관 시 더욱 시원하게 즐기실 수 있습니다.
-              </p>
-            </div>
+            {product.descriptionMarkdown ? (
+              <div className="prose prose-sm max-w-none prose-headings:text-gray-900 prose-h2:text-xl prose-h2:font-bold prose-h3:text-lg prose-h3:font-bold prose-h4:font-bold prose-p:text-gray-700 prose-p:leading-relaxed prose-li:text-gray-600 prose-img:rounded-lg prose-img:w-full prose-img:mb-4">
+                <ReactMarkdown
+                  components={{
+                    img: ({ node, ...props }) => (
+                      <img {...props} className="rounded-lg w-full mb-4" loading="lazy" />
+                    ),
+                    h2: ({ node, ...props }) => (
+                      <h2 {...props} className="text-xl font-bold text-gray-900 mb-4 mt-6" />
+                    ),
+                    h3: ({ node, ...props }) => (
+                      <h3 {...props} className="text-lg font-bold text-gray-900 mb-3 mt-4" />
+                    ),
+                    h4: ({ node, ...props }) => (
+                      <h4 {...props} className="font-bold text-gray-900 mb-3" />
+                    ),
+                    p: ({ node, ...props }) => (
+                      <p {...props} className="text-sm text-gray-700 leading-relaxed mb-4" />
+                    ),
+                    ul: ({ node, ...props }) => (
+                      <ul {...props} className="text-sm text-gray-600 space-y-2 mb-6" />
+                    ),
+                    li: ({ node, ...props }) => (
+                      <li {...props} className="text-sm text-gray-600" />
+                    ),
+                  }}
+                >
+                  {product.descriptionMarkdown}
+                </ReactMarkdown>
+              </div>
+            ) : (
+              <>
+                <h3 className="text-lg font-bold text-gray-900 mb-4">상품 구성 미리보기</h3>
+                <div className="bg-gray-50 rounded-lg p-4 mb-6">
+                  <img
+                    src={product.image || "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600"}
+                    alt="상품 구성"
+                    className="w-full rounded-lg mb-4"
+                  />
+                  <p className="text-sm text-gray-700 leading-relaxed">
+                    {product.description || "건강을 생각하는 프리미엄 건강식품입니다. 엄선된 원재료로 만들어 안심하고 드실 수 있습니다."}
+                  </p>
+                </div>
+              </>
+            )}
 
             {!showFullDescription && (
               <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-white to-transparent" />
