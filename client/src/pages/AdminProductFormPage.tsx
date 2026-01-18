@@ -5,7 +5,7 @@ import MDEditor from "@uiw/react-md-editor";
 import { 
   ChevronLeft, Save, Eye, Image, Video, Link, Plus, Trash2, Star, 
   MessageSquare, X, Upload, Menu, Package, Users, Gift, Calendar, 
-  CreditCard, Truck, HelpCircle, ShieldCheck, Settings, Award
+  CreditCard, Truck, HelpCircle, ShieldCheck, Settings, Award, MoreHorizontal, Pencil
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,6 +20,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useUpload } from "@/hooks/use-upload";
@@ -44,6 +50,10 @@ interface Product {
   storageMethod: string;
   shippingInfo: string;
   refundInfo: string;
+  dawnDeliveryEnabled: boolean;
+  dawnDeliveryDays: number;
+  regularDeliveryEnabled: boolean;
+  regularDeliveryDays: number;
 }
 
 interface Review {
@@ -117,6 +127,10 @@ export default function AdminProductFormPage() {
   const [replyingReviewId, setReplyingReviewId] = useState<number | null>(null);
   const [replyContents, setReplyContents] = useState<Record<number, string>>({});
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [editingReviewId, setEditingReviewId] = useState<number | null>(null);
+  const [editReviewContent, setEditReviewContent] = useState("");
+  const [editingReplyId, setEditingReplyId] = useState<number | null>(null);
+  const [editReplyContent, setEditReplyContent] = useState("");
 
   const { uploadFile, isUploading } = useUpload({
     onSuccess: (response) => {
@@ -207,6 +221,54 @@ export default function AdminProductFormPage() {
         delete updated[variables.reviewId];
         return updated;
       });
+    },
+  });
+
+  const updateReviewMutation = useMutation({
+    mutationFn: async ({ reviewId, content }: { reviewId: number; content: string }) => {
+      const res = await apiRequest("PUT", `/api/admin/reviews/${reviewId}`, { content });
+      return res;
+    },
+    onSuccess: () => {
+      toast({ title: "리뷰가 수정되었습니다" });
+      queryClient.invalidateQueries({ queryKey: ["/api/products", id, "reviews"] });
+      setEditingReviewId(null);
+      setEditReviewContent("");
+    },
+  });
+
+  const deleteReviewMutation = useMutation({
+    mutationFn: async (reviewId: number) => {
+      const res = await apiRequest("DELETE", `/api/admin/reviews/${reviewId}`);
+      return res;
+    },
+    onSuccess: () => {
+      toast({ title: "리뷰가 삭제되었습니다" });
+      queryClient.invalidateQueries({ queryKey: ["/api/products", id, "reviews"] });
+    },
+  });
+
+  const updateReplyMutation = useMutation({
+    mutationFn: async ({ reviewId, reply }: { reviewId: number; reply: string }) => {
+      const res = await apiRequest("PUT", `/api/admin/reviews/${reviewId}/reply`, { reply });
+      return res;
+    },
+    onSuccess: () => {
+      toast({ title: "답변이 수정되었습니다" });
+      queryClient.invalidateQueries({ queryKey: ["/api/products", id, "reviews"] });
+      setEditingReplyId(null);
+      setEditReplyContent("");
+    },
+  });
+
+  const deleteReplyMutation = useMutation({
+    mutationFn: async (reviewId: number) => {
+      const res = await apiRequest("DELETE", `/api/admin/reviews/${reviewId}/reply`);
+      return res;
+    },
+    onSuccess: () => {
+      toast({ title: "답변이 삭제되었습니다" });
+      queryClient.invalidateQueries({ queryKey: ["/api/products", id, "reviews"] });
     },
   });
 
@@ -735,8 +797,56 @@ export default function AdminProductFormPage() {
                             {new Date(review.createdAt).toLocaleDateString()}
                           </p>
                         </div>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                              <MoreHorizontal className="w-4 h-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => {
+                              setEditingReviewId(review.id);
+                              setEditReviewContent(review.content);
+                            }}>
+                              <Pencil className="w-4 h-4 mr-2" /> 수정
+                            </DropdownMenuItem>
+                            <DropdownMenuItem 
+                              className="text-red-600"
+                              onClick={() => {
+                                if (confirm("리뷰를 삭제하시겠습니까?")) {
+                                  deleteReviewMutation.mutate(review.id);
+                                }
+                              }}
+                            >
+                              <Trash2 className="w-4 h-4 mr-2" /> 삭제
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
-                      <p className="text-gray-700 mb-3">{review.content}</p>
+                      
+                      {editingReviewId === review.id ? (
+                        <div className="space-y-2 mb-3">
+                          <Textarea
+                            value={editReviewContent}
+                            onChange={(e) => setEditReviewContent(e.target.value)}
+                            rows={3}
+                          />
+                          <div className="flex gap-2">
+                            <Button 
+                              size="sm" 
+                              onClick={() => updateReviewMutation.mutate({ reviewId: review.id, content: editReviewContent })}
+                              disabled={updateReviewMutation.isPending}
+                            >
+                              {updateReviewMutation.isPending ? "수정중..." : "수정 완료"}
+                            </Button>
+                            <Button size="sm" variant="outline" onClick={() => setEditingReviewId(null)}>
+                              취소
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <p className="text-gray-700 mb-3">{review.content}</p>
+                      )}
                       
                       {(review.images?.length > 0 || review.videos?.length > 0) && (
                         <div className="flex gap-2 mb-3 flex-wrap">
@@ -753,13 +863,62 @@ export default function AdminProductFormPage() {
 
                       {review.adminReply ? (
                         <div className="bg-gray-50 rounded-lg p-3 mt-3">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="text-xs font-bold text-primary">판매자 답변</span>
-                            <span className="text-xs text-gray-400">
-                              {review.adminReplyAt && new Date(review.adminReplyAt).toLocaleDateString()}
-                            </span>
+                          <div className="flex items-center justify-between mb-1">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-bold text-primary">판매자 답변</span>
+                              <span className="text-xs text-gray-400">
+                                {review.adminReplyAt && new Date(review.adminReplyAt).toLocaleDateString()}
+                              </span>
+                            </div>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                                  <MoreHorizontal className="w-3 h-3" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => {
+                                  setEditingReplyId(review.id);
+                                  setEditReplyContent(review.adminReply || "");
+                                }}>
+                                  <Pencil className="w-4 h-4 mr-2" /> 수정
+                                </DropdownMenuItem>
+                                <DropdownMenuItem 
+                                  className="text-red-600"
+                                  onClick={() => {
+                                    if (confirm("답변을 삭제하시겠습니까?")) {
+                                      deleteReplyMutation.mutate(review.id);
+                                    }
+                                  }}
+                                >
+                                  <Trash2 className="w-4 h-4 mr-2" /> 삭제
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                           </div>
-                          <p className="text-sm text-gray-600">{review.adminReply}</p>
+                          {editingReplyId === review.id ? (
+                            <div className="space-y-2">
+                              <Textarea
+                                value={editReplyContent}
+                                onChange={(e) => setEditReplyContent(e.target.value)}
+                                rows={2}
+                              />
+                              <div className="flex gap-2">
+                                <Button 
+                                  size="sm" 
+                                  onClick={() => updateReplyMutation.mutate({ reviewId: review.id, reply: editReplyContent })}
+                                  disabled={updateReplyMutation.isPending}
+                                >
+                                  {updateReplyMutation.isPending ? "수정중..." : "수정 완료"}
+                                </Button>
+                                <Button size="sm" variant="outline" onClick={() => setEditingReplyId(null)}>
+                                  취소
+                                </Button>
+                              </div>
+                            </div>
+                          ) : (
+                            <p className="text-sm text-gray-600">{review.adminReply}</p>
+                          )}
                         </div>
                       ) : replyingReviewId === review.id ? (
                         <div className="mt-3 space-y-2">

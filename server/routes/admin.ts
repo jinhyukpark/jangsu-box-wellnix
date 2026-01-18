@@ -189,4 +189,62 @@ router.post("/api/admin/reviews/:id/reply", requireAdmin, async (req: Request, r
   }
 });
 
+// 리뷰 내용 수정
+router.put("/api/admin/reviews/:id", requireAdmin, async (req: Request, res: Response) => {
+  try {
+    const reviewId = parseInt(req.params.id);
+    const { content } = req.body;
+    const review = await storage.updateReview(reviewId, { content });
+    res.json(review);
+  } catch (error) {
+    console.error("Review update error:", error);
+    res.status(400).json({ error: "리뷰 수정에 실패했습니다" });
+  }
+});
+
+// 리뷰 삭제
+router.delete("/api/admin/reviews/:id", requireAdmin, async (req: Request, res: Response) => {
+  try {
+    const reviewId = parseInt(req.params.id);
+    await storage.deleteReview(reviewId);
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Review delete error:", error);
+    res.status(400).json({ error: "리뷰 삭제에 실패했습니다" });
+  }
+});
+
+// 답변 수정
+router.put("/api/admin/reviews/:id/reply", requireAdmin, async (req: Request, res: Response) => {
+  try {
+    const reviewId = parseInt(req.params.id);
+    const { reply } = req.body;
+    const review = await storage.updateReview(reviewId, {
+      adminReply: reply,
+      adminReplyAt: new Date(),
+      adminReplyBy: req.session.adminId,
+    });
+    res.json(review);
+  } catch (error) {
+    console.error("Reply update error:", error);
+    res.status(400).json({ error: "답변 수정에 실패했습니다" });
+  }
+});
+
+// 답변 삭제
+router.delete("/api/admin/reviews/:id/reply", requireAdmin, async (req: Request, res: Response) => {
+  try {
+    const reviewId = parseInt(req.params.id);
+    const review = await storage.updateReview(reviewId, {
+      adminReply: null,
+      adminReplyAt: null,
+      adminReplyBy: null,
+    });
+    res.json(review);
+  } catch (error) {
+    console.error("Reply delete error:", error);
+    res.status(400).json({ error: "답변 삭제에 실패했습니다" });
+  }
+});
+
 export default router;
