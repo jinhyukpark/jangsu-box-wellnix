@@ -33,8 +33,12 @@ export function registerSupabaseStorageRoutes(app: Express): void {
       const { bucket, path } = req.params;
       const objectPath = `/storage/${bucket}/${path}`;
       
-      const publicUrl = supabaseStorageService.getPublicUrl(objectPath);
-      res.redirect(publicUrl);
+      const { data, contentType } = await supabaseStorageService.downloadObject(objectPath);
+      const buffer = Buffer.from(await data.arrayBuffer());
+      
+      res.set("Content-Type", contentType);
+      res.set("Cache-Control", "public, max-age=31536000");
+      res.send(buffer);
     } catch (error) {
       console.error("Error serving object:", error);
       res.status(500).json({ error: "Failed to serve object" });
