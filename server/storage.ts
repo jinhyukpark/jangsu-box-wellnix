@@ -377,8 +377,14 @@ export class DatabaseStorage implements IStorage {
     return updated;
   }
 
-  async getAllSubscriptions(): Promise<Subscription[]> {
-    return db.select().from(subscriptions).orderBy(desc(subscriptions.createdAt));
+  async getAllSubscriptions(): Promise<any[]> {
+    const subs = await db.select().from(subscriptions).orderBy(desc(subscriptions.createdAt));
+    const enriched = await Promise.all(subs.map(async (sub) => {
+      const [member] = sub.memberId ? await db.select().from(members).where(eq(members.id, sub.memberId)) : [undefined];
+      const [plan] = sub.planId ? await db.select().from(subscriptionPlans).where(eq(subscriptionPlans.id, sub.planId)) : [undefined];
+      return { ...sub, member, plan };
+    }));
+    return enriched;
   }
 
   // Monthly Boxes

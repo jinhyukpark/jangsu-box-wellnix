@@ -1,7 +1,8 @@
 import { Router, Request, Response } from "express";
 import { storage } from "../storage";
-import { insertSubscriptionSchema } from "@shared/schema";
+import { insertSubscriptionSchema, insertSubscriptionPlanSchema } from "@shared/schema";
 import { requireAuth, requireAdmin } from "../middleware";
+import { z } from "zod";
 
 const router = Router();
 
@@ -61,20 +62,28 @@ router.get("/api/admin/subscription-plans", requireAdmin, async (req: Request, r
 
 router.post("/api/admin/subscription-plans", requireAdmin, async (req: Request, res: Response) => {
   try {
-    const plan = await storage.createSubscriptionPlan(req.body);
+    const validatedData = insertSubscriptionPlanSchema.parse(req.body);
+    const plan = await storage.createSubscriptionPlan(validatedData);
     res.json(plan);
   } catch (error) {
     console.error("Create plan error:", error);
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ error: "입력 데이터가 올바르지 않습니다", details: error.errors });
+    }
     res.status(400).json({ error: "플랜 등록에 실패했습니다" });
   }
 });
 
 router.put("/api/admin/subscription-plans/:id", requireAdmin, async (req: Request, res: Response) => {
   try {
-    const plan = await storage.updateSubscriptionPlan(parseInt(req.params.id), req.body);
+    const validatedData = insertSubscriptionPlanSchema.partial().parse(req.body);
+    const plan = await storage.updateSubscriptionPlan(parseInt(req.params.id), validatedData);
     res.json(plan);
   } catch (error) {
     console.error("Update plan error:", error);
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ error: "입력 데이터가 올바르지 않습니다", details: error.errors });
+    }
     res.status(400).json({ error: "플랜 수정에 실패했습니다" });
   }
 });
