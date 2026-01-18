@@ -4,7 +4,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import MDEditor from "@uiw/react-md-editor";
 import { 
   ChevronLeft, Save, Eye, Image, Video, Link, Plus, Trash2, Star, 
-  MessageSquare, X, Upload
+  MessageSquare, X, Upload, Menu, Package, Users, Gift, Calendar, 
+  CreditCard, Truck, HelpCircle, ShieldCheck, Settings, Award
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -63,6 +64,20 @@ interface Category {
   slug: string;
 }
 
+const menuItems = [
+  { id: "products", label: "상품 관리", icon: Package },
+  { id: "brands", label: "브랜드 관리", icon: Award },
+  { id: "members", label: "회원 관리", icon: Users },
+  { id: "subscription", label: "장수박스 관리", icon: Gift },
+  { id: "events", label: "행사 관리", icon: Calendar },
+  { id: "payments", label: "결제 관리", icon: CreditCard },
+  { id: "shipping", label: "배송 관리", icon: Truck },
+  { id: "inquiries", label: "1:1 문의", icon: MessageSquare },
+  { id: "faq", label: "자주묻는질문", icon: HelpCircle },
+  { id: "settings", label: "관리자 설정", icon: ShieldCheck },
+  { id: "base-settings", label: "기준 정보 관리", icon: Settings },
+];
+
 const defaultProduct: Product = {
   name: "",
   shortDescription: "",
@@ -100,6 +115,7 @@ export default function AdminProductFormPage() {
   const [newImageUrl, setNewImageUrl] = useState("");
   const [replyingReviewId, setReplyingReviewId] = useState<number | null>(null);
   const [replyContents, setReplyContents] = useState<Record<number, string>>({});
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const { data: categories = [] } = useQuery<Category[]>({
     queryKey: ["/api/categories"],
@@ -205,35 +221,70 @@ export default function AdminProductFormPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <button 
-              onClick={() => setLocation("/admin")} 
-              className="p-2 hover:bg-gray-100 rounded-lg"
-              data-testid="button-back"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-            <h1 className="text-lg font-bold text-gray-900">
-              {isEdit ? "상품 수정" : "상품 등록"}
-            </h1>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" onClick={() => window.open(`/products/${id}`, "_blank")} disabled={!isEdit}>
-              <Eye className="w-4 h-4 mr-2" />
-              미리보기
-            </Button>
-            <Button onClick={handleSave} disabled={saveMutation.isPending} className="bg-primary">
-              <Save className="w-4 h-4 mr-2" />
-              {saveMutation.isPending ? "저장중..." : "저장"}
-            </Button>
-          </div>
+    <div className="min-h-screen bg-gray-50 flex">
+      {/* Sidebar */}
+      <div className={`fixed inset-y-0 left-0 bg-white border-r border-gray-200 z-50 transition-all duration-300 ${
+        sidebarOpen ? "w-64" : "w-20"
+      }`}>
+        <div className="flex items-center justify-between p-4 border-b border-gray-100 h-16">
+          {sidebarOpen ? (
+            <h1 className="text-xl font-bold text-primary">웰닉스 관리자</h1>
+          ) : (
+            <span className="text-xl font-bold text-primary mx-auto">W</span>
+          )}
+          <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-1 rounded hover:bg-gray-100">
+            {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
         </div>
+
+        <nav className="p-4 space-y-1">
+          {menuItems.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => setLocation("/admin")}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
+                item.id === "products" 
+                  ? "bg-primary text-white" 
+                  : "text-gray-600 hover:bg-gray-100"
+              }`}
+            >
+              <item.icon className="w-5 h-5 flex-shrink-0" />
+              {sidebarOpen && <span className="font-medium">{item.label}</span>}
+            </button>
+          ))}
+        </nav>
       </div>
 
-      <div className="max-w-7xl mx-auto p-6">
+      {/* Main Content */}
+      <div className={`flex-1 transition-all duration-300 ${sidebarOpen ? "ml-64" : "ml-20"}`}>
+        <div className="sticky top-0 z-40 bg-white border-b border-gray-200 shadow-sm">
+          <div className="px-6 py-3 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <button 
+                onClick={() => setLocation("/admin")} 
+                className="p-2 hover:bg-gray-100 rounded-lg"
+                data-testid="button-back"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+              <h1 className="text-lg font-bold text-gray-900">
+                {isEdit ? "상품 수정" : "상품 등록"}
+              </h1>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" onClick={() => window.open(`/products/${id}`, "_blank")} disabled={!isEdit}>
+                <Eye className="w-4 h-4 mr-2" />
+                미리보기
+              </Button>
+              <Button onClick={handleSave} disabled={saveMutation.isPending} className="bg-primary">
+                <Save className="w-4 h-4 mr-2" />
+                {saveMutation.isPending ? "저장중..." : "저장"}
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        <div className="p-6">
         <Tabs defaultValue="description" className="w-full">
           <TabsList className="w-full grid grid-cols-3 bg-white border border-gray-200 rounded-lg h-12 p-1 mb-6">
             <TabsTrigger value="description" className="rounded-md data-[state=active]:bg-primary data-[state=active]:text-white">
@@ -638,6 +689,7 @@ export default function AdminProductFormPage() {
             </div>
           </TabsContent>
         </Tabs>
+        </div>
       </div>
     </div>
   );
