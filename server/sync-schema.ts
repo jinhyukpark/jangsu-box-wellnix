@@ -25,6 +25,14 @@ async function syncSchema() {
       `ALTER TABLE products ADD COLUMN IF NOT EXISTS storage_method text`,
       `ALTER TABLE products ADD COLUMN IF NOT EXISTS shipping_info text`,
       `ALTER TABLE products ADD COLUMN IF NOT EXISTS refund_info text`,
+      // Add missing columns to reviews table
+      `ALTER TABLE reviews ADD COLUMN IF NOT EXISTS order_item_id integer`,
+      `ALTER TABLE reviews ADD COLUMN IF NOT EXISTS images jsonb DEFAULT '[]'`,
+      `ALTER TABLE reviews ADD COLUMN IF NOT EXISTS videos jsonb DEFAULT '[]'`,
+      `ALTER TABLE reviews ADD COLUMN IF NOT EXISTS admin_reply text`,
+      `ALTER TABLE reviews ADD COLUMN IF NOT EXISTS admin_reply_at timestamp`,
+      `ALTER TABLE reviews ADD COLUMN IF NOT EXISTS admin_reply_by integer`,
+      `ALTER TABLE reviews ADD COLUMN IF NOT EXISTS is_visible boolean DEFAULT true`,
     ];
 
     for (const sql of alterStatements) {
