@@ -51,7 +51,34 @@ export function useAdminSubscriptions() {
 export function useAdminSubscriptionPlans() {
   return useQuery<SubscriptionPlan[]>({
     queryKey: ["admin", "subscription-plans"],
-    queryFn: () => fetchWithAuth("/api/subscription-plans"),
+    queryFn: () => fetchWithAuth("/api/admin/subscription-plans"),
+  });
+}
+
+export function useCreateSubscriptionPlan() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: Partial<SubscriptionPlan>) => 
+      fetchWithAuth("/api/admin/subscription-plans", { method: "POST", body: JSON.stringify(data) }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin", "subscription-plans"] }),
+  });
+}
+
+export function useUpdateSubscriptionPlan() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...data }: Partial<SubscriptionPlan> & { id: number }) => 
+      fetchWithAuth(`/api/admin/subscription-plans/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin", "subscription-plans"] }),
+  });
+}
+
+export function useDeleteSubscriptionPlan() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => 
+      fetchWithAuth(`/api/admin/subscription-plans/${id}`, { method: "DELETE" }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin", "subscription-plans"] }),
   });
 }
 

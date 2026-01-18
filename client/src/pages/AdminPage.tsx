@@ -7,7 +7,7 @@ import {
   TrendingUp, ShoppingBag, UserCheck, Clock, HelpCircle, Star, ShieldCheck, Loader2, ShieldX, Award,
   ArrowUpDown, ArrowUp, ArrowDown
 } from "lucide-react";
-import { useAdminProducts, useAdminCategories, useAdminMembers, useAdminSubscriptions, useAdminEvents, useAdminInquiries, useAdminFaqs, useAdminList, useDashboardStats, useCreateProduct, useUpdateProduct, useCreateCategory, useUpdateCategory, useDeleteCategory, useCreateFaq, useUpdateFaq, useDeleteFaq } from "@/hooks/use-admin";
+import { useAdminProducts, useAdminCategories, useAdminMembers, useAdminSubscriptions, useAdminSubscriptionPlans, useAdminEvents, useAdminInquiries, useAdminFaqs, useAdminList, useDashboardStats, useCreateProduct, useUpdateProduct, useCreateCategory, useUpdateCategory, useDeleteCategory, useCreateFaq, useUpdateFaq, useDeleteFaq, useCreateSubscriptionPlan, useUpdateSubscriptionPlan, useDeleteSubscriptionPlan } from "@/hooks/use-admin";
 import { useAdminAuth, useAdminLogout } from "@/hooks/use-admin-auth";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -243,6 +243,24 @@ export default function AdminPage() {
   const { data: categories = [] } = useAdminCategories();
   const { data: members = [], isLoading: membersLoading } = useAdminMembers();
   const { data: subscriptions = [], isLoading: subscriptionsLoading } = useAdminSubscriptions();
+  const { data: subscriptionPlans = [], isLoading: plansLoading } = useAdminSubscriptionPlans();
+  const createPlanMutation = useCreateSubscriptionPlan();
+  const updatePlanMutation = useUpdateSubscriptionPlan();
+  const deletePlanMutation = useDeleteSubscriptionPlan();
+  const [subscriptionTab, setSubscriptionTab] = useState("plans");
+  const [isPlanModalOpen, setIsPlanModalOpen] = useState(false);
+  const [editingPlan, setEditingPlan] = useState<any>(null);
+  const [planForm, setPlanForm] = useState({
+    name: "",
+    slug: "",
+    description: "",
+    price: 0,
+    originalPrice: 0,
+    features: [] as string[],
+    isPopular: false,
+    isActive: true,
+  });
+  const [newFeature, setNewFeature] = useState("");
   const { data: events = [], isLoading: eventsLoading } = useAdminEvents();
   const { data: inquiriesData = [], isLoading: inquiriesLoading } = useAdminInquiries();
   const { data: faqsData = [], isLoading: faqsLoading } = useAdminFaqs();
@@ -304,6 +322,78 @@ export default function AdminPage() {
         description: "다시 시도해주세요.",
       });
     }
+  };
+
+  const resetPlanForm = () => {
+    setPlanForm({
+      name: "",
+      slug: "",
+      description: "",
+      price: 0,
+      originalPrice: 0,
+      features: [],
+      isPopular: false,
+      isActive: true,
+    });
+    setEditingPlan(null);
+    setNewFeature("");
+  };
+
+  const openEditPlanModal = (plan: any) => {
+    setEditingPlan(plan);
+    setPlanForm({
+      name: plan.name || "",
+      slug: plan.slug || "",
+      description: plan.description || "",
+      price: plan.price || 0,
+      originalPrice: plan.originalPrice || 0,
+      features: plan.features || [],
+      isPopular: plan.isPopular || false,
+      isActive: plan.isActive !== false,
+    });
+    setIsPlanModalOpen(true);
+  };
+
+  const handleSavePlan = async () => {
+    if (!planForm.name.trim()) {
+      toast({ variant: "destructive", title: "입력 오류", description: "플랜명을 입력해주세요." });
+      return;
+    }
+    const slug = planForm.slug.trim() || planForm.name.toLowerCase().replace(/[^a-z0-9가-힣]/gi, '-').replace(/-+/g, '-');
+    try {
+      if (editingPlan) {
+        await updatePlanMutation.mutateAsync({ id: editingPlan.id, ...planForm, slug });
+        toast({ title: "수정 완료", description: "플랜이 수정되었습니다." });
+      } else {
+        await createPlanMutation.mutateAsync({ ...planForm, slug });
+        toast({ title: "등록 완료", description: "플랜이 등록되었습니다." });
+      }
+      setIsPlanModalOpen(false);
+      resetPlanForm();
+    } catch (error) {
+      toast({ variant: "destructive", title: "저장 실패", description: "다시 시도해주세요." });
+    }
+  };
+
+  const handleDeletePlan = async (id: number) => {
+    if (!confirm("정말 이 플랜을 삭제하시겠습니까?")) return;
+    try {
+      await deletePlanMutation.mutateAsync(id);
+      toast({ title: "삭제 완료", description: "플랜이 삭제되었습니다." });
+    } catch (error) {
+      toast({ variant: "destructive", title: "삭제 실패", description: "다시 시도해주세요." });
+    }
+  };
+
+  const addFeature = () => {
+    if (newFeature.trim()) {
+      setPlanForm({ ...planForm, features: [...planForm.features, newFeature.trim()] });
+      setNewFeature("");
+    }
+  };
+
+  const removeFeature = (index: number) => {
+    setPlanForm({ ...planForm, features: planForm.features.filter((_, i) => i !== index) });
   };
 
   const resetCategoryForm = () => {
@@ -1554,59 +1644,294 @@ export default function AdminPage() {
         );
 
       case "subscription":
-        if (subscriptionsLoading) return <div className="text-center py-8 text-gray-500">로딩중...</div>;
+        if (subscriptionsLoading || plansLoading) return <div className="text-center py-8 text-gray-500">로딩중...</div>;
         return (
           <div>
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-bold text-gray-900">장수박스 관리</h2>
-              <div className="flex gap-2">
-                <select className="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary">
-                  <option>전체 플랜</option>
-                  <option>효심박스</option>
-                  <option>장수박스</option>
-                  <option>천수박스</option>
-                </select>
-              </div>
             </div>
-            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-              <table className="w-full">
-                <thead className="bg-gray-50 border-b border-gray-200">
-                  <tr>
-                    <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">회원</th>
-                    <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">플랜</th>
-                    <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">구독 시작</th>
-                    <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">다음 배송</th>
-                    <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">금액</th>
-                    <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">상태</th>
-                    <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">관리</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {subscriptions.map((sub) => {
-                    const statusText = getSubscriptionStatus(sub.status);
-                    return (
-                      <tr key={sub.id} className="border-b border-gray-100 hover:bg-gray-50">
-                        <td className="px-4 py-3 text-sm text-gray-900">{sub.member?.name || "-"}</td>
-                        <td className="px-4 py-3 text-sm text-gray-600">{sub.plan?.name || "-"}</td>
-                        <td className="px-4 py-3 text-sm text-gray-600">{formatDate(sub.startDate)}</td>
-                        <td className="px-4 py-3 text-sm text-gray-600">{formatDate(sub.nextDeliveryDate)}</td>
-                        <td className="px-4 py-3 text-sm text-gray-900">{(sub.plan?.price || 0).toLocaleString()}원</td>
-                        <td className="px-4 py-3">
-                          <span className={`text-xs px-2 py-1 rounded-full ${
-                            statusText === "활성" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
-                          }`}>
-                            {statusText}
+
+            <Tabs value={subscriptionTab} onValueChange={setSubscriptionTab} className="space-y-6">
+              <TabsList className="bg-gray-100 p-1 rounded-lg">
+                <TabsTrigger value="plans" className="data-[state=active]:bg-white rounded-md px-4 py-2">
+                  플랜 관리
+                </TabsTrigger>
+                <TabsTrigger value="subscribers" className="data-[state=active]:bg-white rounded-md px-4 py-2">
+                  구독자 관리
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="plans">
+                <div className="flex justify-end mb-4">
+                  <Button 
+                    onClick={() => { resetPlanForm(); setIsPlanModalOpen(true); }}
+                    className="bg-primary text-white hover:bg-primary/90"
+                  >
+                    + 플랜 등록
+                  </Button>
+                </div>
+
+                <div className="grid gap-4">
+                  {subscriptionPlans.map((plan) => (
+                    <div 
+                      key={plan.id} 
+                      className={`bg-white rounded-lg border-2 p-6 relative ${plan.isPopular ? 'border-primary' : 'border-gray-200'}`}
+                    >
+                      {plan.isPopular && (
+                        <span className="absolute top-4 left-4 bg-gray-900 text-white text-xs font-bold px-2 py-1 rounded">
+                          BEST
+                        </span>
+                      )}
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <h3 className="text-xl font-bold text-gray-900 mb-1">{plan.name}</h3>
+                          <p className="text-sm text-gray-600 mb-3">{plan.description}</p>
+                          <div className="flex flex-wrap gap-2 mb-4">
+                            {(plan.features || []).map((feature: string, i: number) => (
+                              <span key={i} className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-xs">
+                                {feature}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                        <div className="text-right ml-6">
+                          {plan.originalPrice && plan.originalPrice > plan.price && (
+                            <p className="text-sm text-gray-400 line-through">{plan.originalPrice.toLocaleString()}원</p>
+                          )}
+                          <p className="text-2xl font-bold text-primary">{plan.price.toLocaleString()}원<span className="text-sm font-normal text-gray-500">/월</span></p>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
+                        <div className="flex items-center gap-2">
+                          <span className={`px-2 py-1 rounded text-xs ${plan.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
+                            {plan.isActive ? '활성' : '비활성'}
                           </span>
-                        </td>
-                        <td className="px-4 py-3">
-                          <button className="text-sm text-primary hover:underline">관리</button>
-                        </td>
+                        </div>
+                        <div className="flex gap-2">
+                          <button 
+                            onClick={() => openEditPlanModal(plan)}
+                            className="text-sm text-primary hover:underline"
+                          >
+                            수정
+                          </button>
+                          <button 
+                            onClick={() => handleDeletePlan(plan.id)}
+                            className="text-sm text-red-500 hover:underline"
+                          >
+                            삭제
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  {subscriptionPlans.length === 0 && (
+                    <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-200">
+                      <p className="text-gray-500">등록된 플랜이 없습니다.</p>
+                      <Button 
+                        onClick={() => { resetPlanForm(); setIsPlanModalOpen(true); }}
+                        className="mt-4 bg-primary text-white hover:bg-primary/90"
+                      >
+                        첫 플랜 등록하기
+                      </Button>
+                    </div>
+                  )}
+                </div>
+
+                <Dialog open={isPlanModalOpen} onOpenChange={(open) => { if (!open) { setIsPlanModalOpen(false); resetPlanForm(); } }}>
+                  <DialogContent className="sm:max-w-[600px] bg-white max-h-[90vh] overflow-y-auto">
+                    <DialogHeader>
+                      <DialogTitle className="text-xl font-bold text-gray-900">
+                        {editingPlan ? '플랜 수정' : '새 플랜 등록'}
+                      </DialogTitle>
+                      <DialogDescription className="text-gray-500">
+                        장수박스 구독 플랜 정보를 입력하세요.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 pt-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label>플랜명 *</Label>
+                          <Input 
+                            value={planForm.name}
+                            onChange={(e) => setPlanForm({ ...planForm, name: e.target.value })}
+                            placeholder="예: 효심 박스"
+                          />
+                        </div>
+                        <div>
+                          <Label>슬러그</Label>
+                          <Input 
+                            value={planForm.slug}
+                            onChange={(e) => setPlanForm({ ...planForm, slug: e.target.value })}
+                            placeholder="자동 생성됩니다"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <Label>설명</Label>
+                        <Input 
+                          value={planForm.description}
+                          onChange={(e) => setPlanForm({ ...planForm, description: e.target.value })}
+                          placeholder="예: 매월 엄선된 건강식품 3~4종"
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label>월 가격 *</Label>
+                          <Input 
+                            type="number"
+                            value={planForm.price}
+                            onChange={(e) => setPlanForm({ ...planForm, price: parseInt(e.target.value) || 0 })}
+                            placeholder="89000"
+                          />
+                        </div>
+                        <div>
+                          <Label>정가 (할인 표시용)</Label>
+                          <Input 
+                            type="number"
+                            value={planForm.originalPrice}
+                            onChange={(e) => setPlanForm({ ...planForm, originalPrice: parseInt(e.target.value) || 0 })}
+                            placeholder="120000"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <Label>특징 태그</Label>
+                        <div className="flex gap-2 mb-2">
+                          <Input 
+                            value={newFeature}
+                            onChange={(e) => setNewFeature(e.target.value)}
+                            placeholder="예: 홍삼/건강즙 포함"
+                            onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addFeature())}
+                          />
+                          <Button type="button" variant="outline" onClick={addFeature}>추가</Button>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          {planForm.features.map((feature, i) => (
+                            <span 
+                              key={i} 
+                              className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm flex items-center gap-1"
+                            >
+                              {feature}
+                              <button 
+                                onClick={() => removeFeature(i)}
+                                className="ml-1 text-gray-400 hover:text-red-500"
+                              >
+                                ×
+                              </button>
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-6">
+                        <div className="flex items-center gap-2">
+                          <Checkbox 
+                            id="plan-popular"
+                            checked={planForm.isPopular}
+                            onCheckedChange={(checked) => setPlanForm({ ...planForm, isPopular: !!checked })}
+                          />
+                          <Label htmlFor="plan-popular">베스트 플랜</Label>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Checkbox 
+                            id="plan-active"
+                            checked={planForm.isActive}
+                            onCheckedChange={(checked) => setPlanForm({ ...planForm, isActive: !!checked })}
+                          />
+                          <Label htmlFor="plan-active">활성화</Label>
+                        </div>
+                      </div>
+                      <div className="flex justify-end gap-2 pt-4">
+                        <Button variant="outline" onClick={() => { setIsPlanModalOpen(false); resetPlanForm(); }}>취소</Button>
+                        <Button 
+                          onClick={handleSavePlan}
+                          disabled={createPlanMutation.isPending || updatePlanMutation.isPending}
+                          className="bg-primary text-white hover:bg-primary/90"
+                        >
+                          {(createPlanMutation.isPending || updatePlanMutation.isPending) ? '저장 중...' : '저장'}
+                        </Button>
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </TabsContent>
+
+              <TabsContent value="subscribers">
+                <div className="flex justify-between items-center mb-4">
+                  <div className="flex gap-2">
+                    <select className="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary">
+                      <option value="">전체 플랜</option>
+                      {subscriptionPlans.map((plan) => (
+                        <option key={plan.id} value={plan.id}>{plan.name}</option>
+                      ))}
+                    </select>
+                    <select className="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary">
+                      <option value="">전체 상태</option>
+                      <option value="active">활성</option>
+                      <option value="paused">일시정지</option>
+                      <option value="cancelled">취소</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                  <table className="w-full">
+                    <thead className="bg-gray-50 border-b border-gray-200">
+                      <tr>
+                        <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">회원</th>
+                        <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">플랜</th>
+                        <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">신청일</th>
+                        <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">이용기간</th>
+                        <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">다음 배송</th>
+                        <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">금액</th>
+                        <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">상태</th>
+                        <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">관리</th>
                       </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+                    </thead>
+                    <tbody>
+                      {subscriptions.map((sub) => {
+                        const statusText = getSubscriptionStatus(sub.status);
+                        const startDate = sub.startDate ? new Date(sub.startDate) : null;
+                        const now = new Date();
+                        const monthsDiff = startDate ? Math.floor((now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 30)) : 0;
+                        return (
+                          <tr key={sub.id} className="border-b border-gray-100 hover:bg-gray-50">
+                            <td className="px-4 py-3">
+                              <div>
+                                <p className="text-sm font-medium text-gray-900">{sub.member?.name || "-"}</p>
+                                <p className="text-xs text-gray-500">{sub.member?.email || ""}</p>
+                              </div>
+                            </td>
+                            <td className="px-4 py-3 text-sm text-gray-600">{sub.plan?.name || "-"}</td>
+                            <td className="px-4 py-3 text-sm text-gray-600">{formatDate(sub.startDate)}</td>
+                            <td className="px-4 py-3 text-sm text-gray-600">{monthsDiff > 0 ? `${monthsDiff}개월` : '신규'}</td>
+                            <td className="px-4 py-3 text-sm text-gray-600">{formatDate(sub.nextDeliveryDate)}</td>
+                            <td className="px-4 py-3 text-sm font-medium text-gray-900">{(sub.plan?.price || 0).toLocaleString()}원</td>
+                            <td className="px-4 py-3">
+                              <span className={`text-xs px-2 py-1 rounded-full ${
+                                statusText === "활성" ? "bg-green-100 text-green-700" : 
+                                statusText === "일시정지" ? "bg-amber-100 text-amber-700" :
+                                "bg-red-100 text-red-700"
+                              }`}>
+                                {statusText}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3">
+                              <button className="text-sm text-primary hover:underline">상세보기</button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                      {subscriptions.length === 0 && (
+                        <tr>
+                          <td colSpan={8} className="px-4 py-12 text-center text-gray-500">
+                            구독자가 없습니다.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </TabsContent>
+            </Tabs>
           </div>
         );
 

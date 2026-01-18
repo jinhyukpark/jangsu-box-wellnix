@@ -63,8 +63,10 @@ export interface IStorage {
   // Subscription Plans
   getSubscriptionPlan(id: number): Promise<SubscriptionPlan | undefined>;
   getAllSubscriptionPlans(): Promise<SubscriptionPlan[]>;
+  getAllSubscriptionPlansAdmin(): Promise<SubscriptionPlan[]>;
   createSubscriptionPlan(plan: InsertSubscriptionPlan): Promise<SubscriptionPlan>;
   updateSubscriptionPlan(id: number, data: Partial<InsertSubscriptionPlan>): Promise<SubscriptionPlan | undefined>;
+  deleteSubscriptionPlan(id: number): Promise<boolean>;
 
   // Subscriptions
   getSubscription(id: number): Promise<Subscription | undefined>;
@@ -336,6 +338,10 @@ export class DatabaseStorage implements IStorage {
     return db.select().from(subscriptionPlans).where(eq(subscriptionPlans.isActive, true));
   }
 
+  async getAllSubscriptionPlansAdmin(): Promise<SubscriptionPlan[]> {
+    return db.select().from(subscriptionPlans).orderBy(asc(subscriptionPlans.price));
+  }
+
   async createSubscriptionPlan(plan: InsertSubscriptionPlan): Promise<SubscriptionPlan> {
     const [created] = await db.insert(subscriptionPlans).values(plan).returning();
     return created;
@@ -344,6 +350,11 @@ export class DatabaseStorage implements IStorage {
   async updateSubscriptionPlan(id: number, data: Partial<InsertSubscriptionPlan>): Promise<SubscriptionPlan | undefined> {
     const [updated] = await db.update(subscriptionPlans).set(data).where(eq(subscriptionPlans.id, id)).returning();
     return updated;
+  }
+
+  async deleteSubscriptionPlan(id: number): Promise<boolean> {
+    await db.delete(subscriptionPlans).where(eq(subscriptionPlans.id, id));
+    return true;
   }
 
   // Subscriptions

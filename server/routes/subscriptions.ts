@@ -50,6 +50,45 @@ router.get("/api/admin/subscriptions", requireAdmin, async (req: Request, res: R
   res.json(subscriptions);
 });
 
+// ============================================================================
+// 관리자 플랜 관리 API
+// ============================================================================
+
+router.get("/api/admin/subscription-plans", requireAdmin, async (req: Request, res: Response) => {
+  const plans = await storage.getAllSubscriptionPlansAdmin();
+  res.json(plans);
+});
+
+router.post("/api/admin/subscription-plans", requireAdmin, async (req: Request, res: Response) => {
+  try {
+    const plan = await storage.createSubscriptionPlan(req.body);
+    res.json(plan);
+  } catch (error) {
+    console.error("Create plan error:", error);
+    res.status(400).json({ error: "플랜 등록에 실패했습니다" });
+  }
+});
+
+router.put("/api/admin/subscription-plans/:id", requireAdmin, async (req: Request, res: Response) => {
+  try {
+    const plan = await storage.updateSubscriptionPlan(parseInt(req.params.id), req.body);
+    res.json(plan);
+  } catch (error) {
+    console.error("Update plan error:", error);
+    res.status(400).json({ error: "플랜 수정에 실패했습니다" });
+  }
+});
+
+router.delete("/api/admin/subscription-plans/:id", requireAdmin, async (req: Request, res: Response) => {
+  try {
+    await storage.deleteSubscriptionPlan(parseInt(req.params.id));
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Delete plan error:", error);
+    res.status(400).json({ error: "플랜 삭제에 실패했습니다" });
+  }
+});
+
 router.get("/api/monthly-boxes", async (req: Request, res: Response) => {
   const boxes = await storage.getAllMonthlyBoxes();
   res.json(boxes);
