@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { useUpload } from "@/hooks/use-upload";
 
 interface Product {
   id?: number;
@@ -116,6 +117,21 @@ export default function AdminProductFormPage() {
   const [replyingReviewId, setReplyingReviewId] = useState<number | null>(null);
   const [replyContents, setReplyContents] = useState<Record<number, string>>({});
   const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  const { uploadFile, isUploading } = useUpload({
+    onSuccess: (response) => {
+      const imageUrl = `/objects/${response.objectPath.replace('/objects/', '')}`;
+      if (!product.image) {
+        setProduct({ ...product, image: imageUrl });
+      } else {
+        setProduct({ ...product, images: [...product.images, imageUrl] });
+      }
+      toast({ title: "이미지가 업로드되었습니다" });
+    },
+    onError: (error) => {
+      toast({ title: "업로드 실패", description: error.message, variant: "destructive" });
+    },
+  });
 
   const { data: categories = [] } = useQuery<Category[]>({
     queryKey: ["/api/categories"],
@@ -408,7 +424,7 @@ export default function AdminProductFormPage() {
                   });
                 })()}
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-2 items-center">
                 <Input
                   value={newImageUrl}
                   onChange={(e) => setNewImageUrl(e.target.value)}
@@ -417,8 +433,30 @@ export default function AdminProductFormPage() {
                   data-testid="input-new-image"
                 />
                 <Button variant="outline" onClick={handleAddImage}>
-                  <Plus className="w-4 h-4 mr-1" /> 이미지 추가
+                  <Plus className="w-4 h-4 mr-1" /> URL 추가
                 </Button>
+                <span className="text-gray-400">또는</span>
+                <label className="cursor-pointer">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        uploadFile(file);
+                        e.target.value = '';
+                      }
+                    }}
+                    disabled={isUploading}
+                  />
+                  <Button variant="default" type="button" disabled={isUploading} asChild>
+                    <span>
+                      <Upload className="w-4 h-4 mr-1" />
+                      {isUploading ? "업로드 중..." : "파일 업로드"}
+                    </span>
+                  </Button>
+                </label>
               </div>
             </div>
 
