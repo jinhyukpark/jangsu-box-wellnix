@@ -1,11 +1,10 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import { Calendar, MapPin, Users, ShoppingCart } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { SEO } from "@/components/SEO";
-import templeImage from "@assets/generated_images/korean_temple_autumn_travel.png";
-import hqImage from "@assets/generated_images/modern_wellness_company_hq.png";
-import rehabImage from "@assets/generated_images/senior_rehab_therapy_equipment.png";
+import type { Event } from "@shared/schema";
 
 const months = [
   { id: "2026-01", label: "1월", year: "2026" },
@@ -18,51 +17,43 @@ const months = [
 
 const categories = ["전체", "여행", "건강식품", "화장품", "운동", "요리"];
 
-const upcomingEvents = [
-  {
-    id: "1",
-    title: "2026 건강한 설맞이 특별 세미나",
-    date: "2026.01.25 (토)",
-    time: "14:00 - 16:00",
-    location: "서울 강남구 웰닉스홀",
-    participants: 127,
-    maxParticipants: 150,
-    image: hqImage,
-    tag: "무료 세미나", status: "모집중",
-    description: "새해 건강 관리 비법과 면역력 증진 방법을 전문가와 함께 알아봅니다.",
-  },
-  {
-    id: "2",
-    title: "시니어 요가 & 명상 클래스",
-    date: "매주 수요일",
-    time: "10:00 - 11:00",
-    location: "온라인 ZOOM",
-    participants: 89,
-    maxParticipants: 100,
-    image: rehabImage,
-    tag: "정기 클래스", status: "모집중",
-    description: "전문 강사와 함께하는 시니어 맞춤 요가와 명상 프로그램입니다.",
-  },
-  {
-    id: "3",
-    title: "홍삼 건강법 특강",
-    date: "2026.02.01 (토)",
-    time: "15:00 - 17:00",
-    location: "부산 해운대 컨벤션센터",
-    participants: 54,
-    maxParticipants: 80,
-    image: templeImage,
-    tag: "건강 강좌", status: "마감됨",
-    description: "홍삼의 효능과 올바른 섭취 방법에 대해 배워봅니다.",
-  },
-];
-
 
 export default function EventsPage() {
   const [, setLocation] = useLocation();
   const [selectedMonth, setSelectedMonth] = useState("2026-01");
   const [selectedCategory, setSelectedCategory] = useState("전체");
   const [selectedStatus, setSelectedStatus] = useState("전체");
+
+  const { data: events = [], isLoading } = useQuery<Event[]>({
+    queryKey: ["/api/events"],
+    queryFn: async () => {
+      const res = await fetch("/api/events");
+      if (!res.ok) throw new Error("Failed to fetch events");
+      return res.json();
+    },
+  });
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case "recruiting": return "모집중";
+      case "closed": return "마감됨";
+      case "completed": return "종료";
+      default: return status;
+    }
+  };
+
+  const formatDate = (dateInput: string | Date) => {
+    const date = typeof dateInput === 'string' ? new Date(dateInput) : dateInput;
+    const days = ["일", "월", "화", "수", "목", "금", "토"];
+    return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, "0")}.${String(date.getDate()).padStart(2, "0")} (${days[date.getDay()]})`;
+  };
+
+  const filteredEvents = events.filter((event) => {
+    const statusLabel = getStatusLabel(event.status || "");
+    if (selectedStatus !== "전체" && statusLabel !== selectedStatus) return false;
+    if (selectedCategory !== "전체" && event.category !== selectedCategory) return false;
+    return true;
+  });
 
   return (
     <AppLayout>
@@ -143,9 +134,11 @@ export default function EventsPage() {
           </div>
           
           <div className="space-y-4">
-            {upcomingEvents
-              .filter((event) => selectedStatus === "전체" || event.status === selectedStatus)
-              .map((event) => (
+            {isLoading ? (
+              <div className="text-center py-8 text-gray-500">로딩중...</div>
+            ) : filteredEvents.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">등록된 행사가 없습니다.</div>
+            ) : filteredEvents.map((event) => (
               <div 
                 key={event.id}
                 onClick={() => setLocation(`/events/${event.id}`)}
@@ -154,20 +147,22 @@ export default function EventsPage() {
               >
                 <div className="relative h-40 overflow-hidden">
                   <img 
-                    src={event.image} 
+                    src={event.image || "https://images.unsplash.com/photo-1497366216548-37526070297c?w=600"} 
                     alt={event.title}
                     className="w-full h-full object-cover"
                   />
                   <div className="absolute top-3 left-3 flex gap-2">
-                    <span className="bg-primary text-white text-xs font-semibold px-2.5 py-1 rounded-lg">
-                      {event.tag}
-                    </span>
+                    {event.tag && (
+                      <span className="bg-primary text-white text-xs font-semibold px-2.5 py-1 rounded-lg">
+                        {event.tag}
+                      </span>
+                    )}
                     <span className={`text-xs font-semibold px-2.5 py-1 rounded-lg ${
-                      event.status === "모집중" 
+                      event.status === "recruiting" 
                         ? "bg-amber-400 text-amber-900" 
                         : "bg-gray-400 text-white"
                     }`}>
-                      {event.status}
+                      {getStatusLabel(event.status || "")}
                     </span>
                   </div>
                 </div>
@@ -179,7 +174,7 @@ export default function EventsPage() {
                   <div className="space-y-1.5 mb-3">
                     <div className="flex items-center gap-2 text-sm text-gray-500">
                       <Calendar className="w-4 h-4" />
-                      <span>{event.date} {event.time}</span>
+                      <span>{formatDate(event.date)} {event.time}</span>
                     </div>
                     <div className="flex items-center gap-2 text-sm text-gray-500">
                       <MapPin className="w-4 h-4" />
@@ -187,11 +182,10 @@ export default function EventsPage() {
                     </div>
                     <div className="flex items-center gap-2 text-sm text-gray-500">
                       <Users className="w-4 h-4" />
-                      <span>{event.participants}/{event.maxParticipants}명</span>
+                      <span>{event.currentParticipants || 0}/{event.maxParticipants || 0}명</span>
                     </div>
                   </div>
-                  
-                                  </div>
+                </div>
               </div>
             ))}
           </div>
