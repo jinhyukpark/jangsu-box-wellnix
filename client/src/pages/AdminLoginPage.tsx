@@ -86,8 +86,8 @@ export default function AdminLoginPage() {
               id="email"
               type="email"
               placeholder="admin@wellnix.kr"
-              //value={formData.email}
-              value="admin@wellnix.kr"
+              value={formData.email}
+              //value="admin@wellnix.kr"
               onChange={(e) =>
                 setFormData({ ...formData, email: e.target.value })
               }
@@ -103,8 +103,8 @@ export default function AdminLoginPage() {
                 id="password"
                 type={showPassword ? "text" : "password"}
                 placeholder="••••••••"
-                //value={formData.password}
-                value="admin1234"
+                value={formData.password}
+                //value="admin1234"
                 onChange={(e) =>
                   setFormData({ ...formData, password: e.target.value })
                 }
