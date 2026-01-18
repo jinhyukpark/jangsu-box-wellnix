@@ -19,7 +19,7 @@ export default function ProductDetailPage() {
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [quantity, setQuantity] = useState(1);
 
-  const { data: product, isLoading } = useQuery({
+  const { data: product, isLoading: isProductLoading } = useQuery({
     queryKey: ["/api/products", id],
     queryFn: async () => {
       const res = await fetch(`/api/products/${id}`);
@@ -28,7 +28,7 @@ export default function ProductDetailPage() {
     },
   });
 
-  const { data: reviews = [] } = useQuery({
+  const { data: reviews = [], isLoading: isReviewsLoading } = useQuery({
     queryKey: ["/api/products", id, "reviews"],
     queryFn: async () => {
       const res = await fetch(`/api/products/${id}/reviews`);
@@ -37,6 +37,8 @@ export default function ProductDetailPage() {
     },
     enabled: !!id,
   });
+
+  const isLoading = isProductLoading || isReviewsLoading;
 
   const allMedia: { type: 'image' | 'video'; url: string }[] = reviews.flatMap((r: any) => {
     const images = Array.isArray(r.images) ? r.images : [];
