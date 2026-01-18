@@ -14,18 +14,18 @@ import jointImg from "@assets/generated_images/joint_health_supplements.png";
 import petImg from "@assets/generated_images/cute_dog_and_cat_together.png";
 import dailyImg from "@assets/generated_images/daily_toiletries_products.png";
 
-const categoryImages = [
-  { image: ginsengImg, label: "홍삼" },
-  { image: heartImg, label: "혈압건강" },
-  { image: vitaminImg, label: "영양제" },
-  { image: fruitImg, label: "과일선물" },
-  { image: cosmeticsImg, label: "화장품" },
-  { image: sleepImg, label: "수면건강" },
-  { image: teaImg, label: "차/음료" },
-  { image: jointImg, label: "관절건강" },
-  { image: petImg, label: "반려동물" },
-  { image: dailyImg, label: "생활용품" },
-];
+const categoryImageMap: Record<string, string> = {
+  "ginseng": ginsengImg,
+  "vitamins": vitaminImg,
+  "juice": teaImg,
+  "probiotics": heartImg,
+  "joint": jointImg,
+  "blood": heartImg,
+  "cosmetics": cosmeticsImg,
+  "sleep": sleepImg,
+  "pet": petImg,
+  "daily": dailyImg,
+};
 
 interface Product {
   id: number;
@@ -80,9 +80,8 @@ export default function GiftsPage() {
     ? activeProducts.filter(p => p.categoryId === selectedCategory)
     : activeProducts;
 
-  const getCategoryImage = (categoryName: string) => {
-    const found = categoryImages.find(c => categoryName?.includes(c.label) || c.label.includes(categoryName || ""));
-    return found?.image || categoryImages[0].image;
+  const getCategoryImage = (slug: string) => {
+    return categoryImageMap[slug] || ginsengImg;
   };
 
   return (
@@ -128,7 +127,7 @@ export default function GiftsPage() {
                     isSelected ? "border-[#006861]" : "border-transparent"
                   }`}>
                     <img 
-                      src={getCategoryImage(cat.name)} 
+                      src={getCategoryImage(cat.slug)} 
                       alt={cat.name}
                       className="w-full h-full object-cover"
                     />
