@@ -36,10 +36,14 @@ export default function ProductDetailPage() {
     enabled: !!id,
   });
 
-  const allMedia: { type: 'image' | 'video'; url: string }[] = reviews.flatMap((r: any) => [
-    ...(r.images || []).map((url: string) => ({ type: 'image' as const, url })),
-    ...(r.videos || []).map((url: string) => ({ type: 'video' as const, url })),
-  ]).slice(0, 20);
+  const allMedia: { type: 'image' | 'video'; url: string }[] = reviews.flatMap((r: any) => {
+    const images = Array.isArray(r.images) ? r.images : [];
+    const videos = Array.isArray(r.videos) ? r.videos : [];
+    return [
+      ...images.map((url: string) => ({ type: 'image' as const, url })),
+      ...videos.map((url: string) => ({ type: 'video' as const, url })),
+    ];
+  }).slice(0, 20);
 
   const handleAddToCart = () => {
     toast({
