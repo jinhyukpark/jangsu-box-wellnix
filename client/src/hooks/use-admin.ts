@@ -82,6 +82,18 @@ export function useDeleteSubscriptionPlan() {
   });
 }
 
+export function useReorderSubscriptionPlans() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (orders: { id: number; displayOrder: number }[]) =>
+      fetchWithAuth("/api/admin/subscription-plans/reorder", { method: "PUT", body: JSON.stringify({ orders }) }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "subscription-plans"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/subscription-plans"] });
+    },
+  });
+}
+
 export function useAdminEvents() {
   return useQuery<Event[]>({
     queryKey: ["admin", "events"],

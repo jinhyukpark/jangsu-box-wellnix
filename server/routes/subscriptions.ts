@@ -98,6 +98,20 @@ router.delete("/api/admin/subscription-plans/:id", requireAdmin, async (req: Req
   }
 });
 
+router.put("/api/admin/subscription-plans/reorder", requireAdmin, async (req: Request, res: Response) => {
+  try {
+    const { orders } = req.body;
+    if (!Array.isArray(orders)) {
+      return res.status(400).json({ error: "orders 배열이 필요합니다" });
+    }
+    await storage.updateSubscriptionPlanOrders(orders);
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Reorder plans error:", error);
+    res.status(400).json({ error: "플랜 순서 변경에 실패했습니다" });
+  }
+});
+
 router.get("/api/monthly-boxes", async (req: Request, res: Response) => {
   const boxes = await storage.getAllMonthlyBoxes();
   res.json(boxes);

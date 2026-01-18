@@ -5,9 +5,9 @@ import {
   Package, Users, Gift, Calendar, CreditCard, Truck, MessageSquare, 
   ChevronRight, Search, Bell, Settings, LogOut, Menu, X,
   TrendingUp, ShoppingBag, UserCheck, Clock, HelpCircle, Star, ShieldCheck, Loader2, ShieldX, Award,
-  ArrowUpDown, ArrowUp, ArrowDown, Home, Image, Link2
+  ArrowUpDown, ArrowUp, ArrowDown, Home, Image, Link2, GripVertical
 } from "lucide-react";
-import { useAdminProducts, useAdminCategories, useAdminMembers, useAdminSubscriptions, useAdminSubscriptionPlans, useAdminEvents, useAdminInquiries, useAdminFaqs, useAdminList, useDashboardStats, useCreateProduct, useUpdateProduct, useCreateCategory, useUpdateCategory, useDeleteCategory, useCreateFaq, useUpdateFaq, useDeleteFaq, useCreateSubscriptionPlan, useUpdateSubscriptionPlan, useDeleteSubscriptionPlan, useDeleteEvent, useMainPageSettings, useUpdateMainPageSettings, type MainPageSettings } from "@/hooks/use-admin";
+import { useAdminProducts, useAdminCategories, useAdminMembers, useAdminSubscriptions, useAdminSubscriptionPlans, useAdminEvents, useAdminInquiries, useAdminFaqs, useAdminList, useDashboardStats, useCreateProduct, useUpdateProduct, useCreateCategory, useUpdateCategory, useDeleteCategory, useCreateFaq, useUpdateFaq, useDeleteFaq, useCreateSubscriptionPlan, useUpdateSubscriptionPlan, useDeleteSubscriptionPlan, useReorderSubscriptionPlans, useDeleteEvent, useMainPageSettings, useUpdateMainPageSettings, type MainPageSettings } from "@/hooks/use-admin";
 import { useAdminAuth, useAdminLogout } from "@/hooks/use-admin-auth";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -521,7 +521,9 @@ export default function AdminPage() {
   const createPlanMutation = useCreateSubscriptionPlan();
   const updatePlanMutation = useUpdateSubscriptionPlan();
   const deletePlanMutation = useDeleteSubscriptionPlan();
+  const reorderPlansMutation = useReorderSubscriptionPlans();
   const [subscriptionTab, setSubscriptionTab] = useState("plans");
+  const [draggedPlanId, setDraggedPlanId] = useState<number | null>(null);
   const [isPlanModalOpen, setIsPlanModalOpen] = useState(false);
   const [editingPlan, setEditingPlan] = useState<any>(null);
   const [planForm, setPlanForm] = useState({
@@ -659,6 +661,48 @@ export default function AdminPage() {
     } catch (error) {
       toast({ variant: "destructive", title: "삭제 실패", description: "다시 시도해주세요." });
     }
+  };
+
+  const handlePlanDragStart = (e: React.DragEvent, planId: number) => {
+    setDraggedPlanId(planId);
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const handlePlanDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+  };
+
+  const handlePlanDrop = async (e: React.DragEvent, targetPlanId: number) => {
+    e.preventDefault();
+    if (draggedPlanId === null || draggedPlanId === targetPlanId) return;
+    
+    const draggedIndex = subscriptionPlans.findIndex(p => p.id === draggedPlanId);
+    const targetIndex = subscriptionPlans.findIndex(p => p.id === targetPlanId);
+    
+    if (draggedIndex === -1 || targetIndex === -1) return;
+    
+    const newPlans = [...subscriptionPlans];
+    const [removed] = newPlans.splice(draggedIndex, 1);
+    newPlans.splice(targetIndex, 0, removed);
+    
+    const orders = newPlans.map((plan, index) => ({
+      id: plan.id,
+      displayOrder: index
+    }));
+    
+    try {
+      await reorderPlansMutation.mutateAsync(orders);
+      toast({ title: "순서 변경 완료", description: "플랜 순서가 변경되었습니다." });
+    } catch (error) {
+      toast({ variant: "destructive", title: "순서 변경 실패", description: "다시 시도해주세요." });
+    }
+    
+    setDraggedPlanId(null);
+  };
+
+  const handlePlanDragEnd = () => {
+    setDraggedPlanId(null);
   };
 
   const addFeature = () => {
@@ -1958,28 +2002,41 @@ export default function AdminPage() {
                 </div>
 
                 <div className="grid gap-4">
+                  <p className="text-sm text-gray-500 mb-2">드래그하여 순서를 변경할 수 있습니다.</p>
                   {subscriptionPlans.map((plan) => (
                     <div 
                       key={plan.id} 
-                      className={`bg-white rounded-lg border-2 p-6 ${plan.isPopular ? 'border-primary' : 'border-gray-200'}`}
+                      draggable
+                      onDragStart={(e) => handlePlanDragStart(e, plan.id)}
+                      onDragOver={handlePlanDragOver}
+                      onDrop={(e) => handlePlanDrop(e, plan.id)}
+                      onDragEnd={handlePlanDragEnd}
+                      className={`bg-white rounded-lg border-2 p-6 cursor-move transition-opacity ${
+                        plan.isPopular ? 'border-primary' : 'border-gray-200'
+                      } ${draggedPlanId === plan.id ? 'opacity-50' : ''}`}
                     >
                       <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <h3 className="text-xl font-bold text-gray-900 mb-1 flex items-center gap-2">
-                            {plan.name}
-                            {plan.isPopular && (
-                              <span className="bg-gray-900 text-white text-xs font-bold px-2 py-1 rounded">
-                                BEST
-                              </span>
-                            )}
-                          </h3>
-                          <p className="text-sm text-gray-600 mb-3">{plan.description}</p>
-                          <div className="flex flex-wrap gap-2 mb-4">
-                            {(plan.features || []).map((feature: string, i: number) => (
-                              <span key={i} className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-xs">
-                                {feature}
-                              </span>
-                            ))}
+                        <div className="flex items-start gap-3">
+                          <div className="flex items-center justify-center w-8 h-8 bg-gray-100 rounded cursor-grab active:cursor-grabbing mt-1">
+                            <GripVertical className="w-4 h-4 text-gray-400" />
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="text-xl font-bold text-gray-900 mb-1 flex items-center gap-2">
+                              {plan.name}
+                              {plan.isPopular && (
+                                <span className="bg-gray-900 text-white text-xs font-bold px-2 py-1 rounded">
+                                  BEST
+                                </span>
+                              )}
+                            </h3>
+                            <p className="text-sm text-gray-600 mb-3">{plan.description}</p>
+                            <div className="flex flex-wrap gap-2 mb-4">
+                              {(plan.features || []).map((feature: string, i: number) => (
+                                <span key={i} className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-xs">
+                                  {feature}
+                                </span>
+                              ))}
+                            </div>
                           </div>
                         </div>
                         <div className="text-right ml-6">

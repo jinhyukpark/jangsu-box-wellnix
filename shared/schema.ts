@@ -141,6 +141,7 @@ export const subscriptionPlans = pgTable("subscription_plans", {
   features: jsonb("features").$type<string[]>().default([]),
   isPopular: boolean("is_popular").default(false),
   isActive: boolean("is_active").default(true),
+  displayOrder: integer("display_order").default(0),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

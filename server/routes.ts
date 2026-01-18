@@ -13,7 +13,7 @@ import orderRoutes from "./routes/orders";
 import memberRoutes from "./routes/members";
 import supportRoutes from "./routes/support";
 import adminRoutes from "./routes/admin";
-import { registerObjectStorageRoutes } from "./replit_integrations/object_storage";
+import { registerSupabaseStorageRoutes } from "./routes/supabase-storage";
 
 const { Pool } = pg;
 
@@ -61,7 +61,7 @@ export async function registerRoutes(
   app.use(supportRoutes);
   app.use(adminRoutes);
   
-  registerObjectStorageRoutes(app);
+  registerSupabaseStorageRoutes(app);
 
   return httpServer;
 }
