@@ -5,7 +5,7 @@ import {
   ChevronRight, Search, Bell, Settings, LogOut, Menu, X,
   TrendingUp, ShoppingBag, UserCheck, Clock, HelpCircle, Star, ShieldCheck, Loader2, ShieldX
 } from "lucide-react";
-import { useAdminProducts, useAdminCategories, useAdminMembers, useAdminSubscriptions, useAdminEvents, useAdminInquiries, useAdminFaqs, useAdminList, useDashboardStats, useCreateProduct, useUpdateProduct, useCreateCategory, useUpdateCategory, useDeleteCategory } from "@/hooks/use-admin";
+import { useAdminProducts, useAdminCategories, useAdminMembers, useAdminSubscriptions, useAdminEvents, useAdminInquiries, useAdminFaqs, useAdminList, useDashboardStats, useCreateProduct, useUpdateProduct, useCreateCategory, useUpdateCategory, useDeleteCategory, useCreateFaq, useUpdateFaq, useDeleteFaq } from "@/hooks/use-admin";
 import { useAdminAuth, useAdminLogout } from "@/hooks/use-admin-auth";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -217,6 +217,15 @@ export default function AdminPage() {
     isActive: true,
     image: ""
   });
+  const [isFaqModalOpen, setIsFaqModalOpen] = useState(false);
+  const [editingFaq, setEditingFaq] = useState<any>(null);
+  const [faqForm, setFaqForm] = useState({
+    category: "",
+    question: "",
+    answer: "",
+    isActive: true,
+    displayOrder: 0
+  });
 
   const { data: authData, isLoading: authLoading, isFetching: authFetching } = useAdminAuth();
   const logoutMutation = useAdminLogout();
@@ -236,6 +245,9 @@ export default function AdminPage() {
   const createCategoryMutation = useCreateCategory();
   const updateCategoryMutation = useUpdateCategory();
   const deleteCategoryMutation = useDeleteCategory();
+  const createFaqMutation = useCreateFaq();
+  const updateFaqMutation = useUpdateFaq();
+  const deleteFaqMutation = useDeleteFaq();
 
   const handleLogout = async () => {
     try {
@@ -360,6 +372,111 @@ export default function AdminPage() {
       image: category.image || ""
     });
     setIsCategoryModalOpen(true);
+  };
+
+  const resetFaqForm = () => {
+    setFaqForm({
+      category: "",
+      question: "",
+      answer: "",
+      isActive: true,
+      displayOrder: 0
+    });
+    setEditingFaq(null);
+  };
+
+  const handleCreateFaq = async () => {
+    if (!faqForm.question.trim() || !faqForm.answer.trim()) {
+      toast({
+        variant: "destructive",
+        title: "입력 오류",
+        description: "질문과 답변을 모두 입력해주세요.",
+      });
+      return;
+    }
+    try {
+      await createFaqMutation.mutateAsync({
+        category: faqForm.category.trim() || null,
+        question: faqForm.question.trim(),
+        answer: faqForm.answer.trim(),
+        isActive: faqForm.isActive,
+        displayOrder: faqForm.displayOrder,
+      });
+      toast({
+        title: "FAQ 등록 완료",
+        description: "새 FAQ가 등록되었습니다.",
+      });
+      setIsFaqModalOpen(false);
+      resetFaqForm();
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "FAQ 등록 실패",
+        description: "다시 시도해주세요.",
+      });
+    }
+  };
+
+  const handleUpdateFaq = async () => {
+    if (!faqForm.question.trim() || !faqForm.answer.trim()) {
+      toast({
+        variant: "destructive",
+        title: "입력 오류",
+        description: "질문과 답변을 모두 입력해주세요.",
+      });
+      return;
+    }
+    try {
+      await updateFaqMutation.mutateAsync({
+        id: editingFaq.id,
+        category: faqForm.category.trim() || null,
+        question: faqForm.question.trim(),
+        answer: faqForm.answer.trim(),
+        isActive: faqForm.isActive,
+        displayOrder: faqForm.displayOrder,
+      });
+      toast({
+        title: "FAQ 수정 완료",
+        description: "FAQ가 수정되었습니다.",
+      });
+      setIsFaqModalOpen(false);
+      resetFaqForm();
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "FAQ 수정 실패",
+        description: "다시 시도해주세요.",
+      });
+    }
+  };
+
+  const handleDeleteFaq = async (faqId: number) => {
+    if (!confirm("이 FAQ를 삭제하시겠습니까?")) return;
+    try {
+      await deleteFaqMutation.mutateAsync(faqId);
+      toast({
+        title: "FAQ 삭제 완료",
+        description: "FAQ가 삭제되었습니다.",
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "FAQ 삭제 실패",
+        description: "다시 시도해주세요.",
+      });
+    }
+  };
+
+  const openEditFaqModal = (faq: any) => {
+    setEditingFaq(faq);
+    setFaqForm({
+      category: faq.category || "",
+      question: faq.question || "",
+      answer: faq.answer || "",
+      isActive: faq.isActive ?? true,
+      displayOrder: faq.displayOrder || 0
+    });
+    setIsFaqModalOpen(true);
   };
 
   if (authLoading || authFetching) {
@@ -1598,36 +1715,45 @@ export default function AdminPage() {
           <div>
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-bold text-gray-900">자주묻는질문</h2>
-              <Dialog>
-                <DialogTrigger asChild>
-                  <button className="bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary/90 flex items-center gap-2">
-                    + FAQ 등록
-                  </button>
-                </DialogTrigger>
+              <button 
+                onClick={() => { resetFaqForm(); setIsFaqModalOpen(true); }}
+                className="bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary/90 flex items-center gap-2"
+              >
+                + FAQ 등록
+              </button>
+              <Dialog open={isFaqModalOpen} onOpenChange={(open) => { if (!open) { resetFaqForm(); } setIsFaqModalOpen(open); }}>
                 <DialogContent className="sm:max-w-[600px] bg-white">
                   <DialogHeader>
-                    <DialogTitle className="text-xl font-bold text-gray-900">FAQ 등록</DialogTitle>
+                    <DialogTitle className="text-xl font-bold text-gray-900">
+                      {editingFaq ? "FAQ 수정" : "FAQ 등록"}
+                    </DialogTitle>
                     <DialogDescription className="text-gray-500">
-                      자주 묻는 질문과 답변을 등록하세요.
+                      자주 묻는 질문과 답변을 {editingFaq ? "수정" : "등록"}하세요.
                     </DialogDescription>
                   </DialogHeader>
                   <div className="space-y-4 pt-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">카테고리</label>
-                      <select className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary">
-                        <option>선택하세요</option>
-                        <option>장수박스</option>
-                        <option>배송</option>
-                        <option>행사/이벤트</option>
-                        <option>교환/환불</option>
-                        <option>기타</option>
+                      <select 
+                        value={faqForm.category}
+                        onChange={(e) => setFaqForm({ ...faqForm, category: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary"
+                      >
+                        <option value="">선택하세요</option>
+                        <option value="장수박스">장수박스</option>
+                        <option value="배송">배송</option>
+                        <option value="행사/이벤트">행사/이벤트</option>
+                        <option value="교환/환불">교환/환불</option>
+                        <option value="기타">기타</option>
                       </select>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">질문</label>
                       <input 
                         type="text" 
-                        placeholder="질문을 입력하세요" 
+                        placeholder="질문을 입력하세요"
+                        value={faqForm.question}
+                        onChange={(e) => setFaqForm({ ...faqForm, question: e.target.value })}
                         className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary"
                       />
                     </div>
@@ -1635,18 +1761,42 @@ export default function AdminPage() {
                       <label className="block text-sm font-medium text-gray-700 mb-1">답변</label>
                       <textarea 
                         rows={5}
-                        placeholder="답변 내용을 입력하세요" 
+                        placeholder="답변 내용을 입력하세요"
+                        value={faqForm.answer}
+                        onChange={(e) => setFaqForm({ ...faqForm, answer: e.target.value })}
                         className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary resize-none"
                       />
                     </div>
                     <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">표시 순서</label>
+                      <input 
+                        type="number" 
+                        placeholder="0"
+                        value={faqForm.displayOrder}
+                        onChange={(e) => setFaqForm({ ...faqForm, displayOrder: parseInt(e.target.value) || 0 })}
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary"
+                      />
+                    </div>
+                    <div>
                       <label className="flex items-center gap-2 text-sm text-gray-700">
-                        <input type="checkbox" className="rounded border-gray-300 text-primary focus:ring-primary" defaultChecked />
+                        <input 
+                          type="checkbox" 
+                          checked={faqForm.isActive}
+                          onChange={(e) => setFaqForm({ ...faqForm, isActive: e.target.checked })}
+                          className="rounded border-gray-300 text-primary focus:ring-primary"
+                        />
                         즉시 게시
                       </label>
                     </div>
-                    <button className="w-full bg-primary text-white font-bold py-3 rounded-lg hover:bg-primary/90">
-                      등록하기
+                    <button 
+                      onClick={editingFaq ? handleUpdateFaq : handleCreateFaq}
+                      disabled={createFaqMutation.isPending || updateFaqMutation.isPending}
+                      className="w-full bg-primary text-white font-bold py-3 rounded-lg hover:bg-primary/90 disabled:opacity-50 flex items-center justify-center gap-2"
+                    >
+                      {(createFaqMutation.isPending || updateFaqMutation.isPending) && (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      )}
+                      {editingFaq ? "수정하기" : "등록하기"}
                     </button>
                   </div>
                 </DialogContent>
@@ -1654,6 +1804,12 @@ export default function AdminPage() {
             </div>
             {faqsLoading ? (
               <div className="text-center py-8 text-gray-500">로딩중...</div>
+            ) : faqsData.length === 0 ? (
+              <div className="text-center py-16 text-gray-400">
+                <HelpCircle className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                <p>등록된 FAQ가 없습니다.</p>
+                <p className="text-sm mt-1">위의 'FAQ 등록' 버튼을 클릭해 첫 번째 FAQ를 추가하세요.</p>
+              </div>
             ) : (
               <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
                 <table className="w-full">
@@ -1680,8 +1836,18 @@ export default function AdminPage() {
                             </span>
                           </td>
                           <td className="px-4 py-3">
-                            <button className="text-sm text-primary hover:underline mr-3">수정</button>
-                            <button className="text-sm text-red-500 hover:underline">삭제</button>
+                            <button 
+                              onClick={() => openEditFaqModal(faq)}
+                              className="text-sm text-primary hover:underline mr-3"
+                            >
+                              수정
+                            </button>
+                            <button 
+                              onClick={() => handleDeleteFaq(faq.id)}
+                              className="text-sm text-red-500 hover:underline"
+                            >
+                              삭제
+                            </button>
                           </td>
                         </tr>
                       );

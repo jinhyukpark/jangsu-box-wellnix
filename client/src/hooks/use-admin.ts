@@ -166,7 +166,7 @@ export function useCreateFaq() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: Partial<Faq>) => 
-      fetchWithAuth("/api/faqs", { method: "POST", body: JSON.stringify(data) }),
+      fetchWithAuth("/api/admin/faqs", { method: "POST", body: JSON.stringify(data) }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin", "faqs"] }),
   });
 }
@@ -175,7 +175,7 @@ export function useUpdateFaq() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id, ...data }: Partial<Faq> & { id: number }) => 
-      fetchWithAuth(`/api/faqs/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+      fetchWithAuth(`/api/admin/faqs/${id}`, { method: "PUT", body: JSON.stringify(data) }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin", "faqs"] }),
   });
 }
@@ -184,7 +184,7 @@ export function useDeleteFaq() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: number) => 
-      fetchWithAuth(`/api/faqs/${id}`, { method: "DELETE" }),
+      fetchWithAuth(`/api/admin/faqs/${id}`, { method: "DELETE" }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin", "faqs"] }),
   });
 }
