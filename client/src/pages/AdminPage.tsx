@@ -661,6 +661,92 @@ export default function AdminPage() {
   
   const { data: events = [], isLoading: eventsLoading } = useAdminEvents();
   const deleteEventMutation = useDeleteEvent();
+  
+  const { data: promotionsData = [], isLoading: promotionsLoading } = useQuery<any[]>({
+    queryKey: ["promotions"],
+    queryFn: async () => {
+      const res = await fetch("/api/promotions", { credentials: "include" });
+      if (!res.ok) throw new Error("Failed to fetch promotions");
+      return res.json();
+    },
+    enabled: !!authData?.admin,
+  });
+  const [isPromotionModalOpen, setIsPromotionModalOpen] = useState(false);
+  const [editingPromotion, setEditingPromotion] = useState<any>(null);
+  const [promotionForm, setPromotionForm] = useState({
+    slug: "",
+    title: "",
+    subtitle: "",
+    description: "",
+    period: "",
+    heroImage: "",
+    isActive: true,
+  });
+  const [selectedPromotionProducts, setSelectedPromotionProducts] = useState<number[]>([]);
+  const [promotionProductSearch, setPromotionProductSearch] = useState("");
+
+  const createPromotionMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const res = await fetch("/api/admin/promotions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error("Failed to create promotion");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["promotions"] });
+    },
+  });
+
+  const updatePromotionMutation = useMutation({
+    mutationFn: async ({ id, ...data }: any) => {
+      const res = await fetch(`/api/admin/promotions/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error("Failed to update promotion");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["promotions"] });
+    },
+  });
+
+  const updatePromotionProductsMutation = useMutation({
+    mutationFn: async ({ id, productIds }: { id: number; productIds: number[] }) => {
+      const res = await fetch(`/api/admin/promotions/${id}/products`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ productIds }),
+      });
+      if (!res.ok) throw new Error("Failed to update promotion products");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["promotions"] });
+    },
+  });
+
+  const deletePromotionMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const res = await fetch(`/api/admin/promotions/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      if (!res.ok) throw new Error("Failed to delete promotion");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["promotions"] });
+    },
+  });
+
   const { data: inquiriesData = [], isLoading: inquiriesLoading } = useAdminInquiries();
   const { data: faqsData = [], isLoading: faqsLoading } = useAdminFaqs();
   const { data: adminsData = [], isLoading: adminsLoading } = useAdminList();
@@ -2568,6 +2654,267 @@ export default function AdminPage() {
                     <tr>
                       <td colSpan={6} className="px-4 py-12 text-center text-gray-500">
                         등록된 행사가 없습니다.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        );
+
+      case "promotions":
+        if (promotionsLoading) return <div className="text-center py-8 text-gray-500">로딩중...</div>;
+        
+        const resetPromotionForm = () => {
+          setPromotionForm({
+            slug: "",
+            title: "",
+            subtitle: "",
+            description: "",
+            period: "",
+            heroImage: "",
+            isActive: true,
+          });
+          setSelectedPromotionProducts([]);
+          setEditingPromotion(null);
+        };
+
+        const openEditPromotionModal = async (promotion: any) => {
+          setEditingPromotion(promotion);
+          setPromotionForm({
+            slug: promotion.slug || "",
+            title: promotion.title || "",
+            subtitle: promotion.subtitle || "",
+            description: promotion.description || "",
+            period: promotion.period || "",
+            heroImage: promotion.heroImage || "",
+            isActive: promotion.isActive !== false,
+          });
+          try {
+            const res = await fetch(`/api/promotions/${promotion.id}`, { credentials: "include" });
+            if (res.ok) {
+              const data = await res.json();
+              setSelectedPromotionProducts(data.products?.map((p: any) => p.id) || []);
+            }
+          } catch (e) {
+            setSelectedPromotionProducts([]);
+          }
+          setIsPromotionModalOpen(true);
+        };
+
+        const handleSavePromotion = async () => {
+          if (!promotionForm.title.trim()) {
+            toast({ variant: "destructive", title: "입력 오류", description: "이벤트명을 입력해주세요." });
+            return;
+          }
+          const slug = promotionForm.slug.trim() || promotionForm.title.toLowerCase().replace(/[^a-z0-9가-힣]/gi, '-').replace(/-+/g, '-');
+          try {
+            if (editingPromotion) {
+              await updatePromotionMutation.mutateAsync({ id: editingPromotion.id, ...promotionForm, slug });
+              await updatePromotionProductsMutation.mutateAsync({ id: editingPromotion.id, productIds: selectedPromotionProducts });
+              toast({ title: "수정 완료", description: "이벤트가 수정되었습니다." });
+            } else {
+              const created = await createPromotionMutation.mutateAsync({ ...promotionForm, slug });
+              if (created?.id) {
+                await updatePromotionProductsMutation.mutateAsync({ id: created.id, productIds: selectedPromotionProducts });
+              }
+              toast({ title: "등록 완료", description: "이벤트가 등록되었습니다." });
+            }
+            setIsPromotionModalOpen(false);
+            resetPromotionForm();
+          } catch (error) {
+            toast({ variant: "destructive", title: "저장 실패", description: "다시 시도해주세요." });
+          }
+        };
+
+        const handleDeletePromotion = async (id: number) => {
+          if (!confirm("정말 이 이벤트를 삭제하시겠습니까?")) return;
+          try {
+            await deletePromotionMutation.mutateAsync(id);
+            toast({ title: "삭제 완료", description: "이벤트가 삭제되었습니다." });
+          } catch (error) {
+            toast({ variant: "destructive", title: "삭제 실패", description: "다시 시도해주세요." });
+          }
+        };
+
+        const togglePromotionProduct = (productId: number) => {
+          if (selectedPromotionProducts.includes(productId)) {
+            setSelectedPromotionProducts(selectedPromotionProducts.filter(id => id !== productId));
+          } else {
+            setSelectedPromotionProducts([...selectedPromotionProducts, productId]);
+          }
+        };
+
+        const filteredProductsForPromotion = products.filter((p: any) =>
+          p.name.toLowerCase().includes(promotionProductSearch.toLowerCase())
+        );
+
+        return (
+          <div>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-gray-900">이벤트관 관리</h2>
+              <Button onClick={() => { resetPromotionForm(); setIsPromotionModalOpen(true); }}>
+                + 이벤트 등록
+              </Button>
+            </div>
+
+            <Dialog open={isPromotionModalOpen} onOpenChange={(isOpen) => { if (!isOpen) { setIsPromotionModalOpen(false); resetPromotionForm(); } }}>
+              <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>{editingPromotion ? "이벤트 수정" : "이벤트 등록"}</DialogTitle>
+                  <DialogDescription>이벤트 정보를 입력하고 상품을 선택하세요.</DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label>이벤트명 *</Label>
+                      <Input
+                        value={promotionForm.title}
+                        onChange={(e) => setPromotionForm({ ...promotionForm, title: e.target.value })}
+                        placeholder="2026 설 선물세트"
+                        className="mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label>슬러그 (URL)</Label>
+                      <Input
+                        value={promotionForm.slug}
+                        onChange={(e) => setPromotionForm({ ...promotionForm, slug: e.target.value })}
+                        placeholder="seol-gift"
+                        className="mt-1"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label>부제목</Label>
+                    <Input
+                      value={promotionForm.subtitle}
+                      onChange={(e) => setPromotionForm({ ...promotionForm, subtitle: e.target.value })}
+                      placeholder="새해 첫 선물로, 특별함과 다양함을 담은 세트를 추천해요."
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label>기간</Label>
+                    <Input
+                      value={promotionForm.period}
+                      onChange={(e) => setPromotionForm({ ...promotionForm, period: e.target.value })}
+                      placeholder="1. 12(월) ~ 2. 27(목)"
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label>히어로 이미지 URL</Label>
+                    <Input
+                      value={promotionForm.heroImage}
+                      onChange={(e) => setPromotionForm({ ...promotionForm, heroImage: e.target.value })}
+                      placeholder="https://..."
+                      className="mt-1"
+                    />
+                    {promotionForm.heroImage && (
+                      <img src={promotionForm.heroImage} alt="Hero preview" className="mt-2 w-full h-32 object-cover rounded-lg" />
+                    )}
+                  </div>
+                  <div>
+                    <Label>설명</Label>
+                    <textarea
+                      value={promotionForm.description}
+                      onChange={(e) => setPromotionForm({ ...promotionForm, description: e.target.value })}
+                      placeholder="이벤트 상세 설명"
+                      className="mt-1 w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-primary min-h-[80px]"
+                    />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Checkbox 
+                      id="promotionActive"
+                      checked={promotionForm.isActive}
+                      onCheckedChange={(checked) => setPromotionForm({ ...promotionForm, isActive: !!checked })}
+                    />
+                    <Label htmlFor="promotionActive">활성화</Label>
+                  </div>
+                  <div>
+                    <Label className="mb-2 block">상품 선택</Label>
+                    <Input
+                      placeholder="상품명으로 검색..."
+                      value={promotionProductSearch}
+                      onChange={(e) => setPromotionProductSearch(e.target.value)}
+                      className="mb-2"
+                    />
+                    {selectedPromotionProducts.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mb-2">
+                        {selectedPromotionProducts.map(id => {
+                          const product = products?.find((p: any) => p.id === id);
+                          return product ? (
+                            <span key={id} className="inline-flex items-center gap-1 bg-primary/10 text-primary text-xs px-2 py-1 rounded">
+                              {product.name}
+                              <button onClick={() => togglePromotionProduct(id)} className="hover:text-red-500">×</button>
+                            </span>
+                          ) : null;
+                        })}
+                      </div>
+                    )}
+                    <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto border rounded p-2">
+                      {filteredProductsForPromotion.map((product: any) => (
+                        <label key={product.id} className="flex items-center gap-2 p-2 hover:bg-gray-50 rounded cursor-pointer">
+                          <Checkbox
+                            checked={selectedPromotionProducts.includes(product.id)}
+                            onCheckedChange={() => togglePromotionProduct(product.id)}
+                          />
+                          <span className="text-sm truncate">{product.name}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                <div className="flex justify-end gap-2">
+                  <Button variant="outline" onClick={() => { setIsPromotionModalOpen(false); resetPromotionForm(); }}>취소</Button>
+                  <Button onClick={handleSavePromotion} disabled={createPromotionMutation.isPending || updatePromotionMutation.isPending}>
+                    {createPromotionMutation.isPending || updatePromotionMutation.isPending ? "저장중..." : "저장"}
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+
+            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b border-gray-200">
+                  <tr>
+                    <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">이벤트명</th>
+                    <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">기간</th>
+                    <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">상품수</th>
+                    <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">상태</th>
+                    <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">관리</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {promotionsData.map((promo: any) => (
+                    <tr key={promo.id} className="border-b border-gray-100 hover:bg-gray-50">
+                      <td className="px-4 py-3">
+                        <div>
+                          <p className="font-medium text-gray-900">{promo.title}</p>
+                          <p className="text-xs text-gray-500">/promotion/{promo.slug}</p>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-600">{promo.period || "-"}</td>
+                      <td className="px-4 py-3 text-sm text-gray-600">-</td>
+                      <td className="px-4 py-3">
+                        <span className={`text-xs px-2 py-1 rounded-full ${promo.isActive ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600"}`}>
+                          {promo.isActive ? "활성" : "비활성"}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex gap-2">
+                          <button onClick={() => openEditPromotionModal(promo)} className="text-sm text-primary hover:underline">수정</button>
+                          <button onClick={() => handleDeletePromotion(promo.id)} className="text-sm text-red-500 hover:underline">삭제</button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                  {promotionsData.length === 0 && (
+                    <tr>
+                      <td colSpan={5} className="px-4 py-12 text-center text-gray-500">
+                        등록된 이벤트가 없습니다.
                       </td>
                     </tr>
                   )}

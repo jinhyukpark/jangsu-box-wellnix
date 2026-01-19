@@ -86,15 +86,37 @@ const promotionConfigs: Record<string, PromotionConfig> = {
 export default function PromotionPage() {
   const params = useParams<{ slug: string }>();
   const slug = params.slug || "seol-gift";
-  const config = promotionConfigs[slug] || promotionConfigs["seol-gift"];
+  const staticConfig = promotionConfigs[slug] || promotionConfigs["seol-gift"];
 
-  const { data: products = [] } = useQuery<any[]>({
+  const { data: dbPromotion } = useQuery<{ promotion: any; products: any[] }>({
+    queryKey: ["/api/promotions", slug],
+    queryFn: async () => {
+      const res = await fetch(`/api/promotions/${slug}`);
+      if (!res.ok) return null;
+      return res.json();
+    },
+  });
+
+  const { data: allProducts = [] } = useQuery<any[]>({
     queryKey: ["/api/products"],
   });
 
-  const filteredProducts = config.categoryIds
-    ? products.filter((p) => config.categoryIds?.includes(p.categoryId))
-    : products.filter((p) => p.isFeatured);
+  const config = dbPromotion?.promotion ? {
+    title: dbPromotion.promotion.title,
+    subtitle: dbPromotion.promotion.subtitle || "",
+    description: dbPromotion.promotion.description || "",
+    period: dbPromotion.promotion.period || "",
+    heroImage: dbPromotion.promotion.heroImage || staticConfig.heroImage,
+    bannerImages: dbPromotion.promotion.bannerImages || [],
+    benefits: dbPromotion.promotion.benefits || [],
+    categoryIds: undefined,
+  } : staticConfig;
+
+  const filteredProducts = dbPromotion?.products && dbPromotion.products.length > 0
+    ? dbPromotion.products
+    : staticConfig.categoryIds
+      ? allProducts.filter((p) => staticConfig.categoryIds?.includes(p.categoryId))
+      : allProducts.filter((p) => p.isFeatured);
 
   return (
     <AppLayout>
