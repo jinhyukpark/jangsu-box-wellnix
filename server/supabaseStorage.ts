@@ -9,7 +9,7 @@ export const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
 const BUCKET_NAME = "_public";
 
 export class SupabaseStorageService {
-  async getUploadUrl(fileName: string, contentType: string): Promise<{ uploadUrl: string; objectPath: string }> {
+  async getUploadUrl(fileName: string, contentType: string): Promise<{ uploadUrl: string; objectPath: string; publicUrl: string }> {
     const objectId = randomUUID();
     const extension = fileName.split('.').pop() || '';
     const objectName = extension ? `${objectId}.${extension}` : objectId;
@@ -22,9 +22,12 @@ export class SupabaseStorageService {
       throw new Error(`Failed to create upload URL: ${error.message}`);
     }
 
+    const publicUrl = `${supabaseUrl}/storage/v1/object/public/${BUCKET_NAME}/uploads/${objectName}`;
+
     return {
       uploadUrl: data.signedUrl,
       objectPath: `/storage/${BUCKET_NAME}/uploads/${objectName}`,
+      publicUrl,
     };
   }
 

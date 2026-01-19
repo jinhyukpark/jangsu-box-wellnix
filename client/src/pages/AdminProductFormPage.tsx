@@ -134,7 +134,7 @@ export default function AdminProductFormPage() {
 
   const { uploadFile, isUploading } = useUpload({
     onSuccess: (response) => {
-      const imageUrl = `/objects/${response.objectPath.replace('/objects/', '')}`;
+      const imageUrl = response.publicUrl;
       if (!product.image) {
         setProduct({ ...product, image: imageUrl });
       } else {

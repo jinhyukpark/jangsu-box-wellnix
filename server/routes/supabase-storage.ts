@@ -12,7 +12,7 @@ export function registerSupabaseStorageRoutes(app: Express): void {
         });
       }
 
-      const { uploadUrl, objectPath } = await supabaseStorageService.getUploadUrl(
+      const { uploadUrl, objectPath, publicUrl } = await supabaseStorageService.getUploadUrl(
         name,
         contentType || "application/octet-stream"
       );
@@ -20,6 +20,7 @@ export function registerSupabaseStorageRoutes(app: Express): void {
       res.json({
         uploadURL: uploadUrl,
         objectPath,
+        publicUrl,
         metadata: { name, contentType },
       });
     } catch (error) {
