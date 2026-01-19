@@ -1,5 +1,6 @@
 import { Home, Gift, Package, Calendar, User } from "lucide-react";
 import { useLocation } from "wouter";
+import { useQueryClient } from "@tanstack/react-query";
 
 const navItems = [
   { icon: Home, label: "홈", path: "/" },
@@ -11,6 +12,12 @@ const navItems = [
 
 export function BottomNav() {
   const [location, setLocation] = useLocation();
+  const queryClient = useQueryClient();
+
+  const handleNavClick = (path: string) => {
+    queryClient.invalidateQueries();
+    setLocation(path);
+  };
 
   return (
     <nav className="bg-white border-t border-gray-100 px-2 py-2">
@@ -22,7 +29,7 @@ export function BottomNav() {
           return (
             <button
               key={item.path}
-              onClick={() => setLocation(item.path)}
+              onClick={() => handleNavClick(item.path)}
               data-testid={`nav-${item.label}`}
               className={`flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition-all duration-200 ${
                 isActive 
