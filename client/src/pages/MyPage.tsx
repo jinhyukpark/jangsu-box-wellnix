@@ -439,35 +439,9 @@ export default function MyPage() {
         </div>
       </header>
 
-      <div className="pb-24 flex flex-col min-h-[calc(100vh-60px)]">
+      <div className="pb-24">
         {!isAuthenticated ? (
-          <>
-            <LoginForm onLogin={handleAuth} isLoading={isLoginLoading || isRegisterLoading} />
-            
-            <div className="flex-1" />
-            
-            <div className="px-4 space-y-4 mb-6">
-              <div>
-                <h3 className="text-sm text-gray-500 mb-2">고객지원</h3>
-                <div className="bg-white rounded-lg border border-gray-100 overflow-hidden divide-y divide-gray-100">
-                  {["공지사항", "자주 묻는 질문", "1:1 문의"].map((item) => (
-                    <button 
-                      key={item} 
-                      className="w-full flex items-center justify-between p-4 hover:bg-gray-50"
-                      onClick={() => handleMenuClick(item)}
-                    >
-                      <span className="font-medium text-gray-800">{item}</span>
-                      <ChevronRight className="w-5 h-5 text-gray-400" />
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <div className="px-4 text-center text-sm text-gray-400 pb-4">
-              <p>웰닉스 v2.1.8</p>
-            </div>
-          </>
+          <LoginForm onLogin={handleAuth} isLoading={isLoginLoading || isRegisterLoading} />
         ) : (
           <>
             <div className="relative bg-gradient-to-br from-[#006861] via-[#007a6a] to-[#005850] p-5 overflow-hidden">
