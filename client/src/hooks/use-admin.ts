@@ -23,7 +23,7 @@ async function fetchWithAuth(url: string, options?: RequestInit) {
 export function useAdminProducts() {
   return useQuery<Product[]>({
     queryKey: ["admin", "products"],
-    queryFn: () => fetchWithAuth("/api/products"),
+    queryFn: () => fetchWithAuth("/api/admin/products"),
   });
 }
 

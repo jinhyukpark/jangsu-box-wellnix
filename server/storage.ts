@@ -60,6 +60,7 @@ export interface IStorage {
   updateProduct(id: number, data: Partial<InsertProduct>): Promise<Product | undefined>;
   deleteProduct(id: number): Promise<boolean>;
   getAllProducts(categoryId?: number): Promise<Product[]>;
+  getAllProductsAdmin(categoryId?: number): Promise<Product[]>;
   searchProducts(query: string): Promise<Product[]>;
   getFeaturedProducts(): Promise<Product[]>;
 
@@ -339,6 +340,13 @@ export class DatabaseStorage implements IStorage {
       return db.select().from(products).where(and(eq(products.categoryId, categoryId), eq(products.status, "active"))).orderBy(desc(products.createdAt));
     }
     return db.select().from(products).where(eq(products.status, "active")).orderBy(desc(products.createdAt));
+  }
+
+  async getAllProductsAdmin(categoryId?: number): Promise<Product[]> {
+    if (categoryId) {
+      return db.select().from(products).where(eq(products.categoryId, categoryId)).orderBy(desc(products.createdAt));
+    }
+    return db.select().from(products).orderBy(desc(products.createdAt));
   }
 
   async searchProducts(query: string): Promise<Product[]> {

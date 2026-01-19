@@ -67,6 +67,12 @@ router.get("/api/products/:id", async (req: Request, res: Response) => {
   res.json(product);
 });
 
+router.get("/api/admin/products", requireAdmin, async (req: Request, res: Response) => {
+  const categoryId = req.query.categoryId ? parseInt(req.query.categoryId as string) : undefined;
+  const products = await storage.getAllProductsAdmin(categoryId);
+  res.json(products);
+});
+
 router.post("/api/admin/products", requireAdmin, async (req: Request, res: Response) => {
   try {
     const data = insertProductSchema.parse(req.body);
