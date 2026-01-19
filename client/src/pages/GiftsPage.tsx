@@ -1,12 +1,11 @@
 import { useState, useRef } from "react";
-import { Filter, ChevronDown, ArrowLeft, ShoppingCart, X, Check } from "lucide-react";
-import { useLocation } from "wouter";
+import { Filter, ChevronDown, ArrowLeft, ShoppingCart, Check, Search } from "lucide-react";
+import { useLocation, Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { AppLayout } from "@/components/AppLayout";
 import { images } from "@/lib/images";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 
 const categoryImageMap: Record<string, string> = {
@@ -59,8 +58,21 @@ export default function GiftsPage() {
   const [showFilterModal, setShowFilterModal] = useState(false);
   
   const [filterOnlyDiscount, setFilterOnlyDiscount] = useState(false);
-  const [filterPriceRange, setFilterPriceRange] = useState<[number, number]>([0, 500000]);
+  const [filterPriceOption, setFilterPriceOption] = useState<string>("all");
   const [filterMinRating, setFilterMinRating] = useState(0);
+
+  const priceOptions = [
+    { value: "all", label: "전체", min: 0, max: Infinity },
+    { value: "under50", label: "5만원 이하", min: 0, max: 50000 },
+    { value: "50to100", label: "5~10만원", min: 50000, max: 100000 },
+    { value: "100to200", label: "10~20만원", min: 100000, max: 200000 },
+    { value: "over200", label: "20만원 이상", min: 200000, max: Infinity },
+  ];
+
+  const getFilterPriceRange = () => {
+    const option = priceOptions.find(o => o.value === filterPriceOption);
+    return option ? [option.min, option.max] : [0, Infinity];
+  };
 
   const { data: products = [], isLoading: productsLoading } = useQuery<Product[]>({
     queryKey: ["/api/products"],
@@ -97,8 +109,9 @@ export default function GiftsPage() {
     filteredProducts = filteredProducts.filter(p => p.originalPrice && p.originalPrice > p.price);
   }
   
+  const priceRange = getFilterPriceRange();
   filteredProducts = filteredProducts.filter(p => 
-    p.price >= filterPriceRange[0] && p.price <= filterPriceRange[1]
+    p.price >= priceRange[0] && p.price <= priceRange[1]
   );
   
   if (filterMinRating > 0) {
@@ -124,11 +137,11 @@ export default function GiftsPage() {
 
   const resetFilters = () => {
     setFilterOnlyDiscount(false);
-    setFilterPriceRange([0, 500000]);
+    setFilterPriceOption("all");
     setFilterMinRating(0);
   };
 
-  const hasActiveFilters = filterOnlyDiscount || filterPriceRange[0] > 0 || filterPriceRange[1] < 500000 || filterMinRating > 0;
+  const hasActiveFilters = filterOnlyDiscount || filterPriceOption !== "all" || filterMinRating > 0;
 
   const getCategoryImage = (slug: string) => {
     return categoryImageMap[slug] || images.koreanRedGinsengRoots;
@@ -148,12 +161,19 @@ export default function GiftsPage() {
             </button>
             <h1 className="text-xl font-bold text-gray-900">선물관</h1>
           </div>
-          <button className="relative p-2" data-testid="cart-btn">
-            <ShoppingCart className="w-6 h-6 text-gray-600" />
-            <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-primary text-white text-xs font-bold rounded-full flex items-center justify-center">
-              3
-            </span>
-          </button>
+          <div className="flex items-center gap-1">
+            <Link href="/search">
+              <button className="p-2 hover:bg-gray-100 rounded-full" data-testid="search-btn">
+                <Search className="w-5 h-5 text-gray-600" />
+              </button>
+            </Link>
+            <button className="relative p-2" data-testid="cart-btn">
+              <ShoppingCart className="w-6 h-6 text-gray-600" />
+              <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-primary text-white text-xs font-bold rounded-full flex items-center justify-center">
+                3
+              </span>
+            </button>
+          </div>
         </div>
         
         <div 
@@ -309,18 +329,21 @@ export default function GiftsPage() {
             </div>
 
             <div>
-              <h4 className="text-sm font-medium mb-3">가격 범위</h4>
-              <Slider
-                value={filterPriceRange}
-                min={0}
-                max={500000}
-                step={10000}
-                onValueChange={(value) => setFilterPriceRange(value as [number, number])}
-                className="mb-2"
-              />
-              <div className="flex justify-between text-sm text-gray-500">
-                <span>{filterPriceRange[0].toLocaleString()}원</span>
-                <span>{filterPriceRange[1].toLocaleString()}원</span>
+              <h4 className="text-sm font-medium mb-3">가격대</h4>
+              <div className="flex flex-wrap gap-2">
+                {priceOptions.map(option => (
+                  <button
+                    key={option.value}
+                    className={`px-3 py-1.5 rounded-full text-sm border transition-colors ${
+                      filterPriceOption === option.value
+                        ? "bg-primary text-white border-primary"
+                        : "bg-white text-gray-600 border-gray-200 hover:border-gray-300"
+                    }`}
+                    onClick={() => setFilterPriceOption(option.value)}
+                  >
+                    {option.label}
+                  </button>
+                ))}
               </div>
             </div>
 
