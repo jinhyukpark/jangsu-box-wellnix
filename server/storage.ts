@@ -28,6 +28,8 @@ import {
   type MainPageSettings, type InsertMainPageSettings, mainPageSettings,
   type Promotion, type InsertPromotion, promotions,
   type PromotionProduct, type InsertPromotionProduct, promotionProducts,
+  type RecentSearch, type InsertRecentSearch, recentSearches,
+  type PopularKeyword, type InsertPopularKeyword, popularKeywords,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -210,6 +212,20 @@ export interface IStorage {
   getPromotionProducts(promotionId: number): Promise<PromotionProduct[]>;
   getPromotionWithProducts(id: number): Promise<{ promotion: Promotion; products: Product[] } | undefined>;
   setPromotionProducts(promotionId: number, productIds: number[]): Promise<void>;
+
+  // Recent Searches (로그인 사용자용)
+  getRecentSearches(memberId: number): Promise<RecentSearch[]>;
+  addRecentSearch(memberId: number, keyword: string): Promise<RecentSearch>;
+  deleteRecentSearch(memberId: number, keyword: string): Promise<boolean>;
+  clearRecentSearches(memberId: number): Promise<boolean>;
+
+  // Popular Keywords (관리자 설정용)
+  getAllPopularKeywords(): Promise<PopularKeyword[]>;
+  getActivePopularKeywords(): Promise<PopularKeyword[]>;
+  createPopularKeyword(data: InsertPopularKeyword): Promise<PopularKeyword>;
+  updatePopularKeyword(id: number, data: Partial<InsertPopularKeyword>): Promise<PopularKeyword | undefined>;
+  deletePopularKeyword(id: number): Promise<boolean>;
+  reorderPopularKeywords(orderedIds: number[]): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -926,6 +942,91 @@ export class DatabaseStorage implements IStorage {
       }));
       await db.insert(promotionProducts).values(values);
     }
+  }
+
+  // Recent Searches
+  async getRecentSearches(memberId: number): Promise<RecentSearch[]> {
+    return db.select().from(recentSearches)
+      .where(eq(recentSearches.memberId, memberId))
+      .orderBy(desc(recentSearches.searchedAt))
+      .limit(10);
+  }
+
+  async addRecentSearch(memberId: number, keyword: string): Promise<RecentSearch> {
+    // First, delete existing same keyword to avoid duplicates
+    await db.delete(recentSearches)
+      .where(and(eq(recentSearches.memberId, memberId), eq(recentSearches.keyword, keyword)));
+    
+    // Insert new search
+    const [created] = await db.insert(recentSearches)
+      .values({ memberId, keyword })
+      .returning();
+    
+    // Keep only last 10 searches
+    const allSearches = await this.getRecentSearches(memberId);
+    if (allSearches.length > 10) {
+      const idsToDelete = allSearches.slice(10).map(s => s.id);
+      for (const id of idsToDelete) {
+        await db.delete(recentSearches).where(eq(recentSearches.id, id));
+      }
+    }
+    
+    return created;
+  }
+
+  async deleteRecentSearch(memberId: number, keyword: string): Promise<boolean> {
+    await db.delete(recentSearches)
+      .where(and(eq(recentSearches.memberId, memberId), eq(recentSearches.keyword, keyword)));
+    return true;
+  }
+
+  async clearRecentSearches(memberId: number): Promise<boolean> {
+    await db.delete(recentSearches).where(eq(recentSearches.memberId, memberId));
+    return true;
+  }
+
+  // Popular Keywords
+  async getAllPopularKeywords(): Promise<PopularKeyword[]> {
+    return db.select().from(popularKeywords).orderBy(asc(popularKeywords.displayOrder));
+  }
+
+  async getActivePopularKeywords(): Promise<PopularKeyword[]> {
+    return db.select().from(popularKeywords)
+      .where(eq(popularKeywords.isActive, true))
+      .orderBy(asc(popularKeywords.displayOrder));
+  }
+
+  async createPopularKeyword(data: InsertPopularKeyword): Promise<PopularKeyword> {
+    // Get max display order
+    const existing = await this.getAllPopularKeywords();
+    const maxOrder = existing.length > 0 ? Math.max(...existing.map(k => k.displayOrder || 0)) : 0;
+    
+    const [created] = await db.insert(popularKeywords)
+      .values({ ...data, displayOrder: maxOrder + 1 })
+      .returning();
+    return created;
+  }
+
+  async updatePopularKeyword(id: number, data: Partial<InsertPopularKeyword>): Promise<PopularKeyword | undefined> {
+    const [updated] = await db.update(popularKeywords)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(popularKeywords.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deletePopularKeyword(id: number): Promise<boolean> {
+    await db.delete(popularKeywords).where(eq(popularKeywords.id, id));
+    return true;
+  }
+
+  async reorderPopularKeywords(orderedIds: number[]): Promise<boolean> {
+    for (let i = 0; i < orderedIds.length; i++) {
+      await db.update(popularKeywords)
+        .set({ displayOrder: i + 1 })
+        .where(eq(popularKeywords.id, orderedIds[i]));
+    }
+    return true;
   }
 }
 
