@@ -119,8 +119,6 @@ export function PromoSidebar() {
     return <div key={banner.key}>{content}</div>;
   };
 
-  const heroTitleParts = (hero.title || "").split(",").map((s) => s.trim());
-
   return (
     <aside className="hidden lg:flex flex-col w-[420px] h-screen bg-background sticky top-0 mr-16">
       <div className="flex flex-col h-full justify-center p-8 overflow-hidden">
@@ -133,31 +131,21 @@ export function PromoSidebar() {
         <div className="flex flex-col">
           {hero.isActive && (
             <div className="relative rounded overflow-hidden mb-6 shadow-xl">
-              <img 
-                src={hero.displayImage}
-                alt="행복한 부모님"
-                className="w-full aspect-[3/4] object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
-              
-              <div className="absolute inset-0 flex flex-col justify-end p-6">
-                <div className="text-center">
-                  {heroTitleParts.map((part, i) => (
-                    <h2 
-                      key={i} 
-                      className="text-2xl font-bold mb-2 font-serif leading-tight"
-                      style={{ color: hero.textColor || "#ffffff" }}
-                    >
-                      {part}{i < heroTitleParts.length - 1 ? "," : ""}
-                    </h2>
-                  ))}
-                  <p className="text-white/80 text-sm leading-relaxed">
-                    {hero.subtitle?.split("<br />").map((line, i) => (
-                      <span key={i}>{line}{i < (hero.subtitle?.split("<br />").length || 1) - 1 && <br />}</span>
-                    ))}
-                  </p>
-                </div>
-              </div>
+              {hero.linkUrl ? (
+                <Link href={hero.linkUrl}>
+                  <img 
+                    src={hero.displayImage}
+                    alt="프로모션"
+                    className="w-full aspect-[3/4] object-cover cursor-pointer"
+                  />
+                </Link>
+              ) : (
+                <img 
+                  src={hero.displayImage}
+                  alt="프로모션"
+                  className="w-full aspect-[3/4] object-cover"
+                />
+              )}
             </div>
           )}
           
