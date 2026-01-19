@@ -107,7 +107,7 @@ export function EventSection() {
         {events.map((event) => (
           <Link key={event.id} href={`/events/${event.id}`}>
             <div 
-              className="flex-shrink-0 w-72 snap-start rounded-lg overflow-hidden bg-white border border-gray-100 shadow-sm cursor-pointer hover:shadow-md transition-shadow"
+              className="flex-shrink-0 w-80 snap-start rounded-lg overflow-hidden bg-white border border-gray-100 shadow-sm cursor-pointer hover:shadow-md transition-shadow"
             >
               <div className="relative h-36 overflow-hidden">
                 <img 
@@ -138,21 +138,21 @@ export function EventSection() {
                 </div>
                 
                 {event.location && (
-                  <div className="border border-gray-200 rounded-lg p-3">
+                  <div className="bg-stone-50 rounded-lg p-3">
                     <div className="flex">
                       <div className="flex flex-col items-center mr-3">
                         <div className="w-2.5 h-2.5 rounded-full bg-[#006861]" />
-                        <div className="w-0.5 h-10 bg-gray-200" />
+                        <div className="w-0.5 h-8 bg-gray-300" />
                         <div className="w-2.5 h-2.5 rounded-full bg-amber-400" />
                       </div>
-                      <div className="flex-1 space-y-3">
+                      <div className="flex-1 space-y-2">
                         <div>
                           <p className="text-xs text-gray-500">출발 {event.time || "07:00"}</p>
-                          <p className="text-sm font-bold text-gray-900">{event.location}</p>
+                          <p className="text-sm font-semibold text-gray-900">{event.location}</p>
                         </div>
                         <div>
-                          <p className="text-xs text-gray-500">도착 {event.detailedAddress ? "10:30" : ""}</p>
-                          <p className="text-sm font-bold text-gray-900">{event.detailedAddress || "목적지"}</p>
+                          <p className="text-xs text-gray-500">도착 10:30</p>
+                          <p className="text-sm font-semibold text-gray-900">{event.detailedAddress || "강원도 평창 힐링리조트"}</p>
                         </div>
                       </div>
                     </div>
