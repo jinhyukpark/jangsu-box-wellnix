@@ -5,7 +5,7 @@ import { HeroBanner } from "@/components/HeroBanner";
 import { CategoryGrid } from "@/components/CategoryGrid";
 import { ProductSection } from "@/components/ProductSection";
 import { SubscriptionBanner } from "@/components/SubscriptionBanner";
-import { PromoBanner } from "@/components/PromoBanner";
+import { Footer } from "@/components/Footer";
 import { EventSection } from "@/components/EventSection";
 import { AppLayout } from "@/components/AppLayout";
 import { CustomerServicePopup } from "@/components/CustomerServicePopup";
@@ -166,7 +166,7 @@ export default function Home() {
           products={giftProducts}
         />
         
-        <PromoBanner onCustomerServiceClick={() => setShowCustomerService(true)} />
+        <Footer onCustomerServiceClick={() => setShowCustomerService(true)} />
         
         <CustomerServicePopup 
           open={showCustomerService} 
