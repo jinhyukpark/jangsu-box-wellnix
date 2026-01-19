@@ -17,6 +17,7 @@ The frontend is a mobile-first React application styled as a 430px-max-width mob
 Preferred communication style: Simple, everyday language.
 Database preference: Use Supabase PostgreSQL (SUPABASE_DATABASE_URL) as the primary database. Do not use Replit's internal PostgreSQL.
 
+
 ## System Architecture
 
 ### Frontend Architecture
