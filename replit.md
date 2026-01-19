@@ -73,6 +73,16 @@ The app layout has two areas:
 - Swipe-to-dismiss where appropriate
 - No hover-only interactions
 
+### ⚠️ Admin vs User Separation ⚠️
+**관리자(Admin)는 슈퍼 관리자이며, 사용자단과 코드/상태를 공유하지 않는다.**
+
+1. **Admin은 독립적**: 관리자 페이지는 사용자 페이지와 별개로 동작
+2. **상태 분리**: 관리자의 데이터 수정은 관리자에서만 관리
+3. **사용자단 반영**: 사용자 페이지는 네비게이션 이동 시 DB에서 최신 데이터를 리로드하여 반영
+4. **API 분리**: 
+   - 사용자 API (`/api/products`): active 상품만 반환
+   - 관리자 API (`/api/admin/products`): 모든 상품 반환 (상태 무관)
+
 ### CRITICAL: External Services Only (Supabase)
 **DO NOT use any Replit built-in services. Use ONLY Supabase for all data storage:**
 
