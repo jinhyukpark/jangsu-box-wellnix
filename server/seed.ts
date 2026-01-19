@@ -7,7 +7,8 @@ import {
   monthlyBoxes,
   notices,
   faqs,
-  admins
+  admins,
+  promotions
 } from "@shared/schema";
 import bcrypt from "bcryptjs";
 
@@ -257,6 +258,49 @@ async function seed() {
       question: "구독 해지는 언제든 가능한가요?",
       answer: "네, 마이페이지에서 언제든 구독 해지가 가능합니다. 다음 결제일 전까지 해지하시면 추가 결제 없이 해지됩니다.",
       displayOrder: 5,
+    },
+  ]);
+
+  await db.insert(promotions).values([
+    {
+      slug: "seol-gift",
+      title: "설 선물세트",
+      subtitle: "새해 첫 선물로, 특별함과 다양함을 담은 세트를 추천해요.",
+      description: "부모님께 전하는 건강한 설 선물",
+      period: "1. 12(월) ~ 2. 27(목)",
+      heroImage: "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=600",
+      isActive: true,
+      displayOrder: 1,
+    },
+    {
+      slug: "jangsu-box",
+      title: "장수박스",
+      subtitle: "매월 정기 배송되는 프리미엄 건강 선물 세트",
+      description: "부모님의 건강을 매달 챙겨드립니다",
+      period: "매월 정기 배송",
+      heroImage: "https://images.unsplash.com/photo-1513201099705-a9746e1e201f?w=600",
+      isActive: true,
+      displayOrder: 2,
+    },
+    {
+      slug: "health-travel",
+      title: "건강 여행",
+      subtitle: "건강한 여행을 위한 필수 아이템",
+      description: "여행길에도 건강을 챙기세요",
+      period: "상시 진행",
+      heroImage: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=600",
+      isActive: true,
+      displayOrder: 3,
+    },
+    {
+      slug: "popular",
+      title: "인기 상품",
+      subtitle: "고객님들이 가장 많이 찾는 베스트셀러",
+      description: "믿고 구매하는 인기 상품",
+      period: "실시간 인기 순위",
+      heroImage: "https://images.unsplash.com/photo-1505576399279-565b52d4ac71?w=600",
+      isActive: true,
+      displayOrder: 4,
     },
   ]);
 
