@@ -52,6 +52,14 @@ export default function EventsPage() {
     const statusLabel = getStatusLabel(event.status || "");
     if (selectedStatus !== "전체" && statusLabel !== selectedStatus) return false;
     if (selectedCategory !== "전체" && event.category !== selectedCategory) return false;
+    
+    // Month filtering
+    if (event.date) {
+      const eventDate = new Date(event.date);
+      const eventYearMonth = `${eventDate.getFullYear()}-${String(eventDate.getMonth() + 1).padStart(2, "0")}`;
+      if (eventYearMonth !== selectedMonth) return false;
+    }
+    
     return true;
   });
 
