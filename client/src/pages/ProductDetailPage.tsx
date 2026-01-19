@@ -194,16 +194,56 @@ export default function ProductDetailPage() {
         </div>
 
       <div className="relative">
-        <div className="aspect-square bg-gray-100">
-          <img
-            src={product.image || "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600"}
-            alt={product.name}
-            className="w-full h-full object-cover"
-          />
-        </div>
-        <div className="absolute bottom-4 right-4 bg-black/60 text-white text-xs px-2 py-1 rounded">
-          {currentImageIndex + 1} / 1
-        </div>
+        {(() => {
+          const allProductImages = [
+            product.image,
+            ...(Array.isArray(product.images) ? product.images : [])
+          ].filter(Boolean);
+          const totalImages = allProductImages.length || 1;
+          const currentImage = allProductImages[currentImageIndex] || product.image || "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600";
+          
+          return (
+            <>
+              <div className="aspect-square bg-gray-100 relative overflow-hidden">
+                <img
+                  src={currentImage}
+                  alt={product.name}
+                  className="w-full h-full object-cover"
+                />
+                {totalImages > 1 && (
+                  <>
+                    <button
+                      onClick={() => setCurrentImageIndex((prev) => (prev - 1 + totalImages) % totalImages)}
+                      className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white p-2 rounded-full transition-colors"
+                    >
+                      <ChevronLeft className="w-5 h-5" />
+                    </button>
+                    <button
+                      onClick={() => setCurrentImageIndex((prev) => (prev + 1) % totalImages)}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white p-2 rounded-full transition-colors"
+                    >
+                      <ChevronLeft className="w-5 h-5 rotate-180" />
+                    </button>
+                  </>
+                )}
+              </div>
+              <div className="absolute bottom-4 right-4 bg-black/60 text-white text-xs px-2 py-1 rounded">
+                {currentImageIndex + 1} / {totalImages}
+              </div>
+              {totalImages > 1 && (
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5">
+                  {allProductImages.map((_, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setCurrentImageIndex(idx)}
+                      className={`w-2 h-2 rounded-full transition-colors ${idx === currentImageIndex ? 'bg-white' : 'bg-white/50'}`}
+                    />
+                  ))}
+                </div>
+              )}
+            </>
+          );
+        })()}
       </div>
 
       <div className="p-4 border-b border-gray-100">
