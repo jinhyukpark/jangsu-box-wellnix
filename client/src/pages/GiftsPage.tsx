@@ -314,9 +314,10 @@ export default function GiftsPage() {
       </div>
 
       {showFilterModal && (
-        <div className="fixed inset-0 z-[100] pointer-events-none">
-          <div className="h-full flex justify-center">
-            <div className="w-full max-w-[430px] relative pointer-events-auto">
+        <div className="fixed inset-0 z-[100]">
+          <div className="h-full w-full flex justify-center">
+            <div className="hidden lg:block w-[400px] shrink-0" />
+            <div className="w-full max-w-[430px] h-full relative">
               <div 
                 className="absolute inset-0 bg-black/50"
                 onClick={() => setShowFilterModal(false)}
