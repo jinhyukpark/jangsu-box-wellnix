@@ -74,7 +74,7 @@ export default function ProductDetailPage() {
   if (isLoading) {
     return (
       <AppLayout hideNav>
-        <div className="min-h-screen bg-white pb-24">
+        <div className="relative min-h-screen bg-white pb-24">
           {/* Header Skeleton */}
           <div className="sticky top-0 left-0 right-0 z-50 bg-white border-b border-gray-100">
             <div className="flex items-center justify-between px-4 py-3">
@@ -134,13 +134,14 @@ export default function ProductDetailPage() {
             </div>
           </div>
 
-          {/* Bottom Bar Skeleton */}
-          <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-white border-t border-gray-200 p-4">
-            <div className="flex gap-3">
-              <div className="w-12 h-12 bg-gray-200 rounded animate-pulse" />
-              <div className="flex-1 h-12 bg-gray-200 rounded animate-pulse" />
-              <div className="flex-1 h-12 bg-gray-200 rounded animate-pulse" />
-            </div>
+        </div>
+        
+        {/* Bottom Bar Skeleton - matches actual bottom bar positioning */}
+        <div className="absolute bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 z-50">
+          <div className="flex gap-3">
+            <div className="w-12 h-12 bg-gray-200 rounded animate-pulse" />
+            <div className="flex-1 h-12 bg-gray-200 rounded animate-pulse" />
+            <div className="flex-1 h-12 bg-gray-200 rounded animate-pulse" />
           </div>
         </div>
       </AppLayout>
