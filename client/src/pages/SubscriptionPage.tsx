@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import { ArrowLeft, ShoppingCart, Gift, ChevronRight, Heart, Calendar, Users, Sparkles } from "lucide-react";
 import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
@@ -22,9 +22,22 @@ const monthlyStories = [
   { id: "3", month: "3월", theme: "봄맞이 활력충전", highlight: "유기농 꿀 & 견과류", image: giftBoxImage },
 ];
 
+const heroSlides = [
+  { image: happySeniorsImage, title: "선물은 역시,\n장수박스", subtitle: "부모님께 매달 건강과 사랑을 전하세요" },
+  { image: giftBoxImage, title: "프리미엄 건강식품\n정기배송", subtitle: "전문가가 엄선한 최고급 건강식품" },
+];
+
 export default function SubscriptionPage() {
   const [, setLocation] = useLocation();
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, []);
 
   const { data: subscriptionPlans = [], isLoading: plansLoading } = useQuery<SubscriptionPlan[]>({
     queryKey: ["/api/subscription-plans"],
@@ -73,14 +86,36 @@ export default function SubscriptionPage() {
 
       <div className="pb-24">
         <div className="relative h-56 overflow-hidden">
-          <img src={happySeniorsImage} alt="장수박스" className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-          <div className="absolute bottom-0 left-0 right-0 p-5">
-            <p className="text-amber-300 text-sm font-medium mb-1">매달 찾아가는 건강 선물</p>
-            <h2 className="text-white text-2xl font-bold mb-2">선물은 역시,<br/>장수박스</h2>
-            <p className="text-white/70 text-sm">부모님께 매달 건강과 사랑을 전하세요</p>
+          {heroSlides.map((slide, index) => (
+            <div
+              key={index}
+              className={`absolute inset-0 transition-opacity duration-500 ${
+                index === currentSlide ? "opacity-100" : "opacity-0"
+              }`}
+            >
+              <img src={slide.image} alt="장수박스" className="w-full h-full object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 p-5">
+                <p className="text-amber-300 text-sm font-medium mb-1">매달 찾아가는 건강 선물</p>
+                <h2 className="text-white text-2xl font-bold mb-2 whitespace-pre-line">{slide.title}</h2>
+                <p className="text-white/70 text-sm">{slide.subtitle}</p>
+              </div>
+            </div>
+          ))}
+          <div className="absolute bottom-4 right-4 bg-white/20 backdrop-blur px-2 py-1 rounded text-white text-xs">
+            {currentSlide + 1} / {heroSlides.length}
           </div>
-          <div className="absolute bottom-4 right-4 bg-white/20 backdrop-blur px-2 py-1 rounded text-white text-xs">1 / 2</div>
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5">
+            {heroSlides.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentSlide(index)}
+                className={`w-2 h-2 rounded-full transition-all ${
+                  index === currentSlide ? "bg-white w-4" : "bg-white/50"
+                }`}
+              />
+            ))}
+          </div>
         </div>
 
         <button 
