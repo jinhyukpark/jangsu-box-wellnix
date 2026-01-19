@@ -3159,22 +3159,75 @@ export default function AdminPage() {
                       </DialogHeader>
                       <div className="space-y-4 pt-4">
                         <div>
-                          <Label>이미지 URL</Label>
-                          <Input 
-                            value={editingBranding.image || ""} 
-                            onChange={(e) => setEditingBranding({ ...editingBranding, image: e.target.value })}
-                            placeholder="https://... 이미지 URL 입력"
-                          />
-                          {editingBranding.image && (
-                            <div className="mt-2">
-                              <img 
-                                src={editingBranding.image} 
-                                alt="미리보기" 
-                                className="h-32 rounded border border-gray-200 object-cover"
-                                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                              />
+                          <Label>이미지</Label>
+                          <div className="mt-2 space-y-3">
+                            {editingBranding.image ? (
+                              <div className="relative">
+                                <img 
+                                  src={editingBranding.image} 
+                                  alt="미리보기" 
+                                  className="w-full h-40 rounded-lg border border-gray-200 object-cover"
+                                  onError={(e) => { (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400x200?text=Image+Error'; }}
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => setEditingBranding({ ...editingBranding, image: "" })}
+                                  className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600"
+                                >
+                                  ×
+                                </button>
+                              </div>
+                            ) : (
+                              <div className="h-40 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-400">
+                                이미지를 업로드하세요
+                              </div>
+                            )}
+                            
+                            <div className="flex gap-2">
+                              <label className="flex-1">
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  className="hidden"
+                                  onChange={async (e) => {
+                                    const file = e.target.files?.[0];
+                                    if (!file) return;
+                                    
+                                    const formData = new FormData();
+                                    formData.append("file", file);
+                                    formData.append("folder", "banners");
+                                    
+                                    try {
+                                      const res = await fetch("/api/upload", {
+                                        method: "POST",
+                                        body: formData,
+                                      });
+                                      const data = await res.json();
+                                      if (data.url) {
+                                        setEditingBranding({ ...editingBranding, image: data.url });
+                                      }
+                                    } catch (error) {
+                                      console.error("Upload failed:", error);
+                                    }
+                                  }}
+                                />
+                                <span className="block w-full text-center py-2 px-4 bg-primary text-white rounded-lg cursor-pointer hover:bg-primary/90 transition-colors">
+                                  <Upload className="w-4 h-4 inline-block mr-2" />
+                                  이미지 업로드
+                                </span>
+                              </label>
                             </div>
-                          )}
+                            
+                            <div className="text-xs text-gray-500">
+                              또는 이미지 URL 직접 입력:
+                            </div>
+                            <Input 
+                              value={editingBranding.image || ""} 
+                              onChange={(e) => setEditingBranding({ ...editingBranding, image: e.target.value })}
+                              placeholder="https://... 이미지 URL"
+                              className="text-sm"
+                            />
+                          </div>
                         </div>
                         <div>
                           <Label>링크 URL</Label>
