@@ -6,16 +6,16 @@ import { AppLayout } from "@/components/AppLayout";
 import { images } from "@/lib/images";
 
 const categoryImageMap: Record<string, string> = {
-  "ginseng": images.koreanRedGinsengRoots,
-  "vitamins": images.vitaminSupplementsPills,
-  "juice": images.koreanTeaSet,
-  "probiotics": images.heartHealthSupplements,
-  "joint": images.jointHealthSupplements,
-  "blood": images.heartHealthSupplements,
+  "hongsam": images.koreanRedGinsengRoots,
+  "blood-pressure": images.heartHealthSupplements,
+  "supplements": images.vitaminSupplementsPills,
+  "fruit-gift": images.freshFruitGiftBasket,
   "cosmetics": images.luxuryCosmeticsSkincareSet,
-  "sleep": images.sleepHealthSupplements,
-  "pet": images.cuteDogAndCatTogether,
-  "daily": images.dailyToiletriesProducts,
+  "sleep-health": images.sleepHealthSupplements,
+  "tea-drinks": images.koreanTeaSet,
+  "joint-health": images.jointHealthSupplements,
+  "pets": images.cuteDogAndCatTogether,
+  "living-goods": images.dailyToiletriesProducts,
 };
 
 interface Product {
