@@ -111,7 +111,7 @@ function LoginForm({ onLogin, isLoading }: { onLogin: (email: string, password: 
   };
 
   return (
-    <div className="relative min-h-screen p-6 pb-20">
+    <div className="relative p-6">
       <div className="text-center mb-6">
         <div className="w-20 h-20 bg-gradient-to-br from-primary to-primary/70 rounded-full flex items-center justify-center mx-auto mb-4">
           <User className="w-10 h-10 text-white" />
@@ -439,10 +439,12 @@ export default function MyPage() {
         </div>
       </header>
 
-      <div className="pb-24">
+      <div className="pb-24 flex flex-col min-h-[calc(100vh-60px)]">
         {!isAuthenticated ? (
           <>
             <LoginForm onLogin={handleAuth} isLoading={isLoginLoading || isRegisterLoading} />
+            
+            <div className="flex-1" />
             
             <div className="px-4 space-y-4 mb-6">
               <div>
