@@ -316,7 +316,7 @@ export default function GiftsPage() {
       {showFilterModal && (
         <div className="fixed inset-0 z-[100]">
           <div className="h-full w-full flex justify-center">
-            <div className="hidden lg:block w-[400px] shrink-0" />
+            <div className="hidden lg:block w-[420px] mr-16 shrink-0" />
             <div className="w-full max-w-[430px] h-full relative">
               <div 
                 className="absolute inset-0 bg-black/50"
