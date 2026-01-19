@@ -747,6 +747,83 @@ export default function AdminPage() {
     },
   });
 
+  const { data: popularKeywords = [], isLoading: keywordsLoading, refetch: refetchKeywords } = useQuery<any[]>({
+    queryKey: ["admin", "popular-keywords"],
+    queryFn: async () => {
+      const res = await fetch("/api/admin/popular-keywords", { credentials: "include" });
+      if (!res.ok) throw new Error("Failed to fetch popular keywords");
+      return res.json();
+    },
+    enabled: !!authData?.admin,
+  });
+  const [isKeywordModalOpen, setIsKeywordModalOpen] = useState(false);
+  const [editingKeyword, setEditingKeyword] = useState<any>(null);
+  const [keywordForm, setKeywordForm] = useState({ keyword: "", isActive: true });
+
+  const createKeywordMutation = useMutation({
+    mutationFn: async (data: { keyword: string; isActive: boolean }) => {
+      const res = await fetch("/api/admin/popular-keywords", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error("Failed to create keyword");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "popular-keywords"] });
+    },
+  });
+
+  const updateKeywordMutation = useMutation({
+    mutationFn: async ({ id, ...data }: { id: number; keyword?: string; isActive?: boolean }) => {
+      const res = await fetch(`/api/admin/popular-keywords/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error("Failed to update keyword");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "popular-keywords"] });
+    },
+  });
+
+  const deleteKeywordMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const res = await fetch(`/api/admin/popular-keywords/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      if (!res.ok) throw new Error("Failed to delete keyword");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "popular-keywords"] });
+    },
+  });
+
+  const reorderKeywordsMutation = useMutation({
+    mutationFn: async (orderedIds: number[]) => {
+      const res = await fetch("/api/admin/popular-keywords/reorder", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ orderedIds }),
+      });
+      if (!res.ok) throw new Error("Failed to reorder keywords");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "popular-keywords"] });
+    },
+  });
+
+  const [draggedKeywordId, setDraggedKeywordId] = useState<number | null>(null);
+
   const { data: inquiriesData = [], isLoading: inquiriesLoading } = useAdminInquiries();
   const { data: faqsData = [], isLoading: faqsLoading } = useAdminFaqs();
   const { data: adminsData = [], isLoading: adminsLoading } = useAdminList();
@@ -2915,6 +2992,207 @@ export default function AdminPage() {
                     <tr>
                       <td colSpan={5} className="px-4 py-12 text-center text-gray-500">
                         등록된 이벤트가 없습니다.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        );
+
+      case "search":
+        if (keywordsLoading) return <div className="text-center py-8 text-gray-500">로딩중...</div>;
+        
+        const resetKeywordForm = () => {
+          setKeywordForm({ keyword: "", isActive: true });
+          setEditingKeyword(null);
+        };
+
+        const openEditKeywordModal = (kw: any) => {
+          setEditingKeyword(kw);
+          setKeywordForm({ keyword: kw.keyword, isActive: kw.isActive });
+          setIsKeywordModalOpen(true);
+        };
+
+        const handleSaveKeyword = async () => {
+          if (!keywordForm.keyword.trim()) {
+            toast({ variant: "destructive", title: "입력 오류", description: "검색어를 입력해주세요." });
+            return;
+          }
+          try {
+            if (editingKeyword) {
+              await updateKeywordMutation.mutateAsync({ id: editingKeyword.id, ...keywordForm });
+              toast({ title: "수정 완료", description: "인기 검색어가 수정되었습니다." });
+            } else {
+              await createKeywordMutation.mutateAsync(keywordForm);
+              toast({ title: "등록 완료", description: "인기 검색어가 등록되었습니다." });
+            }
+            setIsKeywordModalOpen(false);
+            resetKeywordForm();
+          } catch (error) {
+            toast({ variant: "destructive", title: "저장 실패", description: "다시 시도해주세요." });
+          }
+        };
+
+        const handleDeleteKeyword = async (id: number) => {
+          if (!confirm("정말 이 검색어를 삭제하시겠습니까?")) return;
+          try {
+            await deleteKeywordMutation.mutateAsync(id);
+            toast({ title: "삭제 완료", description: "인기 검색어가 삭제되었습니다." });
+          } catch (error) {
+            toast({ variant: "destructive", title: "삭제 실패", description: "다시 시도해주세요." });
+          }
+        };
+
+        const handleKeywordDragStart = (keywordId: number) => {
+          setDraggedKeywordId(keywordId);
+        };
+
+        const handleKeywordDragOver = (e: React.DragEvent, targetId: number) => {
+          e.preventDefault();
+          if (draggedKeywordId === null || draggedKeywordId === targetId) return;
+          
+          const draggedIndex = popularKeywords.findIndex((k: any) => k.id === draggedKeywordId);
+          const targetIndex = popularKeywords.findIndex((k: any) => k.id === targetId);
+          
+          if (draggedIndex === -1 || targetIndex === -1) return;
+          
+          const newOrder = [...popularKeywords];
+          const [draggedItem] = newOrder.splice(draggedIndex, 1);
+          newOrder.splice(targetIndex, 0, draggedItem);
+          
+          const orderedIds = newOrder.map((k: any) => k.id);
+          reorderKeywordsMutation.mutate(orderedIds);
+          setDraggedKeywordId(null);
+        };
+
+        const handleKeywordDrop = () => {
+          setDraggedKeywordId(null);
+        };
+
+        return (
+          <div>
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">검색 관리</h2>
+                <p className="text-sm text-gray-500 mt-1">인기 검색어를 관리합니다. 드래그하여 순서를 변경할 수 있습니다.</p>
+              </div>
+              <Dialog open={isKeywordModalOpen} onOpenChange={(open) => {
+                setIsKeywordModalOpen(open);
+                if (!open) resetKeywordForm();
+              }}>
+                <DialogTrigger asChild>
+                  <Button 
+                    onClick={() => { resetKeywordForm(); setIsKeywordModalOpen(true); }}
+                    className="bg-primary text-white hover:bg-primary/90"
+                    data-testid="button-add-keyword"
+                  >
+                    + 인기 검색어 추가
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[425px]">
+                  <DialogHeader>
+                    <DialogTitle>{editingKeyword ? "인기 검색어 수정" : "인기 검색어 추가"}</DialogTitle>
+                    <DialogDescription>
+                      고객에게 표시될 인기 검색어를 {editingKeyword ? "수정" : "추가"}합니다.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4 py-4">
+                    <div>
+                      <Label htmlFor="keyword">검색어</Label>
+                      <Input
+                        id="keyword"
+                        value={keywordForm.keyword}
+                        onChange={(e) => setKeywordForm({ ...keywordForm, keyword: e.target.value })}
+                        placeholder="예: 홍삼, 비타민"
+                        data-testid="input-keyword"
+                      />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Checkbox
+                        id="isActive"
+                        checked={keywordForm.isActive}
+                        onCheckedChange={(checked) => setKeywordForm({ ...keywordForm, isActive: !!checked })}
+                      />
+                      <Label htmlFor="isActive">활성화</Label>
+                    </div>
+                    <div className="flex gap-2 justify-end">
+                      <Button variant="outline" onClick={() => { setIsKeywordModalOpen(false); resetKeywordForm(); }}>
+                        취소
+                      </Button>
+                      <Button 
+                        onClick={handleSaveKeyword}
+                        disabled={createKeywordMutation.isPending || updateKeywordMutation.isPending}
+                        className="bg-primary text-white hover:bg-primary/90"
+                        data-testid="button-save-keyword"
+                      >
+                        {createKeywordMutation.isPending || updateKeywordMutation.isPending ? "저장 중..." : "저장"}
+                      </Button>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
+
+            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b border-gray-200">
+                  <tr>
+                    <th className="text-left px-4 py-3 text-sm font-medium text-gray-600 w-12"></th>
+                    <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">순서</th>
+                    <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">검색어</th>
+                    <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">상태</th>
+                    <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">관리</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {popularKeywords.map((kw: any, index: number) => (
+                    <tr 
+                      key={kw.id} 
+                      className={`border-b border-gray-100 hover:bg-gray-50 ${draggedKeywordId === kw.id ? 'opacity-50' : ''}`}
+                      draggable
+                      onDragStart={() => handleKeywordDragStart(kw.id)}
+                      onDragOver={(e) => handleKeywordDragOver(e, kw.id)}
+                      onDrop={handleKeywordDrop}
+                      data-testid={`row-keyword-${kw.id}`}
+                    >
+                      <td className="px-4 py-3 cursor-grab">
+                        <GripVertical className="w-4 h-4 text-gray-400" />
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-600">{index + 1}</td>
+                      <td className="px-4 py-3">
+                        <span className="font-medium text-gray-900">{kw.keyword}</span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className={`text-xs px-2 py-1 rounded-full ${kw.isActive ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600"}`}>
+                          {kw.isActive ? "활성" : "비활성"}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex gap-2">
+                          <button 
+                            onClick={() => openEditKeywordModal(kw)} 
+                            className="text-sm text-primary hover:underline"
+                            data-testid={`button-edit-keyword-${kw.id}`}
+                          >
+                            수정
+                          </button>
+                          <button 
+                            onClick={() => handleDeleteKeyword(kw.id)} 
+                            className="text-sm text-red-500 hover:underline"
+                            data-testid={`button-delete-keyword-${kw.id}`}
+                          >
+                            삭제
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                  {popularKeywords.length === 0 && (
+                    <tr>
+                      <td colSpan={5} className="px-4 py-12 text-center text-gray-500">
+                        등록된 인기 검색어가 없습니다.
                       </td>
                     </tr>
                   )}
