@@ -804,15 +804,18 @@ export class DatabaseStorage implements IStorage {
 
   async upsertSiteBranding(key: string, data: Partial<InsertSiteBranding>): Promise<SiteBranding> {
     const existing = await this.getSiteBranding(key);
+    // Remove timestamp fields from data to avoid type conflicts
+    const { createdAt, updatedAt, id, ...cleanData } = data as any;
+    
     if (existing) {
       const [updated] = await db.update(siteBranding)
-        .set({ ...data, updatedAt: new Date() })
+        .set({ ...cleanData, updatedAt: new Date() })
         .where(eq(siteBranding.key, key))
         .returning();
       return updated;
     } else {
       const [created] = await db.insert(siteBranding)
-        .values({ ...data, key } as InsertSiteBranding)
+        .values({ ...cleanData, key } as InsertSiteBranding)
         .returning();
       return created;
     }
@@ -826,15 +829,18 @@ export class DatabaseStorage implements IStorage {
 
   async upsertMainPageSettings(data: Partial<InsertMainPageSettings>): Promise<MainPageSettings> {
     const existing = await this.getMainPageSettings();
+    // Remove timestamp fields from data to avoid type conflicts
+    const { createdAt, updatedAt, id, ...cleanData } = data as any;
+    
     if (existing) {
       const [updated] = await db.update(mainPageSettings)
-        .set({ ...data, updatedAt: new Date() })
+        .set({ ...cleanData, updatedAt: new Date() })
         .where(eq(mainPageSettings.id, existing.id))
         .returning();
       return updated;
     } else {
       const [created] = await db.insert(mainPageSettings)
-        .values(data as InsertMainPageSettings)
+        .values(cleanData as InsertMainPageSettings)
         .returning();
       return created;
     }
