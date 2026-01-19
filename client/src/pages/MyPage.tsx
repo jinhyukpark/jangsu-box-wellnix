@@ -439,14 +439,12 @@ export default function MyPage() {
         </div>
       </header>
 
-      <div className="pb-24 flex flex-col min-h-[calc(100vh-60px)]">
+      <div className="pb-24">
         {!isAuthenticated ? (
           <>
             <LoginForm onLogin={handleAuth} isLoading={isLoginLoading || isRegisterLoading} />
             
-            <div className="flex-1" />
-            
-            <div className="px-4 space-y-4 mb-6">
+            <div className="px-4 space-y-4 mt-6 mb-6">
               <div>
                 <h3 className="text-sm text-gray-500 mb-2">고객지원</h3>
                 <div className="bg-white rounded-lg border border-gray-100 overflow-hidden divide-y divide-gray-100">
