@@ -138,19 +138,24 @@ export function EventSection() {
                 </div>
                 
                 {event.location && (
-                  <div className="border-l-2 border-gray-200 pl-3 ml-1 space-y-2">
-                    <div className="relative">
-                      <div className="absolute -left-[17px] top-1 w-2 h-2 rounded-full bg-[#006861]" />
-                      <p className="text-xs text-gray-500">출발 {event.time || "07:00"}</p>
-                      <p className="text-sm font-medium text-gray-900">{event.location}</p>
-                    </div>
-                    {event.detailedAddress && (
-                      <div className="relative">
-                        <div className="absolute -left-[17px] top-1 w-2 h-2 rounded-full bg-amber-400" />
-                        <p className="text-xs text-gray-500">도착</p>
-                        <p className="text-sm font-medium text-gray-900">{event.detailedAddress}</p>
+                  <div className="border border-gray-200 rounded-lg p-3">
+                    <div className="flex">
+                      <div className="flex flex-col items-center mr-3">
+                        <div className="w-2.5 h-2.5 rounded-full bg-[#006861]" />
+                        <div className="w-0.5 h-10 bg-gray-200" />
+                        <div className="w-2.5 h-2.5 rounded-full bg-amber-400" />
                       </div>
-                    )}
+                      <div className="flex-1 space-y-3">
+                        <div>
+                          <p className="text-xs text-gray-500">출발 {event.time || "07:00"}</p>
+                          <p className="text-sm font-bold text-gray-900">{event.location}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500">도착 {event.detailedAddress ? "10:30" : ""}</p>
+                          <p className="text-sm font-bold text-gray-900">{event.detailedAddress || "목적지"}</p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 )}
                 
