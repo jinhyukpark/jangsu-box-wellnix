@@ -14,7 +14,6 @@ import memberRoutes from "./routes/members";
 import supportRoutes from "./routes/support";
 import adminRoutes from "./routes/admin";
 import promotionRoutes from "./routes/promotions";
-import searchRoutes from "./routes/search";
 import { registerSupabaseStorageRoutes } from "./routes/supabase-storage";
 
 const { Pool } = pg;
@@ -64,7 +63,6 @@ export async function registerRoutes(
   app.use(supportRoutes);
   app.use(adminRoutes);
   app.use(promotionRoutes);
-  app.use(searchRoutes);
   
   registerSupabaseStorageRoutes(app);
 
