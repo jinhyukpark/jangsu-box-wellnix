@@ -335,7 +335,7 @@ export default function EventDetailPage() {
         )}
       </div>
 
-      <div className="fixed bottom-[60px] left-0 right-0 p-4 bg-white border-t border-gray-100 z-40 max-w-[430px] mx-auto">
+      <div className="sticky bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-100 z-40">
         <button 
           className={`w-full font-semibold py-3 rounded-lg transition-colors ${
             isClosed 
