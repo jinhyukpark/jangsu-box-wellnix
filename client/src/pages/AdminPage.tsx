@@ -3094,7 +3094,7 @@ export default function AdminPage() {
               <TabsContent value="branding">
                 <div className="bg-white rounded-lg border border-gray-200 p-6">
                   <h3 className="text-lg font-bold text-gray-900 mb-6">사이트 브랜딩</h3>
-                  <p className="text-sm text-gray-500 mb-6">메인 페이지 히어로 섹션과 배너의 텍스트, 이미지, 색상을 설정합니다.</p>
+                  <p className="text-sm text-gray-500 mb-6">메인 페이지 히어로 섹션과 배너 이미지를 설정합니다.</p>
                   
                   <div className="space-y-6">
                     {brandingData.map((item: any) => (
@@ -3104,7 +3104,6 @@ export default function AdminPage() {
                             <h4 className="font-bold text-gray-900">
                               {item.key === "hero" ? "히어로 섹션" : `배너 ${item.key.replace("banner", "")}`}
                             </h4>
-                            <p className="text-sm text-gray-500">{item.title || "제목 없음"}</p>
                           </div>
                           <div className="flex items-center gap-2">
                             <span className={`px-2 py-1 rounded text-xs ${item.isActive ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600"}`}>
@@ -3120,40 +3119,24 @@ export default function AdminPage() {
                           </div>
                         </div>
                         
-                        {item.image && (
+                        {item.image ? (
                           <div className="mb-3">
                             <img 
                               src={item.image} 
-                              alt={item.title || "브랜딩 이미지"} 
-                              className="h-20 rounded border border-gray-200 object-cover"
+                              alt="브랜딩 이미지" 
+                              className="h-24 rounded border border-gray-200 object-cover"
                               onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                             />
                           </div>
+                        ) : (
+                          <div className="mb-3 h-24 rounded border border-dashed border-gray-300 flex items-center justify-center text-gray-400 text-sm">
+                            이미지 없음
+                          </div>
                         )}
                         
-                        <div className="grid grid-cols-2 gap-4 text-sm">
-                          <div className="flex items-center">
-                            <span className="text-gray-500">배경색:</span>
-                            <span 
-                              className="ml-2 w-6 h-6 rounded border border-gray-300 inline-block" 
-                              style={{ backgroundColor: item.backgroundColor || '#ffffff' }}
-                            />
-                            <span className="ml-2 font-mono text-xs">{item.backgroundColor}</span>
-                          </div>
-                          <div className="flex items-center">
-                            <span className="text-gray-500">텍스트색:</span>
-                            <span 
-                              className="ml-2 w-6 h-6 rounded border border-gray-300 inline-block" 
-                              style={{ backgroundColor: item.textColor || '#000000' }}
-                            />
-                            <span className="ml-2 font-mono text-xs">{item.textColor}</span>
-                          </div>
-                          {item.linkUrl && (
-                            <div className="col-span-2">
-                              <span className="text-gray-500">링크:</span>
-                              <span className="ml-2 text-primary">{item.linkUrl}</span>
-                            </div>
-                          )}
+                        <div className="text-sm">
+                          <span className="text-gray-500">링크:</span>
+                          <span className="ml-2 text-primary">{item.linkUrl || "설정 안됨"}</span>
                         </div>
                       </div>
                     ))}
@@ -3162,7 +3145,7 @@ export default function AdminPage() {
 
                 {editingBranding && (
                   <Dialog open={!!editingBranding} onOpenChange={() => setEditingBranding(null)}>
-                    <DialogContent className="sm:max-w-[600px] bg-white max-h-[90vh] overflow-y-auto">
+                    <DialogContent className="sm:max-w-[500px] bg-white max-h-[90vh] overflow-y-auto">
                       <DialogHeader>
                         <DialogTitle className="text-xl font-bold text-gray-900">
                           {editingBranding.key === "hero" ? "히어로 섹션" : `배너 ${editingBranding.key.replace("banner", "")}`} 수정
@@ -3170,76 +3153,31 @@ export default function AdminPage() {
                       </DialogHeader>
                       <div className="space-y-4 pt-4">
                         <div>
-                          <Label>제목</Label>
-                          <Input 
-                            value={editingBranding.title || ""} 
-                            onChange={(e) => setEditingBranding({ ...editingBranding, title: e.target.value })}
-                            placeholder="제목 입력"
-                          />
-                        </div>
-                        <div>
-                          <Label>부제목</Label>
-                          <Input 
-                            value={editingBranding.subtitle || ""} 
-                            onChange={(e) => setEditingBranding({ ...editingBranding, subtitle: e.target.value })}
-                            placeholder="부제목 입력"
-                          />
-                        </div>
-                        <div>
                           <Label>이미지 URL</Label>
                           <Input 
                             value={editingBranding.image || ""} 
                             onChange={(e) => setEditingBranding({ ...editingBranding, image: e.target.value })}
-                            placeholder="이미지 URL 입력"
+                            placeholder="https://... 이미지 URL 입력"
                           />
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <Label>배경색</Label>
-                            <div className="flex gap-2">
-                              <input 
-                                type="color" 
-                                value={editingBranding.backgroundColor || "#ffffff"} 
-                                onChange={(e) => setEditingBranding({ ...editingBranding, backgroundColor: e.target.value })}
-                                className="w-10 h-10 rounded border cursor-pointer"
-                              />
-                              <Input 
-                                value={editingBranding.backgroundColor || "#ffffff"} 
-                                onChange={(e) => setEditingBranding({ ...editingBranding, backgroundColor: e.target.value })}
+                          {editingBranding.image && (
+                            <div className="mt-2">
+                              <img 
+                                src={editingBranding.image} 
+                                alt="미리보기" 
+                                className="h-32 rounded border border-gray-200 object-cover"
+                                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                               />
                             </div>
-                          </div>
-                          <div>
-                            <Label>텍스트색</Label>
-                            <div className="flex gap-2">
-                              <input 
-                                type="color" 
-                                value={editingBranding.textColor || "#000000"} 
-                                onChange={(e) => setEditingBranding({ ...editingBranding, textColor: e.target.value })}
-                                className="w-10 h-10 rounded border cursor-pointer"
-                              />
-                              <Input 
-                                value={editingBranding.textColor || "#000000"} 
-                                onChange={(e) => setEditingBranding({ ...editingBranding, textColor: e.target.value })}
-                              />
-                            </div>
-                          </div>
+                          )}
                         </div>
                         <div>
                           <Label>링크 URL</Label>
                           <Input 
                             value={editingBranding.linkUrl || ""} 
                             onChange={(e) => setEditingBranding({ ...editingBranding, linkUrl: e.target.value })}
-                            placeholder="/subscription"
+                            placeholder="/subscription 또는 https://..."
                           />
-                        </div>
-                        <div>
-                          <Label>링크 텍스트</Label>
-                          <Input 
-                            value={editingBranding.linkText || ""} 
-                            onChange={(e) => setEditingBranding({ ...editingBranding, linkText: e.target.value })}
-                            placeholder="바로가기"
-                          />
+                          <p className="text-xs text-gray-500 mt-1">이미지 클릭 시 이동할 페이지 주소</p>
                         </div>
                         <div className="flex items-center gap-2">
                           <Checkbox 
