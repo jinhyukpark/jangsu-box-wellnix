@@ -2,7 +2,7 @@ import { images } from "@/lib/images";
 
 export function PromoBanner() {
   return (
-    <div className="px-4 py-4 space-y-3">
+    <div className="px-4 py-6 space-y-6">
       <button
         className="w-full bg-stone-100 hover:bg-stone-200 rounded overflow-hidden flex items-center transition-all group relative h-28"
         data-testid="promo-corporate"
