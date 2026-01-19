@@ -15,8 +15,18 @@ The frontend is a mobile-first React application styled as a 430px-max-width mob
 ## User Preferences
 
 - **Communication style**: Simple, everyday language (Korean)
-- **Database**: Use ONLY Supabase PostgreSQL (`SUPABASE_DATABASE_URL`). Do NOT use Replit's internal PostgreSQL (`DATABASE_URL`).
-- **Storage**: Use ONLY Supabase Storage for all file/image storage.
+
+### CRITICAL: External Services Only (Supabase)
+**DO NOT use any Replit built-in services. Use ONLY Supabase for all data storage:**
+
+1. **Database**: Use ONLY Supabase PostgreSQL (`SUPABASE_DATABASE_URL`)
+   - ❌ DO NOT use Replit's PostgreSQL (`DATABASE_URL`, `PGHOST`, etc.)
+   - ❌ DO NOT use `create_postgresql_database_tool`
+
+2. **File/Image Storage**: Use ONLY Supabase Storage
+   - ❌ DO NOT use Replit's Object Storage / App Storage
+   - ❌ DO NOT use `setup_object_storage` or `check_object_storage_status`
+   - ✅ All images/files must be stored in Supabase Storage bucket
 
 
 ## System Architecture
