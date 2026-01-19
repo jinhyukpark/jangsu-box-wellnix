@@ -107,7 +107,7 @@ export function EventSection() {
         {events.map((event) => (
           <Link key={event.id} href={`/events/${event.id}`}>
             <div 
-              className="flex-shrink-0 w-[85%] snap-start rounded overflow-hidden bg-white border border-gray-100 shadow-sm cursor-pointer hover:shadow-md transition-shadow"
+              className="flex-shrink-0 w-72 snap-start rounded-lg overflow-hidden bg-white border border-gray-100 shadow-sm cursor-pointer hover:shadow-md transition-shadow"
             >
               <div className="relative h-36 overflow-hidden">
                 <img 
