@@ -135,8 +135,8 @@ export default function ProductDetailPage() {
           </div>
 
           {/* Bottom Bar Skeleton */}
-          <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4">
-            <div className="max-w-[430px] mx-auto flex gap-3">
+          <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-white border-t border-gray-200 p-4">
+            <div className="flex gap-3">
               <div className="w-12 h-12 bg-gray-200 rounded animate-pulse" />
               <div className="flex-1 h-12 bg-gray-200 rounded animate-pulse" />
               <div className="flex-1 h-12 bg-gray-200 rounded animate-pulse" />
