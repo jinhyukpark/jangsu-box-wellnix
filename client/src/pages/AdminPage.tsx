@@ -1794,7 +1794,7 @@ export default function AdminPage() {
                       <div className="grid gap-2">
                         <Label>카테고리 이미지</Label>
                         {categoryForm.image ? (
-                          <div className="relative">
+                          <div className="relative inline-block">
                             <div className="w-24 h-24 rounded-lg overflow-hidden border border-gray-200">
                               <img 
                                 src={categoryForm.image} 
@@ -1806,7 +1806,7 @@ export default function AdminPage() {
                               type="button"
                               variant="destructive"
                               size="sm"
-                              className="absolute -top-2 -right-2 w-6 h-6 p-0 rounded-full"
+                              className="absolute top-1 right-1 w-6 h-6 p-0 rounded-full"
                               onClick={() => setCategoryForm({ ...categoryForm, image: "" })}
                               data-testid="button-delete-category-image"
                             >
