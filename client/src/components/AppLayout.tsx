@@ -13,12 +13,12 @@ export function AppLayout({ children, hideNav = false }: AppLayoutProps) {
       <PromoSidebar />
       
       <div className="w-full max-w-[430px] relative">
-        <main className={`bg-white shadow-xl min-h-screen ${hideNav ? '' : 'pb-20'}`}>
+        <main className="bg-white shadow-xl min-h-screen">
           {children}
         </main>
         
         {!hideNav && (
-          <div className="sticky bottom-0 w-full z-50">
+          <div className="fixed bottom-0 w-full max-w-[430px] z-50">
             <BottomNav />
           </div>
         )}
