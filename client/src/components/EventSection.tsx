@@ -129,31 +129,46 @@ export function EventSection() {
                 </div>
               </div>
               
-              <div className="p-3 space-y-2">
+              <div className="p-3 space-y-3">
                 <div className="flex items-center gap-2 text-sm">
                   <Calendar className="w-4 h-4 text-[#006861]" />
-                  <span className="text-gray-700">
-                    {formatDate(event.date)} {event.time || ""}
+                  <span className="font-medium text-gray-900">
+                    {formatDate(event.date)}
                   </span>
                 </div>
                 
                 {event.location && (
-                  <div className="flex items-center gap-2 text-sm">
-                    <MapPin className="w-4 h-4 text-gray-400" />
-                    <span className="text-gray-600">{event.location}</span>
-                  </div>
-                )}
-
-                {event.maxParticipants && (
-                  <div className="flex items-center gap-2 text-sm">
-                    <Users className="w-4 h-4 text-gray-400" />
-                    <span className="text-gray-600">
-                      {event.currentParticipants || 0} / {event.maxParticipants}명
-                    </span>
+                  <div className="border-l-2 border-gray-200 pl-3 ml-1 space-y-2">
+                    <div className="relative">
+                      <div className="absolute -left-[17px] top-1 w-2 h-2 rounded-full bg-[#006861]" />
+                      <p className="text-xs text-gray-500">출발 {event.time || "07:00"}</p>
+                      <p className="text-sm font-medium text-gray-900">{event.location}</p>
+                    </div>
+                    {event.detailedAddress && (
+                      <div className="relative">
+                        <div className="absolute -left-[17px] top-1 w-2 h-2 rounded-full bg-amber-400" />
+                        <p className="text-xs text-gray-500">도착</p>
+                        <p className="text-sm font-medium text-gray-900">{event.detailedAddress}</p>
+                      </div>
+                    )}
                   </div>
                 )}
                 
-                <div className="flex items-center justify-end pt-2">
+                {event.benefits && event.benefits.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5">
+                    {event.benefits.slice(0, 4).map((benefit: any, idx: number) => (
+                      <span key={idx} className="text-xs border border-gray-300 text-gray-600 px-2 py-1 rounded">
+                        {typeof benefit === 'string' ? benefit : benefit.title}
+                      </span>
+                    ))}
+                  </div>
+                )}
+                
+                <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-gray-400 line-through">150,000원</span>
+                    <span className="text-base font-bold text-gray-900">89,000원</span>
+                  </div>
                   <button 
                     className="bg-[#006861] text-white text-sm font-semibold px-4 py-2 rounded hover:bg-[#005550] transition-colors"
                     data-testid={`event-apply-${event.id}`}
