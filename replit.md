@@ -16,24 +16,62 @@ The frontend is a mobile-first React application styled as a 430px-max-width mob
 
 - **Communication style**: Simple, everyday language (Korean)
 
-### CRITICAL: Mobile-First UX Guidelines
-**This is a mobile app (430px max-width). All UX must follow mobile patterns:**
+### ⚠️ MANDATORY: All UI Events MUST Stay Within 430px App Container ⚠️
+**This is the most critical rule. NEVER violate this.**
 
-1. **All Events Within App Container**: 
-   - All modals, popups, dialogs, sheets MUST appear within the 430px app container
-   - ❌ DO NOT use `fixed inset-0` for modals - they will appear outside the app
-   - ✅ Use bottom Sheet components that stay within the app container
-   - ✅ Use the modified Sheet component with `side="bottom"` for mobile-friendly popups
+The app layout has two areas:
+- LEFT: PromoSidebar (promotional info, ignore for events)
+- RIGHT: 430px mobile app container (ALL events happen here)
 
-2. **Mobile-Friendly Interaction Patterns**:
-   - Use bottom sheets instead of center modals
-   - Touch-friendly button sizes (min 44px tap targets)
-   - Swipe-to-dismiss where appropriate
-   - No hover-only interactions
+**ALL modals, popups, sheets, overlays, loading states, filters, dialogs MUST appear ONLY within the 430px app container on the right side.**
 
-3. **Fixed Elements Positioning**:
-   - All fixed bottom bars must use `max-w-[430px]` and center positioning
-   - Example: `fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px]`
+#### ❌ FORBIDDEN Patterns (will cause elements to appear in browser center):
+```tsx
+// NEVER use these - they position relative to browser viewport
+<div className="fixed inset-0 ...">  // Covers entire browser
+<div className="fixed left-1/2 -translate-x-1/2 ...">  // Centers to browser
+<Sheet> or <Dialog> from Radix UI  // Uses React Portal, escapes app container
+```
+
+#### ✅ REQUIRED Patterns (keeps elements inside app container):
+```tsx
+// For overlays/backdrops - use absolute positioning within parent
+<div className="absolute inset-0 bg-black/50 z-40">
+
+// For bottom sheets - use absolute positioning from bottom
+<div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl z-50">
+
+// For modals - create custom component with absolute positioning
+// NEVER use Radix Dialog/Sheet - they use Portals that escape the container
+```
+
+#### Implementation Pattern for Bottom Sheets:
+1. Render the sheet INSIDE the page component (not via Portal)
+2. Use `absolute` positioning, NOT `fixed`
+3. Parent container must have `relative` positioning
+4. Always position within the scrollable content area
+
+#### AppLayout Structure Reference:
+```
+<div className="min-h-screen bg-background flex justify-center">
+  <PromoSidebar />  <!-- LEFT: Promo area (ignore) -->
+  
+  <div className="w-full max-w-[430px] relative">  <!-- RIGHT: App container -->
+    <main className="bg-white shadow-xl min-h-screen relative overflow-hidden">
+      {children}  <!-- All content and modals here -->
+    </main>
+    <BottomNav />  <!-- Fixed nav -->
+  </div>
+</div>
+```
+
+**REMEMBER: The left promo sidebar is for desktop decoration only. ALL user interactions, popups, sheets, and UI events MUST occur within the 430px app area on the right.**
+
+### Mobile-Friendly Interaction Patterns:
+- Use bottom sheets instead of center modals
+- Touch-friendly button sizes (min 44px tap targets)  
+- Swipe-to-dismiss where appropriate
+- No hover-only interactions
 
 ### CRITICAL: External Services Only (Supabase)
 **DO NOT use any Replit built-in services. Use ONLY Supabase for all data storage:**

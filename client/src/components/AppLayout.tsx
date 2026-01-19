@@ -13,7 +13,7 @@ export function AppLayout({ children, hideNav = false }: AppLayoutProps) {
       <PromoSidebar />
       
       <div className="w-full max-w-[430px] relative">
-        <main className="bg-white shadow-xl min-h-screen">
+        <main className="bg-white shadow-xl min-h-screen relative">
           {children}
         </main>
         

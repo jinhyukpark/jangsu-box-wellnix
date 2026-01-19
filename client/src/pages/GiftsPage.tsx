@@ -314,14 +314,16 @@ export default function GiftsPage() {
       </div>
 
       {showFilterModal && (
-        <>
-          <div 
-            className="fixed top-0 bottom-0 w-full max-w-[430px] bg-black/50 z-[100]"
-            onClick={() => setShowFilterModal(false)}
-          />
-          <div 
-            className="fixed bottom-[72px] w-full max-w-[430px] bg-white rounded-t-2xl z-[101] animate-in slide-in-from-bottom duration-300"
-          >
+        <div className="fixed inset-0 z-[100] pointer-events-none">
+          <div className="h-full flex justify-center">
+            <div className="w-full max-w-[430px] relative pointer-events-auto">
+              <div 
+                className="absolute inset-0 bg-black/50"
+                onClick={() => setShowFilterModal(false)}
+              />
+              <div 
+                className="absolute bottom-[72px] left-0 right-0 bg-white rounded-t-2xl z-10 animate-in slide-in-from-bottom duration-300"
+              >
             <div className="relative p-4">
               <button 
                 onClick={() => setShowFilterModal(false)}
@@ -389,9 +391,11 @@ export default function GiftsPage() {
                   적용하기
                 </Button>
               </div>
+              </div>
             </div>
           </div>
-        </>
+        </div>
+      </div>
       )}
     </AppLayout>
   );
