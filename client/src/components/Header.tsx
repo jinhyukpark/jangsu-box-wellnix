@@ -1,5 +1,5 @@
 import { Bell, ShoppingCart, Search } from "lucide-react";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 
@@ -14,6 +14,9 @@ const defaultMenuItems = [
 export function Header() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [location] = useLocation();
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
 
   const { data: promotions = [] } = useQuery<any[]>({
     queryKey: ["/api/promotions"],
@@ -35,11 +38,27 @@ export function Header() {
       ]
     : defaultMenuItems;
 
-  const handleWheel = (e: React.WheelEvent) => {
-    if (scrollRef.current) {
-      e.preventDefault();
-      scrollRef.current.scrollLeft += e.deltaY;
-    }
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!scrollRef.current) return;
+    setIsDragging(true);
+    setStartX(e.pageX - scrollRef.current.offsetLeft);
+    setScrollLeft(scrollRef.current.scrollLeft);
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging || !scrollRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - scrollRef.current.offsetLeft;
+    const walk = (x - startX) * 1.5;
+    scrollRef.current.scrollLeft = scrollLeft - walk;
+  };
+
+  const handleMouseLeave = () => {
+    setIsDragging(false);
   };
 
   const isActive = (href: string) => {
@@ -85,8 +104,11 @@ export function Header() {
       
       <div 
         ref={scrollRef}
-        onWheel={handleWheel}
-        className="px-4 pb-3 overflow-x-auto scrollbar-hide"
+        onMouseDown={handleMouseDown}
+        onMouseUp={handleMouseUp}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
+        className={`px-4 pb-3 overflow-x-auto scrollbar-hide ${isDragging ? "cursor-grabbing select-none" : "cursor-grab"}`}
       >
         <div className="flex gap-2">
           {menuItems.map((item) => (
