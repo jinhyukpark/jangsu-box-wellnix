@@ -15,8 +15,12 @@ export function BottomNav() {
   const queryClient = useQueryClient();
 
   const handleNavClick = (path: string) => {
-    queryClient.invalidateQueries();
     setLocation(path);
+    // 네비게이션 후 모든 쿼리 무효화 및 즉시 리페치
+    setTimeout(() => {
+      queryClient.invalidateQueries();
+      queryClient.refetchQueries();
+    }, 50);
   };
 
   return (
