@@ -315,7 +315,7 @@ export default function GiftsPage() {
       </div>
 
       <Sheet open={showFilterModal} onOpenChange={setShowFilterModal}>
-        <SheetContent side="bottom" className="rounded-t-2xl max-h-[70vh] mx-auto max-w-[430px]">
+        <SheetContent side="bottom" className="rounded-t-2xl max-h-[70vh]">
           <SheetHeader className="pb-4">
             <SheetTitle className="text-lg font-bold text-center">필터</SheetTitle>
           </SheetHeader>
