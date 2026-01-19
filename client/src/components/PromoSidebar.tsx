@@ -38,13 +38,13 @@ const defaultData: Record<string, Partial<BrandingItem>> = {
   banner2: {
     title: "365일 장수박스 서비스",
     subtitle: "웰닉스 에디션에서 보기",
-    backgroundColor: "#e8f4f3",
+    backgroundColor: "#fef9e7",
     linkUrl: "/subscription",
   },
   banner3: {
     title: "고객센터 1588-0000",
     subtitle: "평일 09:00 - 18:00",
-    backgroundColor: "#ecfdf5",
+    backgroundColor: "#e8f4f8",
     linkUrl: "/support",
   },
 };

@@ -22,7 +22,8 @@ export function PromoBanner() {
       </button>
       
       <button
-        className="w-full bg-amber-50 hover:bg-amber-100 rounded-lg overflow-hidden flex items-center transition-all group relative h-32 mt-[15px]"
+        className="w-full rounded-lg overflow-hidden flex items-center transition-all group relative h-32 mt-[15px]"
+        style={{ backgroundColor: "#fef9e7" }}
         data-testid="promo-subscription"
       >
         <div className="text-left flex-1 p-4 z-10">
@@ -35,12 +36,13 @@ export function PromoBanner() {
             alt="장수박스" 
             className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-amber-50 to-transparent" />
+          <div className="absolute inset-0" style={{ background: "linear-gradient(to right, #fef9e7, transparent)" }} />
         </div>
       </button>
       
       <button
-        className="w-full bg-emerald-50 hover:bg-emerald-100 rounded-lg overflow-hidden flex items-center transition-all group relative h-32 mt-[15px]"
+        className="w-full rounded-lg overflow-hidden flex items-center transition-all group relative h-32 mt-[15px]"
+        style={{ backgroundColor: "#e8f4f8" }}
         data-testid="promo-customer-service"
       >
         <div className="text-left flex-1 p-4 z-10">
@@ -53,7 +55,7 @@ export function PromoBanner() {
             alt="고객센터" 
             className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-emerald-50 to-transparent" />
+          <div className="absolute inset-0" style={{ background: "linear-gradient(to right, #e8f4f8, transparent)" }} />
         </div>
       </button>
     </div>
