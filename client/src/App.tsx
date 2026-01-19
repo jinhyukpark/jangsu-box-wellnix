@@ -33,6 +33,7 @@ import ProductDetailPage from "@/pages/ProductDetailPage";
 import ProductGalleryPage from "@/pages/ProductGalleryPage";
 import AdminProductFormPage from "@/pages/AdminProductFormPage";
 import AdminEventFormPage from "@/pages/AdminEventFormPage";
+import PromotionPage from "@/pages/PromotionPage";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -69,6 +70,7 @@ function Router() {
       <Route path="/privacy" component={PrivacyPage} />
       <Route path="/products/:id" component={ProductDetailPage} />
       <Route path="/products/:id/gallery" component={ProductGalleryPage} />
+      <Route path="/promotion/:slug" component={PromotionPage} />
       <Route component={NotFound} />
     </Switch>
   );
