@@ -314,15 +314,15 @@ export default function GiftsPage() {
       </div>
 
       {showFilterModal && (
-        <>
-          <div 
-            className="fixed inset-0 bg-black/50 z-[100]"
-            style={{ maxWidth: "430px", left: "50%", transform: "translateX(-50%)" }}
-            onClick={() => setShowFilterModal(false)}
-          />
-          <div 
-            className="fixed bottom-[72px] left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-white rounded-t-2xl z-[101] animate-in slide-in-from-bottom duration-300"
-          >
+        <div className="fixed inset-0 z-[100] flex justify-center">
+          <div className="w-full max-w-[430px] relative">
+            <div 
+              className="absolute inset-0 bg-black/50"
+              onClick={() => setShowFilterModal(false)}
+            />
+            <div 
+              className="absolute bottom-[72px] left-0 right-0 bg-white rounded-t-2xl z-[101] animate-in slide-in-from-bottom duration-300"
+            >
             <div className="relative p-4">
               <button 
                 onClick={() => setShowFilterModal(false)}
@@ -391,8 +391,9 @@ export default function GiftsPage() {
                 </Button>
               </div>
             </div>
+            </div>
           </div>
-        </>
+        </div>
       )}
     </AppLayout>
   );
