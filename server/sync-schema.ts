@@ -57,6 +57,32 @@ async function syncSchema() {
       // Add missing columns to events table
       `ALTER TABLE events ADD COLUMN IF NOT EXISTS images text[]`,
       `ALTER TABLE events ADD COLUMN IF NOT EXISTS feature_tags jsonb DEFAULT '[]'`,
+      // Create promotions table if not exists
+      `CREATE TABLE IF NOT EXISTS promotions (
+        id SERIAL PRIMARY KEY,
+        slug VARCHAR(100) NOT NULL UNIQUE,
+        title VARCHAR(255) NOT NULL,
+        subtitle TEXT,
+        description TEXT,
+        period VARCHAR(100),
+        hero_image TEXT,
+        banner_images JSONB DEFAULT '[]',
+        benefits JSONB DEFAULT '[]',
+        is_active BOOLEAN DEFAULT true,
+        display_order INTEGER DEFAULT 0,
+        start_date TIMESTAMP,
+        end_date TIMESTAMP,
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP DEFAULT NOW()
+      )`,
+      // Create promotion_products table if not exists
+      `CREATE TABLE IF NOT EXISTS promotion_products (
+        id SERIAL PRIMARY KEY,
+        promotion_id INTEGER NOT NULL REFERENCES promotions(id) ON DELETE CASCADE,
+        product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+        display_order INTEGER DEFAULT 0,
+        created_at TIMESTAMP DEFAULT NOW()
+      )`,
     ];
 
     for (const sql of alterStatements) {
