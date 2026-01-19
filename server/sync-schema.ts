@@ -56,6 +56,7 @@ async function syncSchema() {
       `ALTER TABLE main_page_settings ADD COLUMN IF NOT EXISTS ad_banner_enabled BOOLEAN DEFAULT true`,
       // Add missing columns to events table
       `ALTER TABLE events ADD COLUMN IF NOT EXISTS images text[]`,
+      `ALTER TABLE events ADD COLUMN IF NOT EXISTS feature_tags jsonb DEFAULT '[]'`,
     ];
 
     for (const sql of alterStatements) {

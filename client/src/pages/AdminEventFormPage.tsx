@@ -76,7 +76,21 @@ export default function AdminEventFormPage() {
     promotions: [] as Promotion[],
     organizerInfo: { company: "", contact: "", phone: "", email: "" } as OrganizerInfo,
     notices: [] as string[],
+    featureTags: [] as string[],
   });
+
+  const [newFeatureTag, setNewFeatureTag] = useState("");
+
+  const addFeatureTag = () => {
+    if (newFeatureTag.trim()) {
+      setEventForm({ ...eventForm, featureTags: [...eventForm.featureTags, newFeatureTag.trim()] });
+      setNewFeatureTag("");
+    }
+  };
+
+  const removeFeatureTag = (index: number) => {
+    setEventForm({ ...eventForm, featureTags: eventForm.featureTags.filter((_, i) => i !== index) });
+  };
 
   const { uploadFile, isUploading } = useUpload({
     onSuccess: (response) => {
@@ -132,6 +146,7 @@ export default function AdminEventFormPage() {
         promotions: (existingEvent.promotions as Promotion[]) || [],
         organizerInfo: (existingEvent.organizerInfo as OrganizerInfo) || { company: "", contact: "", phone: "", email: "" },
         notices: (existingEvent.notices as string[]) || [],
+        featureTags: (existingEvent as any).featureTags || [],
       });
     }
   }, [existingEvent]);
@@ -205,6 +220,7 @@ export default function AdminEventFormPage() {
       promotions: eventForm.promotions.length > 0 ? eventForm.promotions : undefined,
       organizerInfo: eventForm.organizerInfo.company ? eventForm.organizerInfo : undefined,
       notices: eventForm.notices.length > 0 ? eventForm.notices : undefined,
+      featureTags: eventForm.featureTags.length > 0 ? eventForm.featureTags : undefined,
     };
     if (isEditing) {
       updateEventMutation.mutate(payload);
@@ -473,6 +489,29 @@ export default function AdminEventFormPage() {
                   />
                 </label>
               </div>
+            </div>
+          </div>
+
+          <div className="border-t pt-6">
+            <Label className="text-base font-bold">특징 태그</Label>
+            <p className="text-sm text-gray-500 mb-3">행사 카드에 표시될 키워드를 입력하세요 (예: 왕복 버스, 점심 식사, 힐링 프로그램)</p>
+            <div className="flex gap-2 mb-3">
+              <Input 
+                value={newFeatureTag}
+                onChange={(e) => setNewFeatureTag(e.target.value)}
+                placeholder="특징 입력 (예: 왕복 버스)"
+                className="flex-1"
+                onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addFeatureTag())}
+              />
+              <Button type="button" variant="outline" onClick={addFeatureTag}>추가</Button>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {eventForm.featureTags.map((tag, i) => (
+                <span key={i} className="inline-flex items-center gap-1 bg-[#006861]/10 text-[#006861] px-3 py-1.5 rounded-full text-sm">
+                  {tag}
+                  <button onClick={() => removeFeatureTag(i)} className="text-[#006861] hover:text-red-500 ml-1">×</button>
+                </span>
+              ))}
             </div>
           </div>
 

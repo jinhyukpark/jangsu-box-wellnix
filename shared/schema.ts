@@ -231,6 +231,7 @@ export const events = pgTable("events", {
   promotions: jsonb("promotions").$type<{title: string; description: string}[]>(),
   organizerInfo: jsonb("organizer_info").$type<{company: string; contact: string; phone: string; email: string}>(),
   notices: jsonb("notices").$type<string[]>(),
+  featureTags: jsonb("feature_tags").$type<string[]>(),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

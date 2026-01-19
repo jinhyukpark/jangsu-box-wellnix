@@ -20,7 +20,8 @@ interface Event {
   maxParticipants?: number;
   currentParticipants?: number;
   status: string;
-  benefits?: string[];
+  benefits?: any[];
+  featureTags?: string[];
 }
 
 interface MainPageSettings {
@@ -159,11 +160,11 @@ export function EventSection() {
                   </div>
                 )}
                 
-                {event.benefits && event.benefits.length > 0 && (
+                {event.featureTags && event.featureTags.length > 0 && (
                   <div className="flex flex-wrap gap-1.5">
-                    {event.benefits.slice(0, 4).map((benefit: any, idx: number) => (
+                    {event.featureTags.slice(0, 4).map((tag: string, idx: number) => (
                       <span key={idx} className="text-xs border border-gray-300 text-gray-600 px-2 py-1 rounded">
-                        {typeof benefit === 'string' ? benefit : benefit.title}
+                        {tag}
                       </span>
                     ))}
                   </div>
