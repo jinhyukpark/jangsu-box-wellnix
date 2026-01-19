@@ -166,6 +166,8 @@ export default function Home() {
           products={giftProducts}
         />
         
+        <div className="h-6" />
+        
         <Footer onCustomerServiceClick={() => setShowCustomerService(true)} />
         
         <CustomerServicePopup 
