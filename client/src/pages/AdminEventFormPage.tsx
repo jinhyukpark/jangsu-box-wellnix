@@ -415,7 +415,7 @@ export default function AdminEventFormPage() {
               </select>
             </div>
             <div>
-              <Label>태그</Label>
+              <Label>제목 badge</Label>
               <Input 
                 value={eventForm.tag}
                 onChange={(e) => setEventForm({ ...eventForm, tag: e.target.value })}
