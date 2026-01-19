@@ -71,7 +71,7 @@ export function Header() {
           {menuItems.map((item) => (
             <Link key={item.label} href={item.href}>
               <button
-                className={`flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                className={`flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-colors whitespace-nowrap ${
                   isActive(item.href)
                     ? "bg-primary text-white" 
                     : "bg-gray-100 text-gray-600 hover:bg-gray-200"
