@@ -2,7 +2,7 @@ import { images } from "@/lib/images";
 
 export function PromoBanner() {
   return (
-    <div className="px-4 py-8 flex flex-col gap-8">
+    <div className="px-4 py-4 flex flex-col">
       <button
         className="w-full bg-stone-100 hover:bg-stone-200 rounded-lg overflow-hidden flex items-center transition-all group relative h-32"
         data-testid="promo-corporate"
@@ -22,7 +22,7 @@ export function PromoBanner() {
       </button>
       
       <button
-        className="w-full bg-amber-50 hover:bg-amber-100 rounded-lg overflow-hidden flex items-center transition-all group relative h-32"
+        className="w-full bg-amber-50 hover:bg-amber-100 rounded-lg overflow-hidden flex items-center transition-all group relative h-32 mt-[15px]"
         data-testid="promo-subscription"
       >
         <div className="text-left flex-1 p-4 z-10">
@@ -40,7 +40,7 @@ export function PromoBanner() {
       </button>
       
       <button
-        className="w-full bg-emerald-50 hover:bg-emerald-100 rounded-lg overflow-hidden flex items-center transition-all group relative h-32"
+        className="w-full bg-emerald-50 hover:bg-emerald-100 rounded-lg overflow-hidden flex items-center transition-all group relative h-32 mt-[15px]"
         data-testid="promo-customer-service"
       >
         <div className="text-left flex-1 p-4 z-10">
