@@ -316,10 +316,13 @@ export default function GiftsPage() {
       {showFilterModal && (
         <>
           <div 
-            className="absolute inset-0 bg-black/50 z-40"
+            className="fixed inset-0 bg-black/50 z-[100]"
+            style={{ maxWidth: "430px", left: "50%", transform: "translateX(-50%)" }}
             onClick={() => setShowFilterModal(false)}
           />
-          <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl z-50 animate-in slide-in-from-bottom duration-300">
+          <div 
+            className="fixed bottom-[72px] left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-white rounded-t-2xl z-[101] animate-in slide-in-from-bottom duration-300"
+          >
             <div className="relative p-4">
               <button 
                 onClick={() => setShowFilterModal(false)}
@@ -379,7 +382,7 @@ export default function GiftsPage() {
                 </div>
               </div>
 
-              <div className="flex gap-2 pt-2 pb-4">
+              <div className="flex gap-2 pt-2 pb-2">
                 <Button variant="outline" className="flex-1" onClick={resetFilters}>
                   초기화
                 </Button>
