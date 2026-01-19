@@ -6,7 +6,7 @@ interface FooterProps {
 
 export function Footer({ onCustomerServiceClick }: FooterProps) {
   return (
-    <div className="bg-white border-t border-gray-100">
+    <div className="bg-white border-t border-gray-100 mb-16">
       <div className="p-5">
         <h3 className="text-base font-semibold text-gray-900">고객센터</h3>
         <p className="text-xl font-bold text-gray-900 mt-1">1644-3684</p>
