@@ -1,6 +1,7 @@
+import { useState } from "react";
 import { useParams, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, Calendar, MapPin, Users, Gift, Utensils, Bus, CheckCircle, MessageCircle, Share2, Building2, Phone, User, Loader2 } from "lucide-react";
+import { ArrowLeft, Calendar, MapPin, Users, Gift, Utensils, Bus, CheckCircle, MessageCircle, Share2, Building2, Phone, User, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { SEO } from "@/components/SEO";
 import { format } from "date-fns";
@@ -38,6 +39,7 @@ const getStatusStyle = (status: string) => {
 export default function EventDetailPage() {
   const params = useParams<{ id: string }>();
   const [, setLocation] = useLocation();
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const { data: event, isLoading, error } = useQuery<Event>({
     queryKey: ["event", params.id],
@@ -76,6 +78,23 @@ export default function EventDetailPage() {
   const promotions = (event.promotions as { title: string; description: string }[] | null) || [];
   const notices = (event.notices as string[] | null) || [];
   const organizer = event.organizerInfo as { company: string; contact: string; phone: string; email: string } | null;
+
+  const allImages = [
+    event.image,
+    ...(event.images || [])
+  ].filter(Boolean) as string[];
+  
+  const hasMultipleImages = allImages.length > 1;
+  
+  const nextImage = () => {
+    setCurrentImageIndex((prev) => (prev + 1) % allImages.length);
+  };
+  
+  const prevImage = () => {
+    setCurrentImageIndex((prev) => (prev - 1 + allImages.length) % allImages.length);
+  };
+  
+  const isClosed = event.status === "closed" || event.status === "completed";
 
   return (
     <AppLayout>
@@ -117,12 +136,44 @@ export default function EventDetailPage() {
 
       <div className="pb-24">
         <div className="relative h-56 overflow-hidden">
-          {event.image ? (
-            <img 
-              src={event.image} 
-              alt={event.title}
-              className="w-full h-full object-cover"
-            />
+          {allImages.length > 0 ? (
+            <>
+              <img 
+                src={allImages[currentImageIndex]} 
+                alt={`${event.title} - ${currentImageIndex + 1}`}
+                className="w-full h-full object-cover transition-opacity duration-300"
+              />
+              {hasMultipleImages && (
+                <>
+                  <button
+                    onClick={prevImage}
+                    className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors"
+                    data-testid="carousel-prev"
+                  >
+                    <ChevronLeft className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={nextImage}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors"
+                    data-testid="carousel-next"
+                  >
+                    <ChevronRight className="w-5 h-5" />
+                  </button>
+                  <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+                    {allImages.map((_, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setCurrentImageIndex(index)}
+                        className={`w-2 h-2 rounded-full transition-colors ${
+                          index === currentImageIndex ? "bg-white" : "bg-white/50"
+                        }`}
+                        data-testid={`carousel-dot-${index}`}
+                      />
+                    ))}
+                  </div>
+                </>
+              )}
+            </>
           ) : (
             <div className="w-full h-full bg-gray-200 flex items-center justify-center">
               <span className="text-gray-400">이미지 없음</span>
@@ -284,16 +335,19 @@ export default function EventDetailPage() {
         )}
       </div>
 
-      {(event.status === "recruiting" || event.status === "active" || event.status === "upcoming") && (
-        <div className="sticky bottom-16 left-0 right-0 p-4 bg-white border-t border-gray-100 z-40">
-          <button 
-            className="w-full bg-primary text-white font-semibold py-3 rounded-lg hover:bg-primary/90 transition-colors"
-            data-testid="apply-event-button"
-          >
-            신청하기
-          </button>
-        </div>
-      )}
+      <div className="sticky bottom-16 left-0 right-0 p-4 bg-white border-t border-gray-100 z-40">
+        <button 
+          className={`w-full font-semibold py-3 rounded-lg transition-colors ${
+            isClosed 
+              ? "bg-gray-300 text-gray-500 cursor-not-allowed" 
+              : "bg-primary text-white hover:bg-primary/90"
+          }`}
+          disabled={isClosed}
+          data-testid="apply-event-button"
+        >
+          {isClosed ? "신청 마감됨" : "신청하기"}
+        </button>
+      </div>
     </AppLayout>
   );
 }
