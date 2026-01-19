@@ -1,12 +1,27 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, type ChangeEvent } from "react";
 import { useLocation, useRoute } from "wouter";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Package, Users, Gift, Calendar, CreditCard, Truck, MessageSquare, HelpCircle, Settings, ShieldCheck, Award, Menu, X, Upload, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { useUpload } from "@/hooks/use-upload";
 import type { Event } from "@shared/schema";
+
+const menuItems = [
+  { id: "products", label: "상품 관리", icon: Package },
+  { id: "brands", label: "브랜드 관리", icon: Award },
+  { id: "members", label: "회원 관리", icon: Users },
+  { id: "subscription", label: "장수박스 관리", icon: Gift },
+  { id: "events", label: "행사 관리", icon: Calendar },
+  { id: "payments", label: "결제 관리", icon: CreditCard },
+  { id: "shipping", label: "배송 관리", icon: Truck },
+  { id: "inquiries", label: "1:1 문의", icon: MessageSquare },
+  { id: "faq", label: "자주묻는질문", icon: HelpCircle },
+  { id: "settings", label: "관리자 설정", icon: ShieldCheck },
+  { id: "base-settings", label: "기준 정보 관리", icon: Settings },
+];
 
 interface ScheduleItem {
   time: string;
@@ -39,6 +54,7 @@ export default function AdminEventFormPage() {
   const isEditing = !!eventId;
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const [eventForm, setEventForm] = useState({
     title: "",
@@ -54,11 +70,27 @@ export default function AdminEventFormPage() {
     maxParticipants: 0,
     status: "recruiting",
     image: "",
+    images: [] as string[],
     programSchedule: [] as ScheduleItem[],
     benefits: [] as Benefit[],
     promotions: [] as Promotion[],
     organizerInfo: { company: "", contact: "", phone: "", email: "" } as OrganizerInfo,
     notices: [] as string[],
+  });
+
+  const { uploadFile, isUploading } = useUpload({
+    onSuccess: (response) => {
+      const imageUrl = response.publicUrl;
+      if (!eventForm.image) {
+        setEventForm({ ...eventForm, image: imageUrl });
+      } else {
+        setEventForm({ ...eventForm, images: [...eventForm.images, imageUrl] });
+      }
+      toast({ title: "이미지가 업로드되었습니다" });
+    },
+    onError: (error) => {
+      toast({ title: "업로드 실패", description: error.message, variant: "destructive" });
+    },
   });
 
   const [newScheduleItem, setNewScheduleItem] = useState({ time: "", description: "" });
@@ -94,6 +126,7 @@ export default function AdminEventFormPage() {
         maxParticipants: existingEvent.maxParticipants || 0,
         status: existingEvent.status || "recruiting",
         image: existingEvent.image || "",
+        images: (existingEvent as any).images || [],
         programSchedule: (existingEvent.programSchedule as ScheduleItem[]) || [],
         benefits: (existingEvent.benefits as Benefit[]) || [],
         promotions: (existingEvent.promotions as Promotion[]) || [],
@@ -166,6 +199,7 @@ export default function AdminEventFormPage() {
       maxParticipants: eventForm.maxParticipants || undefined,
       status: eventForm.status,
       image: eventForm.image || undefined,
+      images: eventForm.images.length > 0 ? eventForm.images : undefined,
       programSchedule: eventForm.programSchedule.length > 0 ? eventForm.programSchedule : undefined,
       benefits: eventForm.benefits.length > 0 ? eventForm.benefits : undefined,
       promotions: eventForm.promotions.length > 0 ? eventForm.promotions : undefined,
@@ -224,20 +258,76 @@ export default function AdminEventFormPage() {
     );
   }
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
-        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center gap-4">
-          <button onClick={() => setLocation("/admin?tab=events")} className="p-2 hover:bg-gray-100 rounded-lg">
-            <ArrowLeft className="w-5 h-5 text-gray-600" />
-          </button>
-          <h1 className="text-xl font-bold text-gray-900">
-            {isEditing ? "행사 수정" : "새 행사 등록"}
-          </h1>
-        </div>
-      </header>
+  const handleFileUpload = (e: ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files) {
+      Array.from(files).forEach((file) => {
+        uploadFile(file);
+      });
+    }
+    e.target.value = "";
+  };
 
-      <main className="max-w-4xl mx-auto px-6 py-8">
+  const handleRemoveImage = (index: number) => {
+    if (index === 0 && eventForm.image) {
+      const newFirstImage = eventForm.images[0] || "";
+      const remainingImages = eventForm.images.slice(1);
+      setEventForm({ ...eventForm, image: newFirstImage, images: remainingImages });
+    } else {
+      const adjustedIndex = eventForm.image ? index - 1 : index;
+      setEventForm({ ...eventForm, images: eventForm.images.filter((_, i) => i !== adjustedIndex) });
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 flex">
+      {/* Sidebar */}
+      <div className={`fixed inset-y-0 left-0 bg-white border-r border-gray-200 z-50 transition-all duration-300 ${
+        sidebarOpen ? "w-64" : "w-20"
+      }`}>
+        <div className="flex items-center justify-between p-4 border-b border-gray-100 h-16">
+          {sidebarOpen ? (
+            <h1 className="text-xl font-bold text-primary">웰닉스 관리자</h1>
+          ) : (
+            <span className="text-xl font-bold text-primary mx-auto">W</span>
+          )}
+          <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-1 rounded hover:bg-gray-100">
+            {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
+        </div>
+
+        <nav className="p-4 space-y-1">
+          {menuItems.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => setLocation(`/admin?tab=${item.id}`)}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
+                item.id === "events" 
+                  ? "bg-primary text-white" 
+                  : "text-gray-600 hover:bg-gray-100"
+              }`}
+            >
+              <item.icon className="w-5 h-5 flex-shrink-0" />
+              {sidebarOpen && <span className="font-medium">{item.label}</span>}
+            </button>
+          ))}
+        </nav>
+      </div>
+
+      {/* Main Content */}
+      <div className={`flex-1 transition-all duration-300 ${sidebarOpen ? "ml-64" : "ml-20"}`}>
+        <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
+          <div className="max-w-4xl mx-auto px-6 py-4 flex items-center gap-4">
+            <button onClick={() => setLocation("/admin?tab=events")} className="p-2 hover:bg-gray-100 rounded-lg">
+              <ArrowLeft className="w-5 h-5 text-gray-600" />
+            </button>
+            <h1 className="text-xl font-bold text-gray-900">
+              {isEditing ? "행사 수정" : "새 행사 등록"}
+            </h1>
+          </div>
+        </header>
+
+        <main className="max-w-4xl mx-auto px-6 py-8">
         <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-6">
           <div className="grid grid-cols-2 gap-4">
             <div className="col-span-2">
@@ -347,12 +437,42 @@ export default function AdminEventFormPage() {
               </select>
             </div>
             <div className="col-span-2">
-              <Label>행사 이미지 URL</Label>
-              <Input 
-                value={eventForm.image}
-                onChange={(e) => setEventForm({ ...eventForm, image: e.target.value })}
-                placeholder="이미지 URL을 입력하세요"
-              />
+              <Label>행사 이미지</Label>
+              <p className="text-sm text-gray-500 mb-3">여러 이미지를 업로드할 수 있습니다. 첫 번째 이미지가 대표 이미지로 사용됩니다.</p>
+              
+              <div className="flex gap-3 flex-wrap mb-3">
+                {(() => {
+                  const allImages = eventForm.image ? [eventForm.image, ...eventForm.images] : [...eventForm.images];
+                  return allImages.map((img, index) => (
+                    <div key={index} className="relative w-24 h-24 rounded-lg overflow-hidden border border-gray-200 group">
+                      <img src={img} alt={`이미지 ${index + 1}`} className="w-full h-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveImage(index)}
+                        className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                      {index === 0 && (
+                        <span className="absolute bottom-1 left-1 bg-primary text-white text-xs px-1.5 py-0.5 rounded">대표</span>
+                      )}
+                    </div>
+                  ));
+                })()}
+                
+                <label className={`w-24 h-24 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-primary hover:bg-gray-50 transition-colors ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}>
+                  <Upload className="w-6 h-6 text-gray-400" />
+                  <span className="text-xs text-gray-500 mt-1">{isUploading ? "업로드중..." : "업로드"}</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    className="hidden"
+                    onChange={handleFileUpload}
+                    disabled={isUploading}
+                  />
+                </label>
+              </div>
             </div>
           </div>
 
@@ -523,6 +643,7 @@ export default function AdminEventFormPage() {
           </div>
         </div>
       </main>
+      </div>
     </div>
   );
 }

@@ -220,6 +220,7 @@ export const events = pgTable("events", {
   detailedAddress: text("detailed_address"),
   locationType: varchar("location_type", { length: 20 }).default("offline"),
   image: text("image"),
+  images: text("images").array(),
   tag: varchar("tag", { length: 50 }),
   category: varchar("category", { length: 50 }),
   maxParticipants: integer("max_participants"),
