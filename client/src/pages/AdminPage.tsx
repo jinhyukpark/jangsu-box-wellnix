@@ -3132,15 +3132,21 @@ export default function AdminPage() {
                         )}
                         
                         <div className="grid grid-cols-2 gap-4 text-sm">
-                          <div>
+                          <div className="flex items-center">
                             <span className="text-gray-500">배경색:</span>
-                            <span className="ml-2 px-2 py-0.5 rounded" style={{ backgroundColor: item.backgroundColor, color: item.textColor }}>
-                              {item.backgroundColor}
-                            </span>
+                            <span 
+                              className="ml-2 w-6 h-6 rounded border border-gray-300 inline-block" 
+                              style={{ backgroundColor: item.backgroundColor || '#ffffff' }}
+                            />
+                            <span className="ml-2 font-mono text-xs">{item.backgroundColor}</span>
                           </div>
-                          <div>
+                          <div className="flex items-center">
                             <span className="text-gray-500">텍스트색:</span>
-                            <span className="ml-2">{item.textColor}</span>
+                            <span 
+                              className="ml-2 w-6 h-6 rounded border border-gray-300 inline-block" 
+                              style={{ backgroundColor: item.textColor || '#000000' }}
+                            />
+                            <span className="ml-2 font-mono text-xs">{item.textColor}</span>
                           </div>
                           {item.linkUrl && (
                             <div className="col-span-2">
