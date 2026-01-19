@@ -722,8 +722,74 @@ export type InsertMainPageSettings = z.infer<typeof insertMainPageSettingsSchema
 export type MainPageSettings = typeof mainPageSettings.$inferSelect;
 
 // ============================================================================
+// 이벤트관 - 프로모션 (Promotions)
+// ============================================================================
+
+export const promotions = pgTable("promotions", {
+  id: serial("id").primaryKey(),
+  slug: varchar("slug", { length: 100 }).notNull().unique(),
+  title: varchar("title", { length: 255 }).notNull(),
+  subtitle: text("subtitle"),
+  description: text("description"),
+  period: varchar("period", { length: 100 }),
+  heroImage: text("hero_image"),
+  bannerImages: jsonb("banner_images").$type<string[]>().default([]),
+  benefits: jsonb("benefits").$type<{title: string; description: string}[]>().default([]),
+  isActive: boolean("is_active").default(true),
+  displayOrder: integer("display_order").default(0),
+  startDate: timestamp("start_date"),
+  endDate: timestamp("end_date"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertPromotionSchema = createInsertSchema(promotions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertPromotion = z.infer<typeof insertPromotionSchema>;
+export type Promotion = typeof promotions.$inferSelect;
+
+// ============================================================================
+// 프로모션 상품 연결 (Promotion Products)
+// ============================================================================
+
+export const promotionProducts = pgTable("promotion_products", {
+  id: serial("id").primaryKey(),
+  promotionId: integer("promotion_id").references(() => promotions.id).notNull(),
+  productId: integer("product_id").references(() => products.id).notNull(),
+  displayOrder: integer("display_order").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertPromotionProductSchema = createInsertSchema(promotionProducts).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertPromotionProduct = z.infer<typeof insertPromotionProductSchema>;
+export type PromotionProduct = typeof promotionProducts.$inferSelect;
+
+// ============================================================================
 // Relations
 // ============================================================================
+
+export const promotionsRelations = relations(promotions, ({ many }) => ({
+  products: many(promotionProducts),
+}));
+
+export const promotionProductsRelations = relations(promotionProducts, ({ one }) => ({
+  promotion: one(promotions, {
+    fields: [promotionProducts.promotionId],
+    references: [promotions.id],
+  }),
+  product: one(products, {
+    fields: [promotionProducts.productId],
+    references: [products.id],
+  }),
+}));
 
 export const membersRelations = relations(members, ({ many }) => ({
   subscriptions: many(subscriptions),
