@@ -8,8 +8,10 @@ import { SubscriptionBanner } from "@/components/SubscriptionBanner";
 import { PromoBanner } from "@/components/PromoBanner";
 import { EventSection } from "@/components/EventSection";
 import { AppLayout } from "@/components/AppLayout";
+import { CustomerServicePopup } from "@/components/CustomerServicePopup";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
+import { useState } from "react";
 
 interface Product {
   id: number;
@@ -41,6 +43,8 @@ interface MainPageSettings {
 }
 
 export default function Home() {
+  const [showCustomerService, setShowCustomerService] = useState(false);
+  
   const { data: products = [] } = useQuery<Product[]>({
     queryKey: ["/api/products"],
     queryFn: async () => {
@@ -162,7 +166,12 @@ export default function Home() {
           products={giftProducts}
         />
         
-        <PromoBanner />
+        <PromoBanner onCustomerServiceClick={() => setShowCustomerService(true)} />
+        
+        <CustomerServicePopup 
+          open={showCustomerService} 
+          onClose={() => setShowCustomerService(false)} 
+        />
       </div>
     </AppLayout>
   );
