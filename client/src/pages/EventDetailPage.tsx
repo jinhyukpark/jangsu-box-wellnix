@@ -103,38 +103,39 @@ export default function EventDetailPage() {
         description={event.description || ""}
         image={event.image || ""}
       />
-      <header className="sticky top-0 z-50 bg-white border-b border-gray-100">
-        <div className="flex items-center justify-between p-4">
-          <div className="flex items-center gap-3">
-            <button 
-              onClick={() => setLocation("/events")}
-              className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
-              data-testid="back-button"
-            >
-              <ArrowLeft className="w-5 h-5 text-gray-600" />
-            </button>
-            <h1 className="font-semibold text-gray-900">행사 상세</h1>
+      <div className="flex flex-col h-[calc(100vh-60px)]">
+        <header className="flex-shrink-0 bg-white border-b border-gray-100">
+          <div className="flex items-center justify-between p-4">
+            <div className="flex items-center gap-3">
+              <button 
+                onClick={() => setLocation("/events")}
+                className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
+                data-testid="back-button"
+              >
+                <ArrowLeft className="w-5 h-5 text-gray-600" />
+              </button>
+              <h1 className="font-semibold text-gray-900">행사 상세</h1>
+            </div>
+            <div className="flex items-center gap-2">
+              <button 
+                className="p-2 hover:bg-yellow-50 rounded-lg transition-colors"
+                data-testid="share-kakao"
+                title="카카오톡 공유"
+              >
+                <MessageCircle className="w-5 h-5 text-yellow-500" />
+              </button>
+              <button 
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                data-testid="share-sms"
+                title="문자 공유"
+              >
+                <Share2 className="w-5 h-5 text-gray-600" />
+              </button>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <button 
-              className="p-2 hover:bg-yellow-50 rounded-lg transition-colors"
-              data-testid="share-kakao"
-              title="카카오톡 공유"
-            >
-              <MessageCircle className="w-5 h-5 text-yellow-500" />
-            </button>
-            <button 
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-              data-testid="share-sms"
-              title="문자 공유"
-            >
-              <Share2 className="w-5 h-5 text-gray-600" />
-            </button>
-          </div>
-        </div>
-      </header>
+        </header>
 
-      <div className="pb-24">
+        <div className="flex-1 overflow-y-auto">
         <div className="relative h-56 overflow-hidden">
           {allImages.length > 0 ? (
             <>
@@ -332,21 +333,22 @@ export default function EventDetailPage() {
               ))}
             </ul>
           </div>
-        )}
-      </div>
+          )}
+        </div>
 
-      <div className="sticky bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-100 z-40">
-        <button 
-          className={`w-full font-semibold py-3 rounded-lg transition-colors ${
-            isClosed 
-              ? "bg-gray-300 text-gray-500 cursor-not-allowed" 
-              : "bg-primary text-white hover:bg-primary/90"
-          }`}
-          disabled={isClosed}
-          data-testid="apply-event-button"
-        >
-          {isClosed ? "신청 마감됨" : "신청하기"}
-        </button>
+        <div className="flex-shrink-0 p-4 bg-white border-t border-gray-100">
+          <button 
+            className={`w-full font-semibold py-3 rounded-lg transition-colors ${
+              isClosed 
+                ? "bg-gray-300 text-gray-500 cursor-not-allowed" 
+                : "bg-primary text-white hover:bg-primary/90"
+            }`}
+            disabled={isClosed}
+            data-testid="apply-event-button"
+          >
+            {isClosed ? "신청 마감됨" : "신청하기"}
+          </button>
+        </div>
       </div>
     </AppLayout>
   );
