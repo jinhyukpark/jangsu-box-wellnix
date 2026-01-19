@@ -96,8 +96,8 @@ export function PromoSidebar() {
 
     if (banner.linkUrl) {
       return (
-        <Link href={banner.linkUrl} key={banner.key}>
-          <a className="block cursor-pointer">{content}</a>
+        <Link href={banner.linkUrl} key={banner.key} className="block cursor-pointer">
+          {content}
         </Link>
       );
     }

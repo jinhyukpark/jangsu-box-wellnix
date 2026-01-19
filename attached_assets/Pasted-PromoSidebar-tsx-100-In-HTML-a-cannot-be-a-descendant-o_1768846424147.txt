@@ -1,0 +1,47 @@
+PromoSidebar.tsx:100 In HTML, <a> cannot be a descendant of <a>.
+This will cause a hydration error.
+
+  ...
+    <Toaster>
+    <Router data-replit-metadata="client/src..." data-component-name="Router">
+      <Switch data-replit-metadata="client/src..." data-component-name="Switch">
+        <Route data-replit-metadata="client/src..." data-component-name="Route" path="/gifts" ...>
+          <GiftsPage params={{}}>
+            <AppLayout data-replit-metadata="client/src..." data-component-name="AppLayout">
+              <div data-replit-metadata="client/src..." data-component-name="div" className="min-h-scre...">
+                <PromoSidebar data-replit-metadata="client/src..." data-component-name="PromoSidebar">
+                  <aside data-replit-metadata="client/src..." data-component-name="aside" className="hidden lg:...">
+                    <div data-replit-metadata="client/src..." data-component-name="div" className="flex flex-...">
+                      <div>
+                      <div data-replit-metadata="client/src..." data-component-name="div" className="flex flex-col">
+                        <div>
+                        <div data-replit-metadata="client/src..." data-component-name="div" className="flex flex-...">
+>                         <a
+>                           data-replit-metadata="client/src/components/PromoSidebar.tsx:99:8"
+>                           data-component-name="Link"
+>                           onClick={function}
+>                           href="/corporate"
+>                           className={undefined}
+>                           ref={null}
+>                         >
+>                           <a
+>                             data-replit-metadata="client/src/components/PromoSidebar.tsx:100:10"
+>                             data-component-name="a"
+>                             className="block cursor-pointer"
+>                           >
+                          ...
+                        ...
+                ...
+<a>		
+renderBanner	@	PromoSidebar.tsx:100
+PromoSidebar	@	PromoSidebar.tsx:138
+<PromoSidebar>		
+AppLayout	@	AppLayout.tsx:30
+<AppLayout>		
+GiftsPage	@	GiftsPage.tsx:152
+<Route>		
+Router	@	App.tsx:44
+<Router>		
+App	@	App.tsx:84
+<App>		
+(anonymous)	@	main.tsx:5
