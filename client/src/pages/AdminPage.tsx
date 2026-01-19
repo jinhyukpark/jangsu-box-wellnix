@@ -558,10 +558,23 @@ function MainPageSettingsPanel({ products, events }: { products: any[], events: 
 }
 
 export default function AdminPage() {
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [activeMenu, setActiveMenu] = useState("products");
+  
+  const getTabFromUrl = () => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get("tab") || "products";
+  };
+  
+  const [activeMenu, setActiveMenu] = useState(getTabFromUrl);
+  
+  useEffect(() => {
+    const tab = getTabFromUrl();
+    if (tab && tab !== activeMenu) {
+      setActiveMenu(tab);
+    }
+  }, [location]);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
   const [selectedMember, setSelectedMember] = useState<any>(null);
