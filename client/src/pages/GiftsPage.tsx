@@ -37,6 +37,7 @@ interface Category {
   id: number;
   name: string;
   slug: string;
+  image?: string;
 }
 
 type SortOption = "popular" | "newest" | "price-low" | "price-high" | "rating";
@@ -143,8 +144,9 @@ export default function GiftsPage() {
 
   const hasActiveFilters = filterOnlyDiscount || filterPriceOption !== "all" || filterMinRating > 0;
 
-  const getCategoryImage = (slug: string) => {
-    return categoryImageMap[slug] || images.koreanRedGinsengRoots;
+  const getCategoryImage = (cat: Category) => {
+    if (cat.image) return cat.image;
+    return categoryImageMap[cat.slug] || images.koreanRedGinsengRoots;
   };
 
   return (
@@ -197,7 +199,7 @@ export default function GiftsPage() {
                     isSelected ? "border-[#006861]" : "border-transparent"
                   }`}>
                     <img 
-                      src={getCategoryImage(cat.slug)} 
+                      src={getCategoryImage(cat)} 
                       alt={cat.name}
                       className="w-full h-full object-cover"
                     />
