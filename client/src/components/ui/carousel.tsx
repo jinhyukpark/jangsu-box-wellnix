@@ -153,9 +153,27 @@ const CarouselContent = React.forwardRef<
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => {
   const { carouselRef, orientation } = useCarousel()
+  const containerRef = React.useRef<HTMLDivElement>(null)
+
+  React.useEffect(() => {
+    const container = containerRef.current
+    if (!container || orientation !== "horizontal") return
+
+    const preventWheelScroll = (e: WheelEvent) => {
+      e.stopPropagation()
+    }
+
+    container.addEventListener("wheel", preventWheelScroll, { passive: true })
+    return () => container.removeEventListener("wheel", preventWheelScroll)
+  }, [orientation])
 
   return (
-    <div ref={carouselRef} className="overflow-hidden">
+    <div ref={(node) => {
+      (containerRef as React.MutableRefObject<HTMLDivElement | null>).current = node
+      if (typeof carouselRef === 'function') {
+        carouselRef(node)
+      }
+    }} className="overflow-hidden">
       <div
         ref={ref}
         className={cn(
