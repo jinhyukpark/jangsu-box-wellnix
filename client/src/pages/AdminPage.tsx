@@ -1547,23 +1547,29 @@ export default function AdminPage() {
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="grid gap-2">
-                      <Label htmlFor="product-price">가격</Label>
+                      <Label htmlFor="product-price">판매가 *</Label>
                       <Input
                         id="product-price"
-                        type="number"
-                        value={productForm.price}
-                        onChange={(e) => setProductForm({ ...productForm, price: parseInt(e.target.value) || 0 })}
+                        type="text"
+                        value={productForm.price ? productForm.price.toLocaleString() : ""}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/[^0-9]/g, "");
+                          setProductForm({ ...productForm, price: parseInt(value) || 0 });
+                        }}
                         placeholder="0"
                         data-testid="input-product-price"
                       />
                     </div>
                     <div className="grid gap-2">
-                      <Label htmlFor="product-original-price">원가</Label>
+                      <Label htmlFor="product-original-price">정가 (할인 전)</Label>
                       <Input
                         id="product-original-price"
-                        type="number"
-                        value={productForm.originalPrice}
-                        onChange={(e) => setProductForm({ ...productForm, originalPrice: parseInt(e.target.value) || 0 })}
+                        type="text"
+                        value={productForm.originalPrice ? productForm.originalPrice.toLocaleString() : ""}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/[^0-9]/g, "");
+                          setProductForm({ ...productForm, originalPrice: parseInt(value) || 0 });
+                        }}
                         placeholder="0"
                         data-testid="input-product-original-price"
                       />
