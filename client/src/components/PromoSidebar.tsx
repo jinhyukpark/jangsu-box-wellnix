@@ -161,7 +161,7 @@ export function PromoSidebar() {
             </div>
           )}
           
-          <div className="space-y-4 mt-4">
+          <div className="flex flex-col gap-[15px] mt-6">
             {renderBanner(banner1, "from-stone-100")}
             {renderBanner(banner2, "from-[#e8f4f3]")}
             {renderBanner(banner3, "from-emerald-50")}
