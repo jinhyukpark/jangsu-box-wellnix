@@ -618,10 +618,10 @@ export default function ProductDetailPage() {
         </TabsContent>
       </Tabs>
 
-        <div className="h-20" />
+        <div className="h-24" />
       </div>
       
-      <div className="absolute bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 z-50">
+      <div className="sticky bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 z-50">
         <div className="flex gap-3">
           <Button 
             variant="outline" 
