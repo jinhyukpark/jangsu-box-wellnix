@@ -1,7 +1,7 @@
 import { ChevronRight } from "lucide-react";
-import { useRef } from "react";
 import { useLocation } from "wouter";
 import { ProductCard } from "./ProductCard";
+import { useDragScroll } from "@/hooks/useDragScroll";
 
 interface Product {
   id: string;
@@ -22,15 +22,8 @@ interface ProductSectionProps {
 }
 
 export function ProductSection({ title, subtitle, products, linkTo = "/gifts" }: ProductSectionProps) {
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const { scrollRef, handlers } = useDragScroll<HTMLDivElement>();
   const [, setLocation] = useLocation();
-
-  const handleWheel = (e: React.WheelEvent) => {
-    if (scrollRef.current) {
-      e.preventDefault();
-      scrollRef.current.scrollLeft += e.deltaY;
-    }
-  };
 
   return (
     <section className="py-5">
@@ -49,7 +42,7 @@ export function ProductSection({ title, subtitle, products, linkTo = "/gifts" }:
       </div>
       <div 
         ref={scrollRef}
-        onWheel={handleWheel}
+        {...handlers}
         className="flex gap-3 overflow-x-auto px-4 pb-2 scrollbar-hide"
       >
         {products.map((product) => (

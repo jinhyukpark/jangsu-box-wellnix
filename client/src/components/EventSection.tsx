@@ -1,8 +1,8 @@
 import { ChevronRight, Calendar, MapPin, Users } from "lucide-react";
-import { useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { images } from "@/lib/images";
+import { useDragScroll } from "@/hooks/useDragScroll";
 
 interface Event {
   id: number;
@@ -31,7 +31,7 @@ interface MainPageSettings {
 }
 
 export function EventSection() {
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const { scrollRef, handlers } = useDragScroll<HTMLDivElement>();
 
   const { data: allEvents = [] } = useQuery<Event[]>({
     queryKey: ["/api/events"],
@@ -65,13 +65,7 @@ export function EventSection() {
 
   const events = getFilteredEvents();
 
-  const handleWheel = (e: React.WheelEvent) => {
-    if (scrollRef.current) {
-      e.preventDefault();
-      scrollRef.current.scrollLeft += e.deltaY;
-    }
-  };
-
+  
   const formatDate = (dateStr?: string) => {
     if (!dateStr) return "";
     const date = new Date(dateStr);
@@ -102,7 +96,7 @@ export function EventSection() {
       
       <div 
         ref={scrollRef}
-        onWheel={handleWheel}
+        {...handlers}
         className="flex gap-4 overflow-x-auto px-4 pb-4 scrollbar-hide snap-x snap-mandatory"
       >
         {events.map((event) => (
