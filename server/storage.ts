@@ -26,6 +26,8 @@ import {
   type Address, type InsertAddress, addresses,
   type SiteBranding, type InsertSiteBranding, siteBranding,
   type MainPageSettings, type InsertMainPageSettings, mainPageSettings,
+  type Promotion, type InsertPromotion, promotions,
+  type PromotionProduct, type InsertPromotionProduct, promotionProducts,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -195,6 +197,19 @@ export interface IStorage {
   // Main Page Settings
   getMainPageSettings(): Promise<MainPageSettings | undefined>;
   upsertMainPageSettings(data: Partial<InsertMainPageSettings>): Promise<MainPageSettings>;
+
+  // Promotions (이벤트관)
+  getPromotion(id: number): Promise<Promotion | undefined>;
+  getPromotionBySlug(slug: string): Promise<Promotion | undefined>;
+  getAllPromotions(): Promise<Promotion[]>;
+  createPromotion(promotion: InsertPromotion): Promise<Promotion>;
+  updatePromotion(id: number, data: Partial<InsertPromotion>): Promise<Promotion | undefined>;
+  deletePromotion(id: number): Promise<boolean>;
+  
+  // Promotion Products
+  getPromotionProducts(promotionId: number): Promise<PromotionProduct[]>;
+  getPromotionWithProducts(id: number): Promise<{ promotion: Promotion; products: Product[] } | undefined>;
+  setPromotionProducts(promotionId: number, productIds: number[]): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -843,6 +858,73 @@ export class DatabaseStorage implements IStorage {
         .values(cleanData as InsertMainPageSettings)
         .returning();
       return created;
+    }
+  }
+
+  // Promotions (이벤트관)
+  async getPromotion(id: number): Promise<Promotion | undefined> {
+    const [promotion] = await db.select().from(promotions).where(eq(promotions.id, id));
+    return promotion;
+  }
+
+  async getPromotionBySlug(slug: string): Promise<Promotion | undefined> {
+    const [promotion] = await db.select().from(promotions).where(eq(promotions.slug, slug));
+    return promotion;
+  }
+
+  async getAllPromotions(): Promise<Promotion[]> {
+    return db.select().from(promotions).orderBy(asc(promotions.displayOrder));
+  }
+
+  async createPromotion(promotion: InsertPromotion): Promise<Promotion> {
+    const [created] = await db.insert(promotions).values(promotion).returning();
+    return created;
+  }
+
+  async updatePromotion(id: number, data: Partial<InsertPromotion>): Promise<Promotion | undefined> {
+    const [updated] = await db.update(promotions).set({ ...data, updatedAt: new Date() }).where(eq(promotions.id, id)).returning();
+    return updated;
+  }
+
+  async deletePromotion(id: number): Promise<boolean> {
+    // First delete associated products
+    await db.delete(promotionProducts).where(eq(promotionProducts.promotionId, id));
+    await db.delete(promotions).where(eq(promotions.id, id));
+    return true;
+  }
+
+  // Promotion Products
+  async getPromotionProducts(promotionId: number): Promise<PromotionProduct[]> {
+    return db.select().from(promotionProducts).where(eq(promotionProducts.promotionId, promotionId)).orderBy(asc(promotionProducts.displayOrder));
+  }
+
+  async getPromotionWithProducts(id: number): Promise<{ promotion: Promotion; products: Product[] } | undefined> {
+    const promotion = await this.getPromotion(id);
+    if (!promotion) return undefined;
+    
+    const promoProducts = await this.getPromotionProducts(id);
+    const productList: Product[] = [];
+    
+    for (const pp of promoProducts) {
+      const [product] = await db.select().from(products).where(eq(products.id, pp.productId));
+      if (product) productList.push(product);
+    }
+    
+    return { promotion, products: productList };
+  }
+
+  async setPromotionProducts(promotionId: number, productIds: number[]): Promise<void> {
+    // Delete existing associations
+    await db.delete(promotionProducts).where(eq(promotionProducts.promotionId, promotionId));
+    
+    // Insert new associations
+    if (productIds.length > 0) {
+      const values = productIds.map((productId, index) => ({
+        promotionId,
+        productId,
+        displayOrder: index,
+      }));
+      await db.insert(promotionProducts).values(values);
     }
   }
 }
