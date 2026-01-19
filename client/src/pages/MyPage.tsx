@@ -18,10 +18,45 @@ function LoginForm({ onLogin, isLoading }: { onLogin: (email: string, password: 
   const [, setLocation] = useLocation();
   const [showEmailForm, setShowEmailForm] = useState(false);
   const [isSignup, setIsSignup] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
+  const [isResetting, setIsResetting] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [name, setName] = useState("");
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!resetEmail) {
+      toast.error("이메일을 입력해주세요.");
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(resetEmail)) {
+      toast.error("올바른 이메일 형식을 입력해주세요.");
+      return;
+    }
+    setIsResetting(true);
+    try {
+      const res = await fetch("/api/auth/forgot-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: resetEmail }),
+      });
+      if (res.ok) {
+        toast.success("비밀번호 재설정 링크를 이메일로 보냈습니다.");
+        setShowForgotPassword(false);
+        setResetEmail("");
+      } else {
+        const data = await res.json();
+        toast.error(data.message || "이메일 전송에 실패했습니다.");
+      }
+    } catch (error) {
+      toast.error("잠시 후 다시 시도해주세요.");
+    } finally {
+      setIsResetting(false);
+    }
+  };
 
   const handleSocialLogin = (provider: string) => {
     toast.info(`${provider} 로그인은 현재 준비 중입니다.`);
@@ -242,6 +277,7 @@ function LoginForm({ onLogin, isLoading }: { onLogin: (email: string, password: 
               </button>
               <button
                 type="button"
+                onClick={() => setShowForgotPassword(true)}
                 className="w-full py-2 text-sm text-gray-500 hover:text-primary transition-colors"
               >
                 비밀번호를 잊으셨나요?
@@ -260,6 +296,49 @@ function LoginForm({ onLogin, isLoading }: { onLogin: (email: string, password: 
           >
             다른 방법으로 로그인
           </button>
+        </div>
+      )}
+
+      {showForgotPassword && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-[380px] shadow-xl">
+            <h3 className="text-lg font-bold text-gray-900 mb-2 text-center">비밀번호 찾기</h3>
+            <p className="text-sm text-gray-500 mb-4 text-center">
+              가입한 이메일을 입력하시면<br />비밀번호 재설정 링크를 보내드립니다.
+            </p>
+            <form onSubmit={handleForgotPassword} className="space-y-4">
+              <div>
+                <label className="block text-xs text-gray-500 mb-1">이메일</label>
+                <input
+                  type="email"
+                  value={resetEmail}
+                  onChange={(e) => setResetEmail(e.target.value)}
+                  placeholder="example@email.com"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  data-testid="input-reset-email"
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={isResetting}
+                className="w-full py-3.5 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                data-testid="btn-reset-submit"
+              >
+                {isResetting ? <Loader2 className="w-5 h-5 animate-spin" /> : null}
+                {isResetting ? "전송 중..." : "재설정 링크 보내기"}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowForgotPassword(false);
+                  setResetEmail("");
+                }}
+                className="w-full py-2 text-sm text-gray-500 hover:text-gray-700"
+              >
+                취소
+              </button>
+            </form>
+          </div>
         </div>
       )}
 

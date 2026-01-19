@@ -75,4 +75,32 @@ router.get("/api/auth/me", async (req: Request, res: Response) => {
   res.json({ member: member ? { ...member, password: undefined } : null });
 });
 
+router.post("/api/auth/forgot-password", async (req: Request, res: Response) => {
+  try {
+    const { email } = req.body;
+    
+    if (!email) {
+      return res.status(400).json({ message: "이메일을 입력해주세요" });
+    }
+
+    const member = await storage.getMemberByEmail(email);
+    
+    // Always return success to prevent email enumeration attacks
+    // In production, send actual password reset email here
+    if (member) {
+      // TODO: Integrate email service to send actual reset link
+      // For now, log the request
+      console.log(`Password reset requested for: ${email}`);
+    }
+    
+    res.json({ 
+      success: true, 
+      message: "해당 이메일로 비밀번호 재설정 링크를 보냈습니다. 이메일을 확인해주세요." 
+    });
+  } catch (error) {
+    console.error("Forgot password error:", error);
+    res.status(500).json({ message: "잠시 후 다시 시도해주세요" });
+  }
+});
+
 export default router;
