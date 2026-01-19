@@ -9,7 +9,7 @@ interface CustomerServicePopupProps {
 
 export function CustomerServicePopup({ open, onClose }: CustomerServicePopupProps) {
   return (
-    <Dialog open={open} onOpenChange={onClose}>
+    <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) onClose(); }}>
       <DialogContent className="sm:max-w-[400px] p-0 overflow-hidden bg-white rounded-2xl">
         <div className="relative">
           <div className="bg-gradient-to-br from-primary to-primary/80 text-white p-6 pb-8">
