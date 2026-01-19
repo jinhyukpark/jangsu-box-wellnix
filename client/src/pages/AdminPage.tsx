@@ -1791,14 +1791,63 @@ export default function AdminPage() {
                         />
                       </div>
                       <div className="grid gap-2">
-                        <Label htmlFor="category-image">이미지 URL (선택)</Label>
-                        <Input
-                          id="category-image"
-                          value={categoryForm.image}
-                          onChange={(e) => setCategoryForm({ ...categoryForm, image: e.target.value })}
-                          placeholder="이미지 URL"
-                          data-testid="input-category-image"
-                        />
+                        <Label>카테고리 이미지</Label>
+                        {categoryForm.image ? (
+                          <div className="relative">
+                            <div className="w-24 h-24 rounded-lg overflow-hidden border border-gray-200">
+                              <img 
+                                src={categoryForm.image} 
+                                alt="카테고리 이미지" 
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="sm"
+                              className="absolute -top-2 -right-2 w-6 h-6 p-0 rounded-full"
+                              onClick={() => setCategoryForm({ ...categoryForm, image: "" })}
+                              data-testid="button-delete-category-image"
+                            >
+                              <X className="w-3 h-3" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-2">
+                            <label className="cursor-pointer">
+                              <input
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={async (e) => {
+                                  const file = e.target.files?.[0];
+                                  if (!file) return;
+                                  const formData = new FormData();
+                                  formData.append("file", file);
+                                  try {
+                                    const res = await fetch("/api/upload", {
+                                      method: "POST",
+                                      body: formData,
+                                    });
+                                    const data = await res.json();
+                                    if (data.url) {
+                                      setCategoryForm({ ...categoryForm, image: data.url });
+                                      toast({ title: "이미지 업로드 완료" });
+                                    }
+                                  } catch (error) {
+                                    toast({ variant: "destructive", title: "이미지 업로드 실패" });
+                                  }
+                                }}
+                                data-testid="input-category-image-file"
+                              />
+                              <div className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
+                                <Upload className="w-4 h-4" />
+                                <span className="text-sm">이미지 업로드</span>
+                              </div>
+                            </label>
+                          </div>
+                        )}
+                        <p className="text-xs text-gray-500">권장 크기: 200x200px (정사각형)</p>
                       </div>
                       <div className="flex items-center gap-2">
                         <Checkbox 
