@@ -661,7 +661,6 @@ export const siteBranding = pgTable("site_branding", {
   title: varchar("title", { length: 255 }),
   subtitle: text("subtitle"),
   image: text("image"),
-  images: text("images").array().default([]),
   backgroundColor: varchar("background_color", { length: 20 }).default("#ffffff"),
   textColor: varchar("text_color", { length: 20 }).default("#000000"),
   linkUrl: text("link_url"),

@@ -5,9 +5,8 @@ import {
   ChevronRight, Search, Bell, LogOut, Menu, X,
   TrendingUp, ShoppingBag, UserCheck, Clock, Star, Loader2, ShieldX,
   ArrowUpDown, ArrowUp, ArrowDown, Image, Link2, GripVertical, Upload,
-  Package, Calendar, Award, Gift, HelpCircle, Trash2
+  Package, Calendar, Award, Gift, HelpCircle
 } from "lucide-react";
-import { useUpload } from "@/hooks/use-upload";
 import { adminMenuItems } from "@/lib/adminMenu";
 import { useAdminProducts, useAdminCategories, useAdminMembers, useAdminSubscriptions, useAdminSubscriptionPlans, useAdminEvents, useAdminInquiries, useAdminFaqs, useAdminList, useDashboardStats, useCreateProduct, useUpdateProduct, useCreateCategory, useUpdateCategory, useDeleteCategory, useCreateFaq, useUpdateFaq, useDeleteFaq, useCreateSubscriptionPlan, useUpdateSubscriptionPlan, useDeleteSubscriptionPlan, useReorderSubscriptionPlans, useDeleteEvent, useMainPageSettings, useUpdateMainPageSettings, type MainPageSettings } from "@/hooks/use-admin";
 import { useAdminAuth, useAdminLogout } from "@/hooks/use-admin-auth";
@@ -662,24 +661,6 @@ export default function AdminPage() {
     enabled: !!authData?.admin,
   });
   const [editingBranding, setEditingBranding] = useState<any>(null);
-  
-  const { uploadFile: uploadBrandingImage, isUploading: isBrandingImageUploading } = useUpload({
-    onSuccess: (response) => {
-      const imageUrl = response.publicUrl;
-      if (editingBranding) {
-        const currentImages = editingBranding.images || [];
-        setEditingBranding({ 
-          ...editingBranding, 
-          images: [...currentImages, imageUrl],
-          image: currentImages.length === 0 ? imageUrl : editingBranding.image
-        });
-      }
-      toast({ title: "이미지가 업로드되었습니다" });
-    },
-    onError: (error) => {
-      toast({ title: "업로드 실패", description: error.message, variant: "destructive" });
-    },
-  });
 
   const createProductMutation = useCreateProduct();
   const updateProductMutation = useUpdateProduct();
@@ -3205,62 +3186,12 @@ export default function AdminPage() {
                           />
                         </div>
                         <div>
-                          <Label>이미지</Label>
-                          <div className="space-y-3">
-                            {(editingBranding.images?.length > 0 || editingBranding.image) && (
-                              <div className="grid grid-cols-3 gap-2">
-                                {(editingBranding.images?.length > 0 ? editingBranding.images : (editingBranding.image ? [editingBranding.image] : [])).map((img: string, idx: number) => (
-                                  <div key={idx} className="relative group">
-                                    <img 
-                                      src={img} 
-                                      alt={`이미지 ${idx + 1}`} 
-                                      className="w-full h-20 object-cover rounded border border-gray-200"
-                                      onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                                    />
-                                    <button
-                                      type="button"
-                                      onClick={() => {
-                                        const currentImages = editingBranding.images?.length > 0 
-                                          ? editingBranding.images 
-                                          : (editingBranding.image ? [editingBranding.image] : []);
-                                        const newImages = currentImages.filter((_: string, i: number) => i !== idx);
-                                        setEditingBranding({ 
-                                          ...editingBranding, 
-                                          images: newImages,
-                                          image: newImages.length > 0 ? newImages[0] : null
-                                        });
-                                      }}
-                                      className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                                    >
-                                      <Trash2 className="w-3 h-3" />
-                                    </button>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                            <label className="flex items-center gap-2 cursor-pointer">
-                              <input
-                                type="file"
-                                accept="image/*"
-                                className="hidden"
-                                onChange={(e) => {
-                                  const file = e.target.files?.[0];
-                                  if (file) {
-                                    uploadBrandingImage(file);
-                                    e.target.value = '';
-                                  }
-                                }}
-                                disabled={isBrandingImageUploading}
-                              />
-                              <Button variant="outline" type="button" disabled={isBrandingImageUploading} asChild>
-                                <span>
-                                  <Upload className="w-4 h-4 mr-1" />
-                                  {isBrandingImageUploading ? "업로드 중..." : "이미지 추가"}
-                                </span>
-                              </Button>
-                            </label>
-                            <p className="text-xs text-gray-500">여러 장의 이미지를 추가할 수 있습니다</p>
-                          </div>
+                          <Label>이미지 URL</Label>
+                          <Input 
+                            value={editingBranding.image || ""} 
+                            onChange={(e) => setEditingBranding({ ...editingBranding, image: e.target.value })}
+                            placeholder="이미지 URL 입력"
+                          />
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                           <div>
