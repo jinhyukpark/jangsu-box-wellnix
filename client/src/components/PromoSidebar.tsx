@@ -81,38 +81,23 @@ export function PromoSidebar() {
   const banner2 = getBranding("banner2");
   const banner3 = getBranding("banner3");
 
-  const renderBanner = (banner: ReturnType<typeof getBranding>, bgGradient: string) => {
+  const renderBanner = (banner: ReturnType<typeof getBranding>) => {
     if (!banner.isActive) return null;
     
     const content = (
-      <button 
-        className="w-full rounded overflow-hidden flex items-center transition-all group relative h-24"
-        style={{ backgroundColor: banner.backgroundColor || undefined }}
-      >
-        <div className="text-left flex-1 p-4 z-10">
-          <h3 className="font-semibold text-stone-800 text-sm">{banner.title}</h3>
-          <p className="text-xs text-stone-500">{banner.subtitle}</p>
-        </div>
-        <div className="absolute right-0 top-0 h-full w-32">
-          <img 
-            src={banner.displayImage}
-            alt={banner.title || "배너"}
-            className="w-full h-full object-cover"
-          />
-          <div 
-            className="absolute inset-0" 
-            style={{ 
-              background: `linear-gradient(to right, ${banner.backgroundColor}, transparent)` 
-            }} 
-          />
-        </div>
-      </button>
+      <div className="w-full rounded overflow-hidden h-24">
+        <img 
+          src={banner.displayImage}
+          alt="배너"
+          className="w-full h-full object-cover"
+        />
+      </div>
     );
 
     if (banner.linkUrl) {
       return (
         <Link href={banner.linkUrl} key={banner.key}>
-          {content}
+          <a className="block cursor-pointer">{content}</a>
         </Link>
       );
     }
@@ -150,9 +135,9 @@ export function PromoSidebar() {
           )}
           
           <div className="flex flex-col gap-[15px] mt-3">
-            {renderBanner(banner1, "from-stone-100")}
-            {renderBanner(banner2, "from-[#e8f4f3]")}
-            {renderBanner(banner3, "from-emerald-50")}
+            {renderBanner(banner1)}
+            {renderBanner(banner2)}
+            {renderBanner(banner3)}
           </div>
           
           <div className="mt-6 pt-6 border-t border-stone-200">
