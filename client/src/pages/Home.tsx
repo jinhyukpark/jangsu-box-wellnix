@@ -166,7 +166,7 @@ export default function Home() {
           products={giftProducts}
         />
         
-        <div className="h-6" />
+        <div className="h-2 bg-gray-50" />
         
         <Footer onCustomerServiceClick={() => setShowCustomerService(true)} />
         
