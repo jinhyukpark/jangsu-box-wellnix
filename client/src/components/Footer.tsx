@@ -35,15 +35,15 @@ export function Footer({ onCustomerServiceClick }: FooterProps) {
           Copyright by Wellnix Inc. All rights reserved
         </p>
         <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-gray-500">
-          <Link href="/terms"><a className="hover:underline">이용약관</a></Link>
+          <Link href="/terms" className="hover:underline">이용약관</Link>
           <span className="text-gray-300">|</span>
-          <Link href="/privacy"><a className="hover:underline">개인정보처리방침</a></Link>
+          <Link href="/privacy" className="hover:underline">개인정보처리방침</Link>
           <span className="text-gray-300">|</span>
           <button onClick={onCustomerServiceClick} className="hover:underline">제휴 문의</button>
           <span className="text-gray-300">|</span>
-          <Link href="/corporate"><a className="hover:underline">기업 구매</a></Link>
+          <Link href="/corporate" className="hover:underline">기업 구매</Link>
           <span className="text-gray-300">|</span>
-          <Link href="/support"><a className="hover:underline">고객센터</a></Link>
+          <Link href="/support" className="hover:underline">고객센터</Link>
         </div>
       </div>
     </div>
