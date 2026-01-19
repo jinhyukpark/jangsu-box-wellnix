@@ -7,14 +7,14 @@ interface FooterProps {
 export function Footer({ onCustomerServiceClick }: FooterProps) {
   return (
     <div className="border-t border-gray-200">
-      <div className="bg-gray-50 p-5">
-        <h3 className="text-base font-semibold text-gray-800">고객센터</h3>
+      <div className="bg-primary/5 p-5 border-b border-primary/10">
+        <h3 className="text-base font-semibold text-primary">고객센터</h3>
         <p className="text-xl font-bold text-gray-900 mt-1">1644-3684</p>
         
-        <div className="mt-3 space-y-1 text-sm text-gray-600">
+        <div className="mt-3 space-y-1 text-sm text-gray-700">
           <p>운영 시간  10:00 ~ 18:00</p>
           <p>재정비 시간  12:30 ~ 13:30</p>
-          <p className="text-gray-400">※ 주말 및 공휴일 휴무</p>
+          <p className="text-gray-500">※ 주말 및 공휴일 휴무</p>
         </div>
         
         <div className="mt-6 pt-5 border-t border-gray-200">
