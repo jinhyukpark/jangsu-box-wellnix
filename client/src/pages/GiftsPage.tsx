@@ -81,6 +81,7 @@ export default function GiftsPage() {
       if (!res.ok) throw new Error("Failed to fetch products");
       return res.json();
     },
+    gcTime: 0,
   });
 
   const { data: categories = [] } = useQuery<Category[]>({
