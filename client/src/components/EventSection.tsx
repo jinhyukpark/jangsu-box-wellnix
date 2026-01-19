@@ -129,12 +129,11 @@ export function EventSection() {
                 </div>
               </div>
               
-              <div className="p-4 space-y-3">
+              <div className="p-3 space-y-2">
                 <div className="flex items-center gap-2 text-sm">
                   <Calendar className="w-4 h-4 text-[#006861]" />
-                  <span className="font-medium text-gray-900">
-                    {formatDate(event.date)}
-                    {event.time && ` ${event.time}`}
+                  <span className="text-gray-700">
+                    {formatDate(event.date)} {event.time || ""}
                   </span>
                 </div>
                 
@@ -154,17 +153,7 @@ export function EventSection() {
                   </div>
                 )}
                 
-                {event.benefits && event.benefits.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5">
-                    {event.benefits.slice(0, 4).map((item, idx) => (
-                      <span key={idx} className="text-xs bg-[#006861]/10 text-[#006861] px-2 py-1 rounded">
-                        {item}
-                      </span>
-                    ))}
-                  </div>
-                )}
-                
-                <div className="flex items-center justify-end pt-2 border-t border-gray-100">
+                <div className="flex items-center justify-end pt-2">
                   <button 
                     className="bg-[#006861] text-white text-sm font-semibold px-4 py-2 rounded hover:bg-[#005550] transition-colors"
                     data-testid={`event-apply-${event.id}`}
