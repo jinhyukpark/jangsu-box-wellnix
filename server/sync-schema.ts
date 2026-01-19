@@ -54,6 +54,8 @@ async function syncSchema() {
       )`,
       // Add missing columns to main_page_settings if table exists
       `ALTER TABLE main_page_settings ADD COLUMN IF NOT EXISTS ad_banner_enabled BOOLEAN DEFAULT true`,
+      // Add missing columns to events table
+      `ALTER TABLE events ADD COLUMN IF NOT EXISTS images text[]`,
     ];
 
     for (const sql of alterStatements) {
