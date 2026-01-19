@@ -176,8 +176,8 @@ export default function ProductDetailPage() {
 
   return (
     <AppLayout hideNav>
-      <div className="min-h-screen bg-white pb-24">
-        <div className="sticky top-0 left-0 right-0 z-50 bg-white border-b border-gray-100">
+      <div className="h-screen bg-white flex flex-col">
+        <div className="shrink-0 bg-white border-b border-gray-100 z-50">
           <div className="flex items-center justify-between px-4 py-3">
             <button onClick={() => window.history.back()} className="p-1" data-testid="button-back">
               <ChevronLeft className="w-6 h-6 text-gray-700" />
@@ -194,6 +194,7 @@ export default function ProductDetailPage() {
           </div>
         </div>
 
+      <div className="flex-1 overflow-y-auto">
       <div className="relative">
         {(() => {
           const allProductImages = [
@@ -618,10 +619,10 @@ export default function ProductDetailPage() {
         </TabsContent>
       </Tabs>
 
-        <div className="h-24" />
+        <div className="h-4" />
       </div>
       
-      <div className="sticky bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 z-50">
+      <div className="shrink-0 bg-white border-t border-gray-200 p-4">
         <div className="flex gap-3">
           <Button 
             variant="outline" 
@@ -640,6 +641,7 @@ export default function ProductDetailPage() {
             바로 구매하기
           </Button>
         </div>
+      </div>
       </div>
     </AppLayout>
   );
