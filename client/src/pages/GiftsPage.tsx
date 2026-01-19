@@ -323,7 +323,7 @@ export default function GiftsPage() {
                 onClick={() => setShowFilterModal(false)}
               />
               <div 
-                className="absolute bottom-[72px] left-0 right-0 bg-white rounded-t-2xl z-10 animate-in slide-in-from-bottom duration-300"
+                className="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl z-10 animate-in slide-in-from-bottom duration-300"
               >
             <div className="relative p-4">
               <button 
@@ -384,7 +384,7 @@ export default function GiftsPage() {
                 </div>
               </div>
 
-              <div className="flex gap-2 pt-2 pb-2">
+              <div className="flex gap-2 pt-2 pb-[88px]">
                 <Button variant="outline" className="flex-1" onClick={resetFilters}>
                   초기화
                 </Button>
