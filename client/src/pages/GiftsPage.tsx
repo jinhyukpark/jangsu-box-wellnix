@@ -1,9 +1,13 @@
 import { useState, useRef } from "react";
-import { Filter, ChevronDown, ArrowLeft, ShoppingCart } from "lucide-react";
+import { Filter, ChevronDown, ArrowLeft, ShoppingCart, X, Check } from "lucide-react";
 import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { AppLayout } from "@/components/AppLayout";
 import { images } from "@/lib/images";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Slider } from "@/components/ui/slider";
+import { Button } from "@/components/ui/button";
 
 const categoryImageMap: Record<string, string> = {
   "hongsam": images.koreanRedGinsengRoots,
@@ -36,10 +40,27 @@ interface Category {
   slug: string;
 }
 
+type SortOption = "popular" | "newest" | "price-low" | "price-high" | "rating";
+const sortOptions: { value: SortOption; label: string }[] = [
+  { value: "popular", label: "인기순" },
+  { value: "newest", label: "최신순" },
+  { value: "price-low", label: "낮은가격순" },
+  { value: "price-high", label: "높은가격순" },
+  { value: "rating", label: "평점순" },
+];
+
 export default function GiftsPage() {
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
   const [, setLocation] = useLocation();
   const scrollRef = useRef<HTMLDivElement>(null);
+  
+  const [sortBy, setSortBy] = useState<SortOption>("popular");
+  const [showSortDropdown, setShowSortDropdown] = useState(false);
+  const [showFilterModal, setShowFilterModal] = useState(false);
+  
+  const [filterOnlyDiscount, setFilterOnlyDiscount] = useState(false);
+  const [filterPriceRange, setFilterPriceRange] = useState<[number, number]>([0, 500000]);
+  const [filterMinRating, setFilterMinRating] = useState(0);
 
   const { data: products = [], isLoading: productsLoading } = useQuery<Product[]>({
     queryKey: ["/api/products"],
@@ -67,9 +88,47 @@ export default function GiftsPage() {
   };
 
   const activeProducts = products.filter(p => p.status === "active");
-  const filteredProducts = selectedCategory
+  
+  let filteredProducts = selectedCategory
     ? activeProducts.filter(p => p.categoryId === selectedCategory)
     : activeProducts;
+  
+  if (filterOnlyDiscount) {
+    filteredProducts = filteredProducts.filter(p => p.originalPrice && p.originalPrice > p.price);
+  }
+  
+  filteredProducts = filteredProducts.filter(p => 
+    p.price >= filterPriceRange[0] && p.price <= filterPriceRange[1]
+  );
+  
+  if (filterMinRating > 0) {
+    filteredProducts = filteredProducts.filter(p => parseFloat(p.rating || "0") >= filterMinRating);
+  }
+  
+  const sortedProducts = [...filteredProducts].sort((a, b) => {
+    switch (sortBy) {
+      case "popular":
+        return (b.reviewCount || 0) - (a.reviewCount || 0);
+      case "newest":
+        return b.id - a.id;
+      case "price-low":
+        return a.price - b.price;
+      case "price-high":
+        return b.price - a.price;
+      case "rating":
+        return parseFloat(b.rating || "0") - parseFloat(a.rating || "0");
+      default:
+        return 0;
+    }
+  });
+
+  const resetFilters = () => {
+    setFilterOnlyDiscount(false);
+    setFilterPriceRange([0, 500000]);
+    setFilterMinRating(0);
+  };
+
+  const hasActiveFilters = filterOnlyDiscount || filterPriceRange[0] > 0 || filterPriceRange[1] < 500000 || filterMinRating > 0;
 
   const getCategoryImage = (slug: string) => {
     return categoryImageMap[slug] || images.koreanRedGinsengRoots;
@@ -135,14 +194,47 @@ export default function GiftsPage() {
         <div className="px-4 pb-3 flex items-center justify-between border-t border-gray-50 pt-3">
           <span className="text-sm text-gray-500">
             {selectedCategory ? `${categories.find(c => c.id === selectedCategory)?.name} ` : "전체 "}
-            {filteredProducts.length}개 상품
+            {sortedProducts.length}개 상품
           </span>
           <div className="flex items-center gap-2">
-            <button className="flex items-center gap-1 text-sm text-gray-600" data-testid="sort-btn">
-              인기순 <ChevronDown className="w-4 h-4" />
-            </button>
-            <button className="p-2 rounded-lg hover:bg-gray-100" data-testid="filter-btn">
-              <Filter className="w-4 h-4 text-gray-600" />
+            <div className="relative">
+              <button 
+                className="flex items-center gap-1 text-sm text-gray-600"
+                onClick={() => setShowSortDropdown(!showSortDropdown)}
+                data-testid="sort-btn"
+              >
+                {sortOptions.find(o => o.value === sortBy)?.label} <ChevronDown className="w-4 h-4" />
+              </button>
+              {showSortDropdown && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setShowSortDropdown(false)} />
+                  <div className="absolute right-0 top-full mt-1 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50 min-w-[120px]">
+                    {sortOptions.map(option => (
+                      <button
+                        key={option.value}
+                        className={`w-full px-4 py-2 text-left text-sm flex items-center justify-between hover:bg-gray-50 ${
+                          sortBy === option.value ? "text-primary font-medium" : "text-gray-600"
+                        }`}
+                        onClick={() => { setSortBy(option.value); setShowSortDropdown(false); }}
+                        data-testid={`sort-${option.value}`}
+                      >
+                        {option.label}
+                        {sortBy === option.value && <Check className="w-4 h-4" />}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+            <button 
+              className={`p-2 rounded-lg hover:bg-gray-100 relative ${hasActiveFilters ? "text-primary" : ""}`}
+              onClick={() => setShowFilterModal(true)}
+              data-testid="filter-btn"
+            >
+              <Filter className="w-4 h-4" />
+              {hasActiveFilters && (
+                <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-primary rounded-full" />
+              )}
             </button>
           </div>
         </div>
@@ -153,13 +245,13 @@ export default function GiftsPage() {
           <div className="flex justify-center py-12">
             <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
           </div>
-        ) : filteredProducts.length === 0 ? (
+        ) : sortedProducts.length === 0 ? (
           <div className="text-center py-12 text-gray-500">
-            등록된 상품이 없습니다
+            {hasActiveFilters ? "조건에 맞는 상품이 없습니다" : "등록된 상품이 없습니다"}
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-3">
-            {filteredProducts.map((product) => {
+            {sortedProducts.map((product) => {
               const discountPercent = product.originalPrice && product.originalPrice > product.price
                 ? Math.round((1 - product.price / product.originalPrice) * 100)
                 : 0;
@@ -199,6 +291,69 @@ export default function GiftsPage() {
           </div>
         )}
       </div>
+
+      <Dialog open={showFilterModal} onOpenChange={setShowFilterModal}>
+        <DialogContent className="max-w-[380px] mx-auto">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-bold">필터</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            <div>
+              <label className="flex items-center gap-3 cursor-pointer">
+                <Checkbox 
+                  checked={filterOnlyDiscount}
+                  onCheckedChange={(checked) => setFilterOnlyDiscount(!!checked)}
+                />
+                <span className="text-sm font-medium">할인 상품만 보기</span>
+              </label>
+            </div>
+
+            <div>
+              <h4 className="text-sm font-medium mb-3">가격 범위</h4>
+              <Slider
+                value={filterPriceRange}
+                min={0}
+                max={500000}
+                step={10000}
+                onValueChange={(value) => setFilterPriceRange(value as [number, number])}
+                className="mb-2"
+              />
+              <div className="flex justify-between text-sm text-gray-500">
+                <span>{filterPriceRange[0].toLocaleString()}원</span>
+                <span>{filterPriceRange[1].toLocaleString()}원</span>
+              </div>
+            </div>
+
+            <div>
+              <h4 className="text-sm font-medium mb-3">최소 평점</h4>
+              <div className="flex gap-2">
+                {[0, 3, 3.5, 4, 4.5].map(rating => (
+                  <button
+                    key={rating}
+                    className={`px-3 py-1.5 rounded-full text-sm border transition-colors ${
+                      filterMinRating === rating 
+                        ? "bg-primary text-white border-primary" 
+                        : "bg-white text-gray-600 border-gray-200 hover:border-gray-300"
+                    }`}
+                    onClick={() => setFilterMinRating(rating)}
+                  >
+                    {rating === 0 ? "전체" : `${rating}★ 이상`}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex gap-2 pt-2">
+            <Button variant="outline" className="flex-1" onClick={resetFilters}>
+              초기화
+            </Button>
+            <Button className="flex-1" onClick={() => setShowFilterModal(false)}>
+              적용하기
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </AppLayout>
   );
 }
