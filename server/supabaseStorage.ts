@@ -16,17 +16,17 @@ export class SupabaseStorageService {
     
     const { data, error } = await supabase.storage
       .from(BUCKET_NAME)
-      .createSignedUploadUrl(`uploads/${objectName}`, { upsert: false });
+      .createSignedUploadUrl(`images/${objectName}`, { upsert: false });
 
     if (error) {
       throw new Error(`Failed to create upload URL: ${error.message}`);
     }
 
-    const publicUrl = `${supabaseUrl}/storage/v1/object/public/${BUCKET_NAME}/uploads/${objectName}`;
+    const publicUrl = `${supabaseUrl}/storage/v1/object/public/${BUCKET_NAME}/images/${objectName}`;
 
     return {
       uploadUrl: data.signedUrl,
-      objectPath: `/storage/${BUCKET_NAME}/uploads/${objectName}`,
+      objectPath: `/storage/${BUCKET_NAME}/images/${objectName}`,
       publicUrl,
     };
   }
