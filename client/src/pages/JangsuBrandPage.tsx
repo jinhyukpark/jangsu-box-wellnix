@@ -20,8 +20,8 @@ export default function JangsuBrandPage() {
       />
       
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 transition-colors duration-300 bg-white/80 backdrop-blur-md border-b border-gray-100/50">
-        <div className="flex items-center justify-between px-4 h-14 max-w-[430px] mx-auto w-full">
+      <header className="sticky top-0 z-50 transition-colors duration-300 bg-white/80 backdrop-blur-md border-b border-gray-100/50">
+        <div className="flex items-center justify-between px-4 h-14 w-full">
           <button 
             onClick={() => setLocation("/subscription")} 
             className="p-2 -ml-2 hover:bg-black/5 rounded-full transition-colors"
@@ -187,17 +187,17 @@ export default function JangsuBrandPage() {
           </motion.div>
         </section>
 
-        {/* Bottom CTA */}
-        <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-100 z-50 max-w-[430px] mx-auto">
-          <button 
-            onClick={() => setLocation("/subscription")}
-            className="w-full bg-primary text-white font-bold text-lg py-4 rounded-xl shadow-lg shadow-primary/30 hover:bg-primary/90 transition-all flex items-center justify-center gap-2"
-          >
-            <Gift className="w-5 h-5" />
-            부모님께 마음 전하러 가기
-          </button>
-        </div>
-
+      </div>
+      
+      {/* Bottom CTA - sticky within the app container */}
+      <div className="sticky bottom-0 p-4 bg-white border-t border-gray-100 z-50">
+        <button 
+          onClick={() => setLocation("/subscription")}
+          className="w-full bg-primary text-white font-bold text-lg py-4 rounded-xl shadow-lg shadow-primary/30 hover:bg-primary/90 transition-all flex items-center justify-center gap-2"
+        >
+          <Gift className="w-5 h-5" />
+          부모님께 마음 전하러 가기
+        </button>
       </div>
     </AppLayout>
   );
