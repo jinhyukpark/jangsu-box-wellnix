@@ -4,10 +4,10 @@ import * as schema from "@shared/schema";
 
 const { Pool } = pg;
 
-const connectionString = process.env.SUPABASE_DATABASE_URL;
+const connectionString = process.env.DATABASE_URL || process.env.SUPABASE_DATABASE_URL;
 
 if (!connectionString) {
-  throw new Error("SUPABASE_DATABASE_URL is not set");
+  throw new Error("DATABASE_URL is not set");
 }
 
 const pool = new Pool({
