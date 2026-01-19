@@ -52,7 +52,7 @@ export function EventSection() {
 
   const getFilteredEvents = () => {
     const limit = settings?.eventsLimit || 4;
-    const activeEvents = allEvents.filter(e => e.status === "active" || e.status === "upcoming");
+    const activeEvents = allEvents.filter(e => e.status === "active" || e.status === "upcoming" || e.status === "recruiting");
     
     if (settings?.eventsCriteria === "manual" && settings.eventsManualIds?.length > 0) {
       return activeEvents
