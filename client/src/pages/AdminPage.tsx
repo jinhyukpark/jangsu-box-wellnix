@@ -780,7 +780,7 @@ export default function AdminPage() {
     e.dataTransfer.dropEffect = "move";
   };
 
-  const handlePlanDrop = async (e: React.DragEvent, targetPlanId: number) => {
+  const handlePlanDrop = (e: React.DragEvent, targetPlanId: number) => {
     e.preventDefault();
     if (draggedPlanId === null || draggedPlanId === targetPlanId) return;
     
@@ -793,17 +793,26 @@ export default function AdminPage() {
     const [removed] = newPlans.splice(draggedIndex, 1);
     newPlans.splice(targetIndex, 0, removed);
     
+    // Optimistic update - immediately update the UI
+    const updatedPlans = newPlans.map((plan, index) => ({
+      ...plan,
+      displayOrder: index
+    }));
+    queryClient.setQueryData(["admin", "subscription-plans"], updatedPlans);
+    
     const orders = newPlans.map((plan, index) => ({
       id: plan.id,
       displayOrder: index
     }));
     
-    try {
-      await reorderPlansMutation.mutateAsync(orders);
-      toast({ title: "순서 변경 완료", description: "플랜 순서가 변경되었습니다." });
-    } catch (error) {
-      toast({ variant: "destructive", title: "순서 변경 실패", description: "다시 시도해주세요." });
-    }
+    // Save in background
+    reorderPlansMutation.mutate(orders, {
+      onError: () => {
+        // Revert on error
+        queryClient.invalidateQueries({ queryKey: ["admin", "subscription-plans"] });
+        toast({ variant: "destructive", title: "순서 변경 실패", description: "다시 시도해주세요." });
+      }
+    });
     
     setDraggedPlanId(null);
   };
