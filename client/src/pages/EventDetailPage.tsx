@@ -142,7 +142,8 @@ export default function EventDetailPage() {
               <img 
                 src={allImages[currentImageIndex]} 
                 alt={`${event.title} - ${currentImageIndex + 1}`}
-                className="w-full h-full object-cover transition-opacity duration-300"
+                className="w-full h-full object-cover"
+                loading="eager"
               />
               {hasMultipleImages && (
                 <>
