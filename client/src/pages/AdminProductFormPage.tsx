@@ -1,12 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useLocation } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import MDEditor from "@uiw/react-md-editor";
 import { 
   ChevronLeft, Save, Eye, Image, Video, Link, Plus, Trash2, Star, 
-  MessageSquare, X, Upload, Menu, Package, Users, Gift, Calendar, 
-  CreditCard, Truck, HelpCircle, ShieldCheck, Settings, Award, MoreHorizontal, Pencil
+  MessageSquare, X, Upload, Menu, MoreHorizontal, Pencil
 } from "lucide-react";
+import { adminMenuItems } from "@/lib/adminMenu";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,6 +26,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useUpload } from "@/hooks/use-upload";
@@ -75,19 +85,7 @@ interface Category {
   slug: string;
 }
 
-const menuItems = [
-  { id: "products", label: "상품 관리", icon: Package },
-  { id: "brands", label: "브랜드 관리", icon: Award },
-  { id: "members", label: "회원 관리", icon: Users },
-  { id: "subscription", label: "장수박스 관리", icon: Gift },
-  { id: "events", label: "행사 관리", icon: Calendar },
-  { id: "payments", label: "결제 관리", icon: CreditCard },
-  { id: "shipping", label: "배송 관리", icon: Truck },
-  { id: "inquiries", label: "1:1 문의", icon: MessageSquare },
-  { id: "faq", label: "자주묻는질문", icon: HelpCircle },
-  { id: "settings", label: "관리자 설정", icon: ShieldCheck },
-  { id: "base-settings", label: "기준 정보 관리", icon: Settings },
-];
+const menuItems = adminMenuItems;
 
 const defaultProduct: Product = {
   name: "",
@@ -131,6 +129,24 @@ export default function AdminProductFormPage() {
   const [editReviewContent, setEditReviewContent] = useState("");
   const [editingReplyId, setEditingReplyId] = useState<number | null>(null);
   const [editReplyContent, setEditReplyContent] = useState("");
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
+  const initialFormRef = useRef<string>("");
+
+  const handleNavigate = (path: string) => {
+    if (hasUnsavedChanges) {
+      setPendingNavigation(path);
+    } else {
+      setLocation(path);
+    }
+  };
+
+  const confirmNavigation = () => {
+    if (pendingNavigation) {
+      setLocation(pendingNavigation);
+      setPendingNavigation(null);
+    }
+  };
 
   const { uploadFile, isUploading } = useUpload({
     onSuccess: (response) => {
@@ -178,13 +194,24 @@ export default function AdminProductFormPage() {
 
   useEffect(() => {
     if (existingProduct) {
-      setProduct({
+      const newProduct = {
         ...defaultProduct,
         ...existingProduct,
         images: existingProduct.images || [],
-      });
+      };
+      setProduct(newProduct);
+      initialFormRef.current = JSON.stringify(newProduct);
     }
   }, [existingProduct]);
+
+  useEffect(() => {
+    if (initialFormRef.current) {
+      const currentProductStr = JSON.stringify(product);
+      setHasUnsavedChanges(currentProductStr !== initialFormRef.current);
+    } else if (product.name) {
+      setHasUnsavedChanges(true);
+    }
+  }, [product]);
 
   const saveMutation = useMutation({
     mutationFn: async (data: Product) => {
@@ -328,7 +355,7 @@ export default function AdminProductFormPage() {
           {menuItems.map((item) => (
             <button
               key={item.id}
-              onClick={() => setLocation("/admin")}
+              onClick={() => handleNavigate(`/admin?tab=${item.id}`)}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
                 item.id === "products" 
                   ? "bg-primary text-white" 
@@ -348,7 +375,7 @@ export default function AdminProductFormPage() {
           <div className="px-6 py-3 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <button 
-                onClick={() => setLocation("/admin")} 
+                onClick={() => handleNavigate("/admin?tab=products")} 
                 className="p-2 hover:bg-gray-100 rounded-lg"
                 data-testid="button-back"
               >
@@ -1086,6 +1113,21 @@ export default function AdminProductFormPage() {
         </Tabs>
         </div>
       </div>
+
+      <AlertDialog open={!!pendingNavigation} onOpenChange={() => setPendingNavigation(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>저장되지 않은 변경사항</AlertDialogTitle>
+            <AlertDialogDescription>
+              저장되지 않은 변경사항이 있습니다. 이동하시면 변경사항이 모두 사라집니다. 그래도 이동하시겠습니까?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>취소</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmNavigation}>이동</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

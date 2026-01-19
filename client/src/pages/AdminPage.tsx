@@ -2,11 +2,12 @@ import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { 
-  Package, Users, Gift, Calendar, CreditCard, Truck, MessageSquare, 
-  ChevronRight, Search, Bell, Settings, LogOut, Menu, X,
-  TrendingUp, ShoppingBag, UserCheck, Clock, HelpCircle, Star, ShieldCheck, Loader2, ShieldX, Award,
-  ArrowUpDown, ArrowUp, ArrowDown, Home, Image, Link2, GripVertical, Upload
+  ChevronRight, Search, Bell, LogOut, Menu, X,
+  TrendingUp, ShoppingBag, UserCheck, Clock, Star, Loader2, ShieldX,
+  ArrowUpDown, ArrowUp, ArrowDown, Image, Link2, GripVertical, Upload,
+  Package, Calendar, Award, Gift, HelpCircle
 } from "lucide-react";
+import { adminMenuItems } from "@/lib/adminMenu";
 import { useAdminProducts, useAdminCategories, useAdminMembers, useAdminSubscriptions, useAdminSubscriptionPlans, useAdminEvents, useAdminInquiries, useAdminFaqs, useAdminList, useDashboardStats, useCreateProduct, useUpdateProduct, useCreateCategory, useUpdateCategory, useDeleteCategory, useCreateFaq, useUpdateFaq, useDeleteFaq, useCreateSubscriptionPlan, useUpdateSubscriptionPlan, useDeleteSubscriptionPlan, useReorderSubscriptionPlans, useDeleteEvent, useMainPageSettings, useUpdateMainPageSettings, type MainPageSettings } from "@/hooks/use-admin";
 import { useAdminAuth, useAdminLogout } from "@/hooks/use-admin-auth";
 import { Button } from "@/components/ui/button";
@@ -37,20 +38,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-const menuItems = [
-  { id: "members", label: "회원 관리", icon: Users },
-  { id: "settings", label: "관리자 설정", icon: ShieldCheck },
-  { id: "main-page", label: "메인 페이지 설정", icon: Home },
-  { id: "products", label: "상품 관리", icon: Package },
-  { id: "brands", label: "브랜드 관리", icon: Award },
-  { id: "subscription", label: "장수박스 관리", icon: Gift },
-  { id: "events", label: "행사 관리", icon: Calendar },
-  { id: "payments", label: "결제 관리", icon: CreditCard },
-  { id: "shipping", label: "배송 관리", icon: Truck },
-  { id: "inquiries", label: "1:1 문의", icon: MessageSquare },
-  { id: "faq", label: "자주묻는질문", icon: HelpCircle },
-  { id: "base-settings", label: "기준 정보 관리", icon: Settings },
-];
+const menuItems = adminMenuItems;
 
 const mockProducts = [
   { id: 1, name: "유기농 현미", category: "곡물", price: 25000, stock: 150, status: "판매중" },

@@ -1,27 +1,26 @@
-import { useState, useEffect, type ChangeEvent } from "react";
+import { useState, useEffect, useRef, type ChangeEvent } from "react";
 import { useLocation, useRoute } from "wouter";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Package, Users, Gift, Calendar, CreditCard, Truck, MessageSquare, HelpCircle, Settings, ShieldCheck, Award, Menu, X, Upload, Trash2 } from "lucide-react";
+import { ArrowLeft, Menu, X, Upload, Trash2 } from "lucide-react";
+import { adminMenuItems } from "@/lib/adminMenu";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useUpload } from "@/hooks/use-upload";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import type { Event } from "@shared/schema";
 
-const menuItems = [
-  { id: "products", label: "상품 관리", icon: Package },
-  { id: "brands", label: "브랜드 관리", icon: Award },
-  { id: "members", label: "회원 관리", icon: Users },
-  { id: "subscription", label: "장수박스 관리", icon: Gift },
-  { id: "events", label: "행사 관리", icon: Calendar },
-  { id: "payments", label: "결제 관리", icon: CreditCard },
-  { id: "shipping", label: "배송 관리", icon: Truck },
-  { id: "inquiries", label: "1:1 문의", icon: MessageSquare },
-  { id: "faq", label: "자주묻는질문", icon: HelpCircle },
-  { id: "settings", label: "관리자 설정", icon: ShieldCheck },
-  { id: "base-settings", label: "기준 정보 관리", icon: Settings },
-];
+const menuItems = adminMenuItems;
 
 interface ScheduleItem {
   time: string;
@@ -55,6 +54,24 @@ export default function AdminEventFormPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
+  const initialFormRef = useRef<string>("");
+
+  const handleNavigate = (path: string) => {
+    if (hasUnsavedChanges) {
+      setPendingNavigation(path);
+    } else {
+      setLocation(path);
+    }
+  };
+
+  const confirmNavigation = () => {
+    if (pendingNavigation) {
+      setLocation(pendingNavigation);
+      setPendingNavigation(null);
+    }
+  };
 
   const [eventForm, setEventForm] = useState({
     title: "",
@@ -126,7 +143,7 @@ export default function AdminEventFormPage() {
     if (existingEvent) {
       const dateStr = existingEvent.date ? new Date(existingEvent.date).toISOString().slice(0, 16) : "";
       const endDateStr = existingEvent.endDate ? new Date(existingEvent.endDate).toISOString().slice(0, 16) : "";
-      setEventForm({
+      const newForm = {
         title: existingEvent.title || "",
         description: existingEvent.description || "",
         date: dateStr,
@@ -147,9 +164,20 @@ export default function AdminEventFormPage() {
         organizerInfo: (existingEvent.organizerInfo as OrganizerInfo) || { company: "", contact: "", phone: "", email: "" },
         notices: (existingEvent.notices as string[]) || [],
         featureTags: (existingEvent as any).featureTags || [],
-      });
+      };
+      setEventForm(newForm);
+      initialFormRef.current = JSON.stringify(newForm);
     }
   }, [existingEvent]);
+
+  useEffect(() => {
+    if (initialFormRef.current) {
+      const currentFormStr = JSON.stringify(eventForm);
+      setHasUnsavedChanges(currentFormStr !== initialFormRef.current);
+    } else if (eventForm.title) {
+      setHasUnsavedChanges(true);
+    }
+  }, [eventForm]);
 
   const createEventMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -316,7 +344,7 @@ export default function AdminEventFormPage() {
           {menuItems.map((item) => (
             <button
               key={item.id}
-              onClick={() => setLocation(`/admin?tab=${item.id}`)}
+              onClick={() => handleNavigate(`/admin?tab=${item.id}`)}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
                 item.id === "events" 
                   ? "bg-primary text-white" 
@@ -334,7 +362,7 @@ export default function AdminEventFormPage() {
       <div className={`flex-1 transition-all duration-300 ${sidebarOpen ? "ml-64" : "ml-20"}`}>
         <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
           <div className="max-w-4xl mx-auto px-6 py-4 flex items-center gap-4">
-            <button onClick={() => setLocation("/admin?tab=events")} className="p-2 hover:bg-gray-100 rounded-lg">
+            <button onClick={() => handleNavigate("/admin?tab=events")} className="p-2 hover:bg-gray-100 rounded-lg">
               <ArrowLeft className="w-5 h-5 text-gray-600" />
             </button>
             <h1 className="text-xl font-bold text-gray-900">
@@ -671,7 +699,7 @@ export default function AdminEventFormPage() {
           </div>
 
           <div className="flex justify-end gap-3 pt-6 border-t">
-            <Button variant="outline" onClick={() => setLocation("/admin?tab=events")}>취소</Button>
+            <Button variant="outline" onClick={() => handleNavigate("/admin?tab=events")}>취소</Button>
             <Button 
               onClick={handleSave}
               disabled={createEventMutation.isPending || updateEventMutation.isPending}
@@ -683,6 +711,21 @@ export default function AdminEventFormPage() {
         </div>
       </main>
       </div>
+
+      <AlertDialog open={!!pendingNavigation} onOpenChange={() => setPendingNavigation(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>저장되지 않은 변경사항</AlertDialogTitle>
+            <AlertDialogDescription>
+              저장되지 않은 변경사항이 있습니다. 이동하시면 변경사항이 모두 사라집니다. 그래도 이동하시겠습니까?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>취소</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmNavigation}>이동</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
