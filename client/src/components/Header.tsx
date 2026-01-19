@@ -1,8 +1,9 @@
 import { Bell, ShoppingCart, Search } from "lucide-react";
 import { useRef } from "react";
 import { Link, useLocation } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 
-const menuItems = [
+const defaultMenuItems = [
   { label: "홈", href: "/" },
   { label: "설 선물세트", href: "/promotion/seol-gift" },
   { label: "장수박스", href: "/promotion/jangsu-box" },
@@ -13,6 +14,26 @@ const menuItems = [
 export function Header() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [location] = useLocation();
+
+  const { data: promotions = [] } = useQuery<any[]>({
+    queryKey: ["/api/promotions"],
+    queryFn: async () => {
+      const res = await fetch("/api/promotions");
+      if (!res.ok) return [];
+      return res.json();
+    },
+    staleTime: 60000,
+  });
+
+  const menuItems = promotions.length > 0
+    ? [
+        { label: "홈", href: "/" },
+        ...promotions
+          .filter((p: any) => p.isActive)
+          .sort((a: any, b: any) => (a.displayOrder || 0) - (b.displayOrder || 0))
+          .map((p: any) => ({ label: p.title, href: `/promotion/${p.slug}` }))
+      ]
+    : defaultMenuItems;
 
   const handleWheel = (e: React.WheelEvent) => {
     if (scrollRef.current) {
