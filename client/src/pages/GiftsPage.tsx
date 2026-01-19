@@ -4,9 +4,9 @@ import { useLocation, Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { AppLayout } from "@/components/AppLayout";
 import { images } from "@/lib/images";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 
 const categoryImageMap: Record<string, string> = {
   "hongsam": images.koreanRedGinsengRoots,
@@ -312,12 +312,12 @@ export default function GiftsPage() {
         )}
       </div>
 
-      <Dialog open={showFilterModal} onOpenChange={setShowFilterModal}>
-        <DialogContent className="max-w-[380px] mx-auto">
-          <DialogHeader>
-            <DialogTitle className="text-lg font-bold">필터</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-6 py-4">
+      <Sheet open={showFilterModal} onOpenChange={setShowFilterModal}>
+        <SheetContent side="bottom" className="rounded-t-2xl max-h-[70vh] mx-auto max-w-[430px]">
+          <SheetHeader className="pb-4">
+            <SheetTitle className="text-lg font-bold text-center">필터</SheetTitle>
+          </SheetHeader>
+          <div className="space-y-5 pb-4">
             <div>
               <label className="flex items-center gap-3 cursor-pointer">
                 <Checkbox 
@@ -349,7 +349,7 @@ export default function GiftsPage() {
 
             <div>
               <h4 className="text-sm font-medium mb-3">최소 평점</h4>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 {[0, 3, 3.5, 4, 4.5].map(rating => (
                   <button
                     key={rating}
@@ -367,7 +367,7 @@ export default function GiftsPage() {
             </div>
           </div>
 
-          <div className="flex gap-2 pt-2">
+          <div className="flex gap-2 pt-2 pb-4">
             <Button variant="outline" className="flex-1" onClick={resetFilters}>
               초기화
             </Button>
@@ -375,8 +375,8 @@ export default function GiftsPage() {
               적용하기
             </Button>
           </div>
-        </DialogContent>
-      </Dialog>
+        </SheetContent>
+      </Sheet>
     </AppLayout>
   );
 }
