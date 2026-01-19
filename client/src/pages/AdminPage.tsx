@@ -8,6 +8,20 @@ import {
   Package, Calendar, Award, Gift, HelpCircle
 } from "lucide-react";
 import { adminMenuItems } from "@/lib/adminMenu";
+import { images } from "@/lib/images";
+
+const categoryImageMap: Record<string, string> = {
+  "hongsam": images.koreanRedGinsengRoots,
+  "blood-pressure": images.heartHealthSupplements,
+  "supplements": images.vitaminSupplementsPills,
+  "fruit-gift": images.freshFruitGiftBasket,
+  "cosmetics": images.luxuryCosmeticsSkincareSet,
+  "sleep-health": images.sleepHealthSupplements,
+  "tea-drinks": images.koreanTeaSet,
+  "joint-health": images.jointHealthSupplements,
+  "pets": images.cuteDogAndCatTogether,
+  "living-goods": images.dailyToiletriesProducts,
+};
 import { useAdminProducts, useAdminCategories, useAdminMembers, useAdminSubscriptions, useAdminSubscriptionPlans, useAdminEvents, useAdminInquiries, useAdminFaqs, useAdminList, useDashboardStats, useCreateProduct, useUpdateProduct, useCreateCategory, useUpdateCategory, useDeleteCategory, useCreateFaq, useUpdateFaq, useDeleteFaq, useCreateSubscriptionPlan, useUpdateSubscriptionPlan, useDeleteSubscriptionPlan, useReorderSubscriptionPlans, useDeleteEvent, useMainPageSettings, useUpdateMainPageSettings, type MainPageSettings } from "@/hooks/use-admin";
 import { useAdminAuth, useAdminLogout } from "@/hooks/use-admin-auth";
 import { Button } from "@/components/ui/button";
@@ -1671,6 +1685,7 @@ export default function AdminPage() {
                     <thead className="bg-gray-50 border-b border-gray-200">
                       <tr>
                         <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">순서</th>
+                        <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">이미지</th>
                         <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">카테고리명</th>
                         <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">슬러그</th>
                         <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">상품 수</th>
@@ -1684,6 +1699,15 @@ export default function AdminPage() {
                         return (
                           <tr key={category.id} className="border-b border-gray-100 hover:bg-gray-50">
                             <td className="px-4 py-3 text-sm text-gray-600">{category.displayOrder || 0}</td>
+                            <td className="px-4 py-3">
+                              <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-100">
+                                <img 
+                                  src={categoryImageMap[category.slug] || images.koreanRedGinsengRoots} 
+                                  alt={category.name}
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+                            </td>
                             <td className="px-4 py-3 text-sm text-gray-900 font-medium">{category.name}</td>
                             <td className="px-4 py-3 text-sm text-gray-500">{category.slug}</td>
                             <td className="px-4 py-3 text-sm text-gray-600">{productCount}개</td>
@@ -1717,7 +1741,7 @@ export default function AdminPage() {
                       })}
                       {categories.length === 0 && (
                         <tr>
-                          <td colSpan={6} className="px-4 py-8 text-center text-gray-500">
+                          <td colSpan={7} className="px-4 py-8 text-center text-gray-500">
                             등록된 카테고리가 없습니다.
                           </td>
                         </tr>
