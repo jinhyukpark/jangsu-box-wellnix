@@ -1,12 +1,11 @@
 import { useState, useRef } from "react";
-import { Filter, ChevronDown, ArrowLeft, ShoppingCart, Check, Search } from "lucide-react";
+import { Filter, ChevronDown, ArrowLeft, ShoppingCart, Check, Search, X } from "lucide-react";
 import { useLocation, Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { AppLayout } from "@/components/AppLayout";
 import { images } from "@/lib/images";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 
 const categoryImageMap: Record<string, string> = {
   "hongsam": images.koreanRedGinsengRoots,
@@ -314,71 +313,84 @@ export default function GiftsPage() {
         )}
       </div>
 
-      <Sheet open={showFilterModal} onOpenChange={setShowFilterModal}>
-        <SheetContent side="bottom" className="rounded-t-2xl max-h-[70vh]">
-          <SheetHeader className="pb-4">
-            <SheetTitle className="text-lg font-bold text-center">필터</SheetTitle>
-          </SheetHeader>
-          <div className="space-y-5 pb-4">
-            <div>
-              <label className="flex items-center gap-3 cursor-pointer">
-                <Checkbox 
-                  checked={filterOnlyDiscount}
-                  onCheckedChange={(checked) => setFilterOnlyDiscount(!!checked)}
-                />
-                <span className="text-sm font-medium">할인 상품만 보기</span>
-              </label>
-            </div>
+      {showFilterModal && (
+        <>
+          <div 
+            className="absolute inset-0 bg-black/50 z-40"
+            onClick={() => setShowFilterModal(false)}
+          />
+          <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl z-50 animate-in slide-in-from-bottom duration-300">
+            <div className="relative p-4">
+              <button 
+                onClick={() => setShowFilterModal(false)}
+                className="absolute top-4 right-4 p-1 hover:bg-gray-100 rounded-full"
+              >
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
+              <h3 className="text-lg font-bold text-center mb-4">필터</h3>
+              
+              <div className="space-y-5 pb-4">
+                <div>
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <Checkbox 
+                      checked={filterOnlyDiscount}
+                      onCheckedChange={(checked) => setFilterOnlyDiscount(!!checked)}
+                    />
+                    <span className="text-sm font-medium">할인 상품만 보기</span>
+                  </label>
+                </div>
 
-            <div>
-              <h4 className="text-sm font-medium mb-3">가격대</h4>
-              <div className="flex flex-wrap gap-2">
-                {priceOptions.map(option => (
-                  <button
-                    key={option.value}
-                    className={`px-3 py-1.5 rounded-full text-sm border transition-colors ${
-                      filterPriceOption === option.value
-                        ? "bg-primary text-white border-primary"
-                        : "bg-white text-gray-600 border-gray-200 hover:border-gray-300"
-                    }`}
-                    onClick={() => setFilterPriceOption(option.value)}
-                  >
-                    {option.label}
-                  </button>
-                ))}
+                <div>
+                  <h4 className="text-sm font-medium mb-3">가격대</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {priceOptions.map(option => (
+                      <button
+                        key={option.value}
+                        className={`px-3 py-1.5 rounded-full text-sm border transition-colors ${
+                          filterPriceOption === option.value
+                            ? "bg-primary text-white border-primary"
+                            : "bg-white text-gray-600 border-gray-200 hover:border-gray-300"
+                        }`}
+                        onClick={() => setFilterPriceOption(option.value)}
+                      >
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="text-sm font-medium mb-3">최소 평점</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {[0, 3, 3.5, 4, 4.5].map(rating => (
+                      <button
+                        key={rating}
+                        className={`px-3 py-1.5 rounded-full text-sm border transition-colors ${
+                          filterMinRating === rating 
+                            ? "bg-primary text-white border-primary" 
+                            : "bg-white text-gray-600 border-gray-200 hover:border-gray-300"
+                        }`}
+                        onClick={() => setFilterMinRating(rating)}
+                      >
+                        {rating === 0 ? "전체" : `${rating}★ 이상`}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
-            </div>
 
-            <div>
-              <h4 className="text-sm font-medium mb-3">최소 평점</h4>
-              <div className="flex flex-wrap gap-2">
-                {[0, 3, 3.5, 4, 4.5].map(rating => (
-                  <button
-                    key={rating}
-                    className={`px-3 py-1.5 rounded-full text-sm border transition-colors ${
-                      filterMinRating === rating 
-                        ? "bg-primary text-white border-primary" 
-                        : "bg-white text-gray-600 border-gray-200 hover:border-gray-300"
-                    }`}
-                    onClick={() => setFilterMinRating(rating)}
-                  >
-                    {rating === 0 ? "전체" : `${rating}★ 이상`}
-                  </button>
-                ))}
+              <div className="flex gap-2 pt-2 pb-4">
+                <Button variant="outline" className="flex-1" onClick={resetFilters}>
+                  초기화
+                </Button>
+                <Button className="flex-1" onClick={() => setShowFilterModal(false)}>
+                  적용하기
+                </Button>
               </div>
             </div>
           </div>
-
-          <div className="flex gap-2 pt-2 pb-4">
-            <Button variant="outline" className="flex-1" onClick={resetFilters}>
-              초기화
-            </Button>
-            <Button className="flex-1" onClick={() => setShowFilterModal(false)}>
-              적용하기
-            </Button>
-          </div>
-        </SheetContent>
-      </Sheet>
+        </>
+      )}
     </AppLayout>
   );
 }
