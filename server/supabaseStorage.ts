@@ -67,6 +67,27 @@ export class SupabaseStorageService {
       throw new Error(`Failed to delete object: ${error.message}`);
     }
   }
+
+  async uploadBuffer(buffer: Buffer, fileName: string, contentType: string, folder: string = "images"): Promise<string> {
+    const objectId = randomUUID();
+    const extension = fileName.split('.').pop() || '';
+    const objectName = extension ? `${objectId}.${extension}` : objectId;
+    const fullPath = `${folder}/${objectName}`;
+    
+    const { data, error } = await supabase.storage
+      .from(BUCKET_NAME)
+      .upload(fullPath, buffer, {
+        contentType,
+        upsert: true
+      });
+
+    if (error) {
+      throw new Error(`Failed to upload file: ${error.message}`);
+    }
+
+    const publicUrl = `${supabaseUrl}/storage/v1/object/public/${BUCKET_NAME}/${fullPath}`;
+    return publicUrl;
+  }
 }
 
 export const supabaseStorageService = new SupabaseStorageService();

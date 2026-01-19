@@ -1,7 +1,35 @@
 import type { Express, Request, Response } from "express";
 import { supabaseStorageService } from "../supabaseStorage";
+import multer from "multer";
+
+const upload = multer({ 
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 } // 10MB
+});
 
 export function registerSupabaseStorageRoutes(app: Express): void {
+  // Direct file upload endpoint
+  app.post("/api/upload", upload.single("file"), async (req: Request, res: Response) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: "No file provided" });
+      }
+      
+      const folder = (req.body.folder as string) || "images";
+      const url = await supabaseStorageService.uploadBuffer(
+        req.file.buffer,
+        req.file.originalname,
+        req.file.mimetype,
+        folder
+      );
+      
+      res.json({ url });
+    } catch (error) {
+      console.error("Upload error:", error);
+      res.status(500).json({ error: "Failed to upload file" });
+    }
+  });
+
   app.post("/api/uploads/request-url", async (req: Request, res: Response) => {
     try {
       const { name, contentType } = req.body;
