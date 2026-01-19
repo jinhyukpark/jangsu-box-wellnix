@@ -5,10 +5,13 @@ export function useDragScroll<T extends HTMLElement>() {
   const isDragging = useRef(false);
   const startX = useRef(0);
   const scrollLeft = useRef(0);
+  const hasMoved = useRef(false);
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     if (!scrollRef.current) return;
+    e.preventDefault();
     isDragging.current = true;
+    hasMoved.current = false;
     scrollRef.current.style.cursor = "grabbing";
     scrollRef.current.style.userSelect = "none";
     startX.current = e.pageX - scrollRef.current.offsetLeft;
@@ -18,6 +21,7 @@ export function useDragScroll<T extends HTMLElement>() {
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     if (!isDragging.current || !scrollRef.current) return;
     e.preventDefault();
+    hasMoved.current = true;
     const x = e.pageX - scrollRef.current.offsetLeft;
     const walk = (x - startX.current) * 1.5;
     scrollRef.current.scrollLeft = scrollLeft.current - walk;
@@ -46,10 +50,18 @@ export function useDragScroll<T extends HTMLElement>() {
     }
   }, []);
 
+  const handleDragStart = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+  }, []);
+
   useEffect(() => {
     const el = scrollRef.current;
     if (el) {
       el.style.cursor = "grab";
+      const images = el.querySelectorAll("img");
+      images.forEach((img) => {
+        img.draggable = false;
+      });
     }
   }, []);
 
@@ -61,6 +73,7 @@ export function useDragScroll<T extends HTMLElement>() {
       onMouseUp: handleMouseUp,
       onMouseLeave: handleMouseLeave,
       onWheel: handleWheel,
+      onDragStart: handleDragStart,
     },
   };
 }

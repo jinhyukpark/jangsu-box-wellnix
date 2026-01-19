@@ -25,7 +25,8 @@ export function ProductCard({ id, name, price, originalPrice, image, rating, rev
         <img 
           src={image} 
           alt={name}
-          className="w-full aspect-square object-cover group-hover:scale-105 transition-transform duration-300"
+          draggable={false}
+          className="w-full aspect-square object-cover group-hover:scale-105 transition-transform duration-300 select-none pointer-events-none"
         />
         {badge && (
           <span className="absolute top-2 left-2 bg-primary text-white text-xs font-semibold px-2 py-1 rounded-lg">

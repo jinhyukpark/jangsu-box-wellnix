@@ -108,7 +108,8 @@ export function EventSection() {
                 <img 
                   src={event.image || images.seniorsHealthTourEvent} 
                   alt={event.title}
-                  className="w-full h-full object-cover"
+                  draggable={false}
+                  className="w-full h-full object-cover select-none pointer-events-none"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                 <div className="absolute bottom-3 left-3 right-3">
