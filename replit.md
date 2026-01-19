@@ -72,7 +72,7 @@ Middleware (`server/middleware.ts`):
 ## External Dependencies
 
 ### Database
-- **PostgreSQL**: Primary database (requires `DATABASE_URL` environment variable)
+- **Supabase PostgreSQL**: Primary database (requires `SUPABASE_DATABASE_URL` environment variable)
 - **Drizzle ORM**: Type-safe database queries and schema management
 
 ### UI Components

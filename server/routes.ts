@@ -30,7 +30,8 @@ export async function registerRoutes(
 ): Promise<Server> {
   const PgSession = connectPgSimple(session);
   const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
+    connectionString: process.env.SUPABASE_DATABASE_URL,
+    ssl: { rejectUnauthorized: false },
   });
 
   app.use(
