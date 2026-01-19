@@ -16,6 +16,25 @@ The frontend is a mobile-first React application styled as a 430px-max-width mob
 
 - **Communication style**: Simple, everyday language (Korean)
 
+### CRITICAL: Mobile-First UX Guidelines
+**This is a mobile app (430px max-width). All UX must follow mobile patterns:**
+
+1. **All Events Within App Container**: 
+   - All modals, popups, dialogs, sheets MUST appear within the 430px app container
+   - ❌ DO NOT use `fixed inset-0` for modals - they will appear outside the app
+   - ✅ Use bottom Sheet components that stay within the app container
+   - ✅ Use the modified Sheet component with `side="bottom"` for mobile-friendly popups
+
+2. **Mobile-Friendly Interaction Patterns**:
+   - Use bottom sheets instead of center modals
+   - Touch-friendly button sizes (min 44px tap targets)
+   - Swipe-to-dismiss where appropriate
+   - No hover-only interactions
+
+3. **Fixed Elements Positioning**:
+   - All fixed bottom bars must use `max-w-[430px]` and center positioning
+   - Example: `fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px]`
+
 ### CRITICAL: External Services Only (Supabase)
 **DO NOT use any Replit built-in services. Use ONLY Supabase for all data storage:**
 

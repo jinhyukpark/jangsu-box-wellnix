@@ -5,6 +5,7 @@ import { AppLayout } from "@/components/AppLayout";
 import { images } from "@/lib/images";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 
 const giftBoxImage = images.premiumKoreanHealthGiftBox;
 const happySeniorsImage = images.happySeniorsReceivingGift;
@@ -299,48 +300,48 @@ function LoginForm({ onLogin, isLoading }: { onLogin: (email: string, password: 
         </div>
       )}
 
-      {showForgotPassword && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-[380px] shadow-xl">
-            <h3 className="text-lg font-bold text-gray-900 mb-2 text-center">비밀번호 찾기</h3>
-            <p className="text-sm text-gray-500 mb-4 text-center">
-              가입한 이메일을 입력하시면<br />비밀번호 재설정 링크를 보내드립니다.
-            </p>
-            <form onSubmit={handleForgotPassword} className="space-y-4">
-              <div>
-                <label className="block text-xs text-gray-500 mb-1">이메일</label>
-                <input
-                  type="email"
-                  value={resetEmail}
-                  onChange={(e) => setResetEmail(e.target.value)}
-                  placeholder="example@email.com"
-                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                  data-testid="input-reset-email"
-                />
-              </div>
-              <button
-                type="submit"
-                disabled={isResetting}
-                className="w-full py-3.5 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
-                data-testid="btn-reset-submit"
-              >
-                {isResetting ? <Loader2 className="w-5 h-5 animate-spin" /> : null}
-                {isResetting ? "전송 중..." : "재설정 링크 보내기"}
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setShowForgotPassword(false);
-                  setResetEmail("");
-                }}
-                className="w-full py-2 text-sm text-gray-500 hover:text-gray-700"
-              >
-                취소
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
+      <Sheet open={showForgotPassword} onOpenChange={setShowForgotPassword}>
+        <SheetContent side="bottom" className="rounded-t-2xl">
+          <SheetHeader className="pb-4">
+            <SheetTitle className="text-lg font-bold text-center">비밀번호 찾기</SheetTitle>
+          </SheetHeader>
+          <p className="text-sm text-gray-500 mb-4 text-center">
+            가입한 이메일을 입력하시면<br />비밀번호 재설정 링크를 보내드립니다.
+          </p>
+          <form onSubmit={handleForgotPassword} className="space-y-4">
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">이메일</label>
+              <input
+                type="email"
+                value={resetEmail}
+                onChange={(e) => setResetEmail(e.target.value)}
+                placeholder="example@email.com"
+                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                data-testid="input-reset-email"
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={isResetting}
+              className="w-full py-3.5 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+              data-testid="btn-reset-submit"
+            >
+              {isResetting ? <Loader2 className="w-5 h-5 animate-spin" /> : null}
+              {isResetting ? "전송 중..." : "재설정 링크 보내기"}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setShowForgotPassword(false);
+                setResetEmail("");
+              }}
+              className="w-full py-2 text-sm text-gray-500 hover:text-gray-700"
+            >
+              취소
+            </button>
+          </form>
+        </SheetContent>
+      </Sheet>
 
       <div className="text-center">
         <p className="text-xs text-gray-400">
