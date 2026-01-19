@@ -847,3 +847,44 @@ export const eventParticipantsRelations = relations(eventParticipants, ({ one })
     references: [members.id],
   }),
 }));
+
+// ============================================================================
+// 최근 검색어 (Recent Searches) - 로그인 사용자별 저장
+// ============================================================================
+
+export const recentSearches = pgTable("recent_searches", {
+  id: serial("id").primaryKey(),
+  memberId: integer("member_id").references(() => members.id).notNull(),
+  keyword: varchar("keyword", { length: 100 }).notNull(),
+  searchedAt: timestamp("searched_at").defaultNow(),
+});
+
+export const insertRecentSearchSchema = createInsertSchema(recentSearches).omit({
+  id: true,
+  searchedAt: true,
+});
+
+export type InsertRecentSearch = z.infer<typeof insertRecentSearchSchema>;
+export type RecentSearch = typeof recentSearches.$inferSelect;
+
+// ============================================================================
+// 인기 검색어 (Popular Keywords) - 관리자가 설정
+// ============================================================================
+
+export const popularKeywords = pgTable("popular_keywords", {
+  id: serial("id").primaryKey(),
+  keyword: varchar("keyword", { length: 100 }).notNull(),
+  displayOrder: integer("display_order").default(0),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertPopularKeywordSchema = createInsertSchema(popularKeywords).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertPopularKeyword = z.infer<typeof insertPopularKeywordSchema>;
+export type PopularKeyword = typeof popularKeywords.$inferSelect;

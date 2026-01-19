@@ -1,6 +1,6 @@
 import { 
   Package, Users, Gift, Calendar, CreditCard, Truck, MessageSquare, 
-  HelpCircle, Settings, ShieldCheck, Award, Home, Sparkles
+  HelpCircle, Settings, ShieldCheck, Award, Home, Sparkles, Search
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -18,6 +18,7 @@ export const adminMenuItems: AdminMenuItem[] = [
   { id: "brands", label: "브랜드 관리", icon: Award },
   { id: "subscription", label: "장수박스 관리", icon: Gift },
   { id: "promotions", label: "이벤트관 관리", icon: Sparkles },
+  { id: "search", label: "검색 관리", icon: Search },
   { id: "events", label: "행사 관리", icon: Calendar },
   { id: "payments", label: "결제 관리", icon: CreditCard },
   { id: "shipping", label: "배송 관리", icon: Truck },
