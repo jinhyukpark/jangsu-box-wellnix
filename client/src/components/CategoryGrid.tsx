@@ -24,13 +24,11 @@ export function CategoryGrid() {
   return (
     <div className="px-4 py-5">
       <div className="grid grid-cols-5 gap-3">
-        {categories.map((cat, index) => {
-          return (
+        {categories.map((cat) => (
             <button
               key={cat.label}
               data-testid={`category-${cat.label}`}
-              className="flex flex-col items-center gap-2 group animate-fade-in"
-              style={{ animationDelay: `${index * 50}ms` }}
+              className="flex flex-col items-center gap-2 group"
               onClick={handleCategoryClick}
             >
               <div className="w-14 h-14 rounded-full overflow-hidden bg-gray-50 flex items-center justify-center transition-all duration-200 group-hover:scale-105 group-hover:shadow-md">
@@ -42,8 +40,7 @@ export function CategoryGrid() {
               </div>
               <span className="text-xs font-medium text-gray-700">{cat.label}</span>
             </button>
-          );
-        })}
+        ))}
       </div>
     </div>
   );
