@@ -954,12 +954,13 @@ export default function AdminPage() {
 
   const openEditCategoryModal = (category: any) => {
     setEditingCategory(category);
+    const existingImage = category.image || categoryImageMap[category.slug] || "";
     setCategoryForm({
       name: category.name || "",
       slug: category.slug || "",
       displayOrder: category.displayOrder || 0,
       isActive: category.isActive ?? true,
-      image: category.image || ""
+      image: existingImage
     });
     setIsCategoryModalOpen(true);
   };
