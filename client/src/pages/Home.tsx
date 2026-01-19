@@ -133,7 +133,7 @@ export default function Home() {
         <Header />
       </div>
       
-      <div className="pb-20">
+      <div>
         <HeroBanner />
         
         <CategoryGrid />
