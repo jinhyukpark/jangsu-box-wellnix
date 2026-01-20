@@ -1,13 +1,13 @@
 import { useState, useEffect, useRef, type ChangeEvent } from "react";
 import { useLocation, useRoute } from "wouter";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Menu, X, Upload, Trash2 } from "lucide-react";
-import { adminMenuItems } from "@/lib/adminMenu";
+import { ArrowLeft, Upload, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useUpload } from "@/hooks/use-upload";
+import { AdminLayout } from "@/components/AdminLayout";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,8 +19,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import type { Event } from "@shared/schema";
-
-const menuItems = adminMenuItems;
 
 interface ScheduleItem {
   time: string;
@@ -53,7 +51,6 @@ export default function AdminEventFormPage() {
   const isEditing = !!eventId;
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
   const initialFormRef = useRef<string>("");
@@ -296,9 +293,11 @@ export default function AdminEventFormPage() {
 
   if (isEditing && eventLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <p className="text-gray-500">로딩중...</p>
-      </div>
+      <AdminLayout activeTab="events" onNavigate={handleNavigate}>
+        <div className="flex items-center justify-center h-screen">
+          <p className="text-gray-500">로딩중...</p>
+        </div>
+      </AdminLayout>
     );
   }
 
@@ -324,43 +323,8 @@ export default function AdminEventFormPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      {/* Sidebar */}
-      <div className={`fixed inset-y-0 left-0 bg-white border-r border-gray-200 z-50 transition-all duration-300 ${
-        sidebarOpen ? "w-64" : "w-20"
-      }`}>
-        <div className="flex items-center justify-between p-4 border-b border-gray-100 h-16">
-          {sidebarOpen ? (
-            <h1 className="text-xl font-bold text-primary">웰닉스 관리자</h1>
-          ) : (
-            <span className="text-xl font-bold text-primary mx-auto">W</span>
-          )}
-          <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-1 rounded hover:bg-gray-100">
-            {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
-        </div>
-
-        <nav className="p-4 space-y-1">
-          {menuItems.map((item) => (
-            <button
-              key={item.id}
-              onClick={() => handleNavigate(`/admin?tab=${item.id}`)}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
-                item.id === "events" 
-                  ? "bg-primary text-white" 
-                  : "text-gray-600 hover:bg-gray-100"
-              }`}
-            >
-              <item.icon className="w-5 h-5 flex-shrink-0" />
-              {sidebarOpen && <span className="font-medium">{item.label}</span>}
-            </button>
-          ))}
-        </nav>
-      </div>
-
-      {/* Main Content */}
-      <div className={`flex-1 transition-all duration-300 ${sidebarOpen ? "ml-64" : "ml-20"}`}>
-        <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
+    <AdminLayout activeTab="events" onNavigate={handleNavigate}>
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
           <div className="max-w-4xl mx-auto px-6 py-4 flex items-center gap-4">
             <button onClick={() => handleNavigate("/admin?tab=events")} className="p-2 hover:bg-gray-100 rounded-lg">
               <ArrowLeft className="w-5 h-5 text-gray-600" />
@@ -710,7 +674,6 @@ export default function AdminEventFormPage() {
           </div>
         </div>
       </main>
-      </div>
 
       <AlertDialog open={!!pendingNavigation} onOpenChange={() => setPendingNavigation(null)}>
         <AlertDialogContent>
@@ -726,6 +689,6 @@ export default function AdminEventFormPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </AdminLayout>
   );
 }

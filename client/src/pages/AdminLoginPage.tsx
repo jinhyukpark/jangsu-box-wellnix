@@ -47,11 +47,12 @@ export default function AdminLoginPage() {
         description: "관리자 페이지로 이동합니다.",
       });
       setLocation("/admin");
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "이메일과 비밀번호를 확인해주세요.";
       toast({
         variant: "destructive",
         title: "로그인 실패",
-        description: error.message || "이메일과 비밀번호를 확인해주세요.",
+        description: message,
       });
     }
   };

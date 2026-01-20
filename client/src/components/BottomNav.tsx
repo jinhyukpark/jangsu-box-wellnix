@@ -1,6 +1,5 @@
 import { Home, Gift, Package, Calendar, User } from "lucide-react";
 import { useLocation } from "wouter";
-import { useQueryClient } from "@tanstack/react-query";
 
 const navItems = [
   { icon: Home, label: "홈", path: "/" },
@@ -12,15 +11,11 @@ const navItems = [
 
 export function BottomNav() {
   const [location, setLocation] = useLocation();
-  const queryClient = useQueryClient();
 
+  // React Query의 staleTime이 데이터 신선도를 관리하므로
+  // 네비게이션 시 전체 캐시 무효화 불필요
   const handleNavClick = (path: string) => {
     setLocation(path);
-    // 네비게이션 후 모든 쿼리 무효화 및 즉시 리페치
-    setTimeout(() => {
-      queryClient.invalidateQueries();
-      queryClient.refetchQueries();
-    }, 50);
   };
 
   return (

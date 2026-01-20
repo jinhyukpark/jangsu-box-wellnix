@@ -2,12 +2,12 @@ import { useState, useEffect, useRef } from "react";
 import { useParams, useLocation } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import MDEditor from "@uiw/react-md-editor";
-import { 
-  ChevronLeft, Save, Eye, Image, Video, Link, Plus, Trash2, Star, 
-  MessageSquare, X, Upload, Menu, MoreHorizontal, Pencil
+import {
+  ChevronLeft, Save, Eye, Image, Video, Link, Plus, Trash2, Star,
+  MessageSquare, Upload, MoreHorizontal, Pencil, X
 } from "lucide-react";
-import { adminMenuItems } from "@/lib/adminMenu";
 import { Button } from "@/components/ui/button";
+import { AdminLayout } from "@/components/AdminLayout";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -85,8 +85,6 @@ interface Category {
   slug: string;
 }
 
-const menuItems = adminMenuItems;
-
 const defaultProduct: Product = {
   name: "",
   shortDescription: "",
@@ -124,7 +122,6 @@ export default function AdminProductFormPage() {
   const [newImageUrl, setNewImageUrl] = useState("");
   const [replyingReviewId, setReplyingReviewId] = useState<number | null>(null);
   const [replyContents, setReplyContents] = useState<Record<number, string>>({});
-  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [editingReviewId, setEditingReviewId] = useState<number | null>(null);
   const [editReviewContent, setEditReviewContent] = useState("");
   const [editingReplyId, setEditingReplyId] = useState<number | null>(null);
@@ -335,43 +332,8 @@ export default function AdminProductFormPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      {/* Sidebar */}
-      <div className={`fixed inset-y-0 left-0 bg-white border-r border-gray-200 z-50 transition-all duration-300 ${
-        sidebarOpen ? "w-64" : "w-20"
-      }`}>
-        <div className="flex items-center justify-between p-4 border-b border-gray-100 h-16">
-          {sidebarOpen ? (
-            <h1 className="text-xl font-bold text-primary">웰닉스 관리자</h1>
-          ) : (
-            <span className="text-xl font-bold text-primary mx-auto">W</span>
-          )}
-          <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-1 rounded hover:bg-gray-100">
-            {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
-        </div>
-
-        <nav className="p-4 space-y-1">
-          {menuItems.map((item) => (
-            <button
-              key={item.id}
-              onClick={() => handleNavigate(`/admin?tab=${item.id}`)}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
-                item.id === "products" 
-                  ? "bg-primary text-white" 
-                  : "text-gray-600 hover:bg-gray-100"
-              }`}
-            >
-              <item.icon className="w-5 h-5 flex-shrink-0" />
-              {sidebarOpen && <span className="font-medium">{item.label}</span>}
-            </button>
-          ))}
-        </nav>
-      </div>
-
-      {/* Main Content */}
-      <div className={`flex-1 transition-all duration-300 ${sidebarOpen ? "ml-64" : "ml-20"}`}>
-        <div className="sticky top-0 z-40 bg-white border-b border-gray-200 shadow-sm">
+    <AdminLayout activeTab="products" onNavigate={handleNavigate}>
+      <div className="sticky top-0 z-40 bg-white border-b border-gray-200 shadow-sm">
           <div className="px-6 py-3 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <button 
@@ -1112,7 +1074,6 @@ export default function AdminProductFormPage() {
           </TabsContent>
         </Tabs>
         </div>
-      </div>
 
       <AlertDialog open={!!pendingNavigation} onOpenChange={() => setPendingNavigation(null)}>
         <AlertDialogContent>
@@ -1128,6 +1089,6 @@ export default function AdminProductFormPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </AdminLayout>
   );
 }

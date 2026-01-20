@@ -261,14 +261,28 @@ async function seed() {
     },
   ]);
 
+  // Supabase 이미지 URL 생성 함수
+  const SUPABASE_URL = "https://iquuynjyrvsnpvpijbql.supabase.co";
+  const getImageUrl = (filename: string) =>
+    `${SUPABASE_URL}/storage/v1/object/public/_public/images/${filename}`;
+
   await db.insert(promotions).values([
     {
       slug: "seol-gift",
-      title: "설 선물세트",
+      title: "2026 설 선물세트",
       subtitle: "새해 첫 선물로, 특별함과 다양함을 담은 세트를 추천해요.",
       description: "부모님께 전하는 건강한 설 선물",
       period: "1. 12(월) ~ 2. 27(목)",
-      heroImage: "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=600",
+      heroImage: getImageUrl("luxury_korean_health_gift_set.png"),
+      bannerImages: [
+        getImageUrl("luxury_korean_health_gift_set.png"),
+        getImageUrl("premium_luxury_gift_box.png"),
+      ],
+      benefits: [
+        { title: "얼리버드 혜택", description: "1.12 ~ 1.29 기간 주문 시 추가 할인" },
+        { title: "보자기 포장 제공", description: "100% 국내산 보자기 포장 제공" },
+        { title: "세뱃돈 봉투 3종", description: "프리미엄 세트 구매 시 증정" },
+      ],
       isActive: true,
       displayOrder: 1,
     },
@@ -278,7 +292,16 @@ async function seed() {
       subtitle: "매월 정기 배송되는 프리미엄 건강 선물 세트",
       description: "부모님의 건강을 매달 챙겨드립니다",
       period: "매월 정기 배송",
-      heroImage: "https://images.unsplash.com/photo-1513201099705-a9746e1e201f?w=600",
+      heroImage: getImageUrl("happy_seniors_opening_gift_box.png"),
+      bannerImages: [
+        getImageUrl("happy_seniors_opening_gift_box.png"),
+        getImageUrl("korean_health_gift_set.png"),
+      ],
+      benefits: [
+        { title: "정기 배송 할인", description: "매월 10% 추가 할인 적용" },
+        { title: "무료 배송", description: "전 상품 무료 배송" },
+        { title: "구독 선물", description: "3개월 구독 시 건강즙 세트 증정" },
+      ],
       isActive: true,
       displayOrder: 2,
     },
@@ -288,7 +311,14 @@ async function seed() {
       subtitle: "건강한 여행을 위한 필수 아이템",
       description: "여행길에도 건강을 챙기세요",
       period: "상시 진행",
-      heroImage: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=600",
+      heroImage: getImageUrl("korean_temple_autumn_travel.png"),
+      bannerImages: [
+        getImageUrl("korean_temple_autumn_travel.png"),
+      ],
+      benefits: [
+        { title: "휴대용 세트", description: "여행에 편리한 휴대용 포장" },
+        { title: "여행 할인", description: "여행 시즌 특별 할인" },
+      ],
       isActive: true,
       displayOrder: 3,
     },
@@ -298,7 +328,15 @@ async function seed() {
       subtitle: "고객님들이 가장 많이 찾는 베스트셀러",
       description: "믿고 구매하는 인기 상품",
       period: "실시간 인기 순위",
-      heroImage: "https://images.unsplash.com/photo-1505576399279-565b52d4ac71?w=600",
+      heroImage: getImageUrl("korean_red_ginseng_roots.png"),
+      bannerImages: [
+        getImageUrl("korean_red_ginseng_roots.png"),
+        getImageUrl("vitamin_supplements_pills.png"),
+      ],
+      benefits: [
+        { title: "베스트셀러", description: "검증된 인기 상품만 모았습니다" },
+        { title: "고객 후기", description: "수천 건의 실제 구매 후기" },
+      ],
       isActive: true,
       displayOrder: 4,
     },

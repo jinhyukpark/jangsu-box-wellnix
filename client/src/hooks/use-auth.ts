@@ -88,7 +88,11 @@ export function useAuth() {
     mutationFn: logout,
     onSuccess: () => {
       queryClient.setQueryData(["auth", "me"], null);
-      queryClient.invalidateQueries();
+      // 사용자 관련 쿼리만 무효화 (관리자 쿼리 영향 방지)
+      queryClient.invalidateQueries({ queryKey: ["auth"] });
+      queryClient.invalidateQueries({ queryKey: ["cart"] });
+      queryClient.invalidateQueries({ queryKey: ["orders"] });
+      queryClient.invalidateQueries({ queryKey: ["wishlist"] });
     },
   });
 

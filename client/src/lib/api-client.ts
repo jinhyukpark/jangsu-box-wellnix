@@ -3,7 +3,10 @@
  * Base URL은 환경 변수로 설정하여 개발/운영 환경 분리
  */
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
+// 개발 환경에서는 Vite 프록시 사용 (상대 경로), 프로덕션에서는 환경변수 사용
+const API_BASE_URL = import.meta.env.PROD
+  ? (import.meta.env.VITE_API_BASE_URL || '/api')
+  : '/api';
 
 interface ApiRequestOptions extends RequestInit {
   params?: Record<string, string | number | boolean>;
@@ -20,15 +23,17 @@ class ApiClient {
    * Build URL with query parameters
    */
   private buildURL(endpoint: string, params?: Record<string, string | number | boolean>): string {
-    const url = new URL(`${this.baseURL}${endpoint}`);
-    
-    if (params) {
+    let urlString = `${this.baseURL}${endpoint}`;
+
+    if (params && Object.keys(params).length > 0) {
+      const searchParams = new URLSearchParams();
       Object.entries(params).forEach(([key, value]) => {
-        url.searchParams.append(key, String(value));
+        searchParams.append(key, String(value));
       });
+      urlString += `?${searchParams.toString()}`;
     }
-    
-    return url.toString();
+
+    return urlString;
   }
 
   /**
@@ -58,7 +63,6 @@ class ApiClient {
 
       return await response.json();
     } catch (error) {
-      console.error('API Request Error:', error);
       throw error;
     }
   }

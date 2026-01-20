@@ -1,4 +1,4 @@
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { AppDialog, AppDialogContent } from "@/components/ui/app-dialog";
 import { Button } from "@/components/ui/button";
 import { Phone, MessageCircle, Clock, Heart, Shield, Truck, Award, X } from "lucide-react";
 
@@ -9,8 +9,8 @@ interface CustomerServicePopupProps {
 
 export function CustomerServicePopup({ open, onClose }: CustomerServicePopupProps) {
   return (
-    <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) onClose(); }}>
-      <DialogContent className="sm:max-w-[400px] p-0 overflow-hidden bg-white rounded-2xl">
+    <AppDialog open={open} onOpenChange={(isOpen) => { if (!isOpen) onClose(); }}>
+      <AppDialogContent className="max-w-[400px] p-0 overflow-hidden bg-white rounded-2xl">
         <div className="relative">
           <div className="bg-gradient-to-br from-primary to-primary/80 text-white p-6 pb-8">
             <button 
@@ -97,7 +97,7 @@ export function CustomerServicePopup({ open, onClose }: CustomerServicePopupProp
             </div>
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
+      </AppDialogContent>
+    </AppDialog>
   );
 }
