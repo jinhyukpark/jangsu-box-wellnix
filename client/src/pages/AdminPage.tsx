@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { 
-  ChevronRight, Search, Bell, LogOut, Menu, X,
-  TrendingUp, ShoppingBag, UserCheck, Clock, Star, Loader2, ShieldX,
-  ArrowUpDown, ArrowUp, ArrowDown, Image, Link2, GripVertical, Upload,
-  Package, Calendar, Award, Gift, HelpCircle
+import {
+  ChevronRight, Search, Bell, X,
+  TrendingUp, ShoppingBag, UserCheck, Clock, Loader2, ShieldX,
+  ArrowUpDown, ArrowUp, ArrowDown, GripVertical, Upload,
+  Award, Gift, HelpCircle
 } from "lucide-react";
+import { AdminLayout } from "@/components/AdminLayout";
 import { adminMenuItems } from "@/lib/adminMenu";
 import { images } from "@/lib/images";
 
@@ -22,8 +23,8 @@ const categoryImageMap: Record<string, string> = {
   "pets": images.cuteDogAndCatTogether,
   "living-goods": images.dailyToiletriesProducts,
 };
-import { useAdminProducts, useAdminCategories, useAdminMembers, useAdminSubscriptions, useAdminSubscriptionPlans, useAdminEvents, useAdminInquiries, useAdminFaqs, useAdminList, useDashboardStats, useCreateProduct, useUpdateProduct, useCreateCategory, useUpdateCategory, useDeleteCategory, useCreateFaq, useUpdateFaq, useDeleteFaq, useCreateSubscriptionPlan, useUpdateSubscriptionPlan, useDeleteSubscriptionPlan, useReorderSubscriptionPlans, useDeleteEvent, useMainPageSettings, useUpdateMainPageSettings, type MainPageSettings } from "@/hooks/use-admin";
-import { useAdminAuth, useAdminLogout } from "@/hooks/use-admin-auth";
+import { useAdminProducts, useAdminCategories, useAdminMembers, useAdminSubscriptions, useAdminSubscriptionPlans, useAdminEvents, useAdminInquiries, useAdminFaqs, useAdminList, useDashboardStats, useCreateProduct, useUpdateProduct, useCreateCategory, useUpdateCategory, useDeleteCategory, useCreateFaq, useUpdateFaq, useDeleteFaq, useCreateSubscriptionPlan, useUpdateSubscriptionPlan, useDeleteSubscriptionPlan, useReorderSubscriptionPlans, useDeleteEvent } from "@/hooks/use-admin";
+import { useAdminAuth } from "@/hooks/use-admin-auth";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -51,525 +52,67 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import type { Product, Category, Event as EventType, SubscriptionPlan, Member, Faq, Promotion } from "@shared/schema";
+import { MainPageSettingsPanel } from "@/components/admin/MainPageSettingsPanel";
 
-const menuItems = adminMenuItems;
+// ============================================================================
+// Types
+// ============================================================================
 
-const mockProducts = [
-  { id: 1, name: "유기농 현미", category: "곡물", price: 25000, stock: 150, status: "판매중" },
-  { id: 2, name: "프리미엄 홍삼 스틱", category: "건강식품", price: 89000, stock: 45, status: "판매중" },
-  { id: 3, name: "국산 검은콩", category: "곡물", price: 18000, stock: 0, status: "품절" },
-  { id: 4, name: "제주 감귤청", category: "음료", price: 32000, stock: 78, status: "판매중" },
-  { id: 5, name: "천연 벌꿀", category: "건강식품", price: 45000, stock: 23, status: "판매중" },
-];
-
-const mockMembers = [
-  { id: 1, name: "김영수", email: "kim@example.com", phone: "010-1234-5678", joinDate: "2025-10-15", status: "활성", subscription: "장수박스", address: "서울시 강남구 테헤란로 123" },
-  { id: 2, name: "이미영", email: "lee@example.com", phone: "010-2345-6789", joinDate: "2025-11-02", status: "활성", subscription: "효심박스", address: "경기도 성남시 분당구 정자동 456" },
-  { id: 3, name: "박철수", email: "park@example.com", phone: "010-3456-7890", joinDate: "2025-12-20", status: "휴면", subscription: "-", address: "부산시 해운대구 우동 789" },
-  { id: 4, name: "최지현", email: "choi@example.com", phone: "010-4567-8901", joinDate: "2026-01-05", status: "활성", subscription: "천수박스", address: "대구시 수성구 범어동 101" },
-];
-
-const mockSubscriptions = [
-  { id: 1, member: "김영수", plan: "장수박스", startDate: "2025-10-15", nextDelivery: "2026-02-01", status: "활성", amount: 159000 },
-  { id: 2, member: "이미영", plan: "효심박스", startDate: "2025-11-02", nextDelivery: "2026-02-01", status: "활성", amount: 89000 },
-  { id: 3, member: "최지현", plan: "천수박스", startDate: "2026-01-05", nextDelivery: "2026-02-05", status: "활성", amount: 289000 },
-  { id: 4, member: "정민호", plan: "장수박스", startDate: "2025-08-10", nextDelivery: "-", status: "해지", amount: 159000 },
-];
-
-const mockEvents = [
-  { 
-    id: 1, 
-    title: "2026 건강한 설맞이 특별 세미나", 
-    date: "2026-01-25", 
-    location: "서울 강남구", 
-    participants: 127, 
-    max: 150, 
-    status: "모집중",
-    description: "설 명절을 맞이하여 부모님 건강 관리 비법과 명절 증후군 예방 스트레칭을 배우는 특별 세미나입니다.",
-    participantList: [
-      { name: "김영수", phone: "010-1234-5678", status: "신청완료" },
-      { name: "이미영", phone: "010-2345-6789", status: "신청완료" },
-      { name: "박철수", phone: "010-3456-7890", status: "취소" },
-    ]
-  },
-  { 
-    id: 2, 
-    title: "시니어 요가 & 명상 클래스", 
-    date: "2026-02-05", 
-    location: "온라인 ZOOM", 
-    participants: 89, 
-    max: 100, 
-    status: "모집중",
-    description: "집에서 쉽게 따라할 수 있는 시니어 맞춤 요가와 마음의 평화를 찾는 명상 클래스입니다.",
-    participantList: [
-      { name: "최지현", phone: "010-4567-8901", status: "신청완료" },
-    ]
-  },
-  { 
-    id: 3, 
-    title: "홍삼 건강법 특강", 
-    date: "2026-03-15", 
-    location: "부산 해운대", 
-    participants: 80, 
-    max: 80, 
-    status: "마감",
-    description: "홍삼의 효능과 올바른 섭취 방법에 대해 알아보는 건강 특강입니다.",
-    participantList: []
-  },
-];
-
-const mockPayments = [
-  { id: "PAY-20260112-001", member: "김영수", amount: 159000, method: "카드", status: "완료", date: "2026-01-12" },
-  { id: "PAY-20260111-002", member: "이미영", amount: 89000, method: "카드", status: "완료", date: "2026-01-11" },
-  { id: "PAY-20260110-003", member: "최지현", amount: 289000, method: "계좌이체", status: "완료", date: "2026-01-10" },
-  { id: "PAY-20260109-004", member: "박민수", amount: 45000, method: "카드", status: "환불", date: "2026-01-09" },
-];
-
-const mockShipping = [
-  { id: "SHP-20260112-001", member: "김영수", address: "서울시 강남구 테헤란로 123", status: "배송중", trackingNo: "1234567890", date: "2026-01-12" },
-  { id: "SHP-20260111-002", member: "이미영", address: "경기도 성남시 분당구 정자동 456", status: "배송완료", trackingNo: "2345678901", date: "2026-01-11" },
-  { id: "SHP-20260110-003", member: "최지현", address: "부산시 해운대구 우동 789", status: "배송준비", trackingNo: "-", date: "2026-01-10" },
-];
-
-const mockInquiries = [
-  { id: 1, member: "김영수", subject: "배송 지연 문의", category: "배송", status: "답변대기", date: "2026-01-12" },
-  { id: 2, member: "이미영", subject: "구독 해지 방법", category: "구독", status: "답변완료", date: "2026-01-11" },
-  { id: 3, member: "박철수", subject: "상품 교환 요청", category: "교환/반품", status: "처리중", date: "2026-01-10" },
-  { id: 4, member: "최지현", subject: "결제 오류", category: "결제", status: "답변대기", date: "2026-01-09" },
-];
-
-const mockFAQs = [
-  { id: 1, category: "장수박스", question: "장수박스 구독은 어떻게 신청하나요?", status: "게시중" },
-  { id: 2, category: "배송", question: "배송 기간은 얼마나 걸리나요?", status: "게시중" },
-  { id: 3, category: "교환/환불", question: "단순 변심으로 인한 반품이 가능한가요?", status: "게시중" },
-  { id: 4, category: "기타", question: "회원 탈퇴는 어떻게 하나요?", status: "숨김" },
-];
-
-const mockAdmins = [
-  { 
-    id: 1, 
-    name: "최고관리자", 
-    email: "admin@wellnix.com", 
-    role: "슈퍼 관리자", 
-    status: "활성",
-    lastLogin: "2026-01-15 10:30",
-    permissions: ["all"]
-  },
-  { 
-    id: 2, 
-    name: "김철수", 
-    email: "cs@wellnix.com", 
-    role: "CS 매니저", 
-    status: "활성",
-    lastLogin: "2026-01-15 09:15",
-    permissions: ["inquiries", "members", "faq"]
-  },
-  { 
-    id: 3, 
-    name: "이영희", 
-    email: "md@wellnix.com", 
-    role: "MD", 
-    status: "활성",
-    lastLogin: "2026-01-14 18:20",
-    permissions: ["products", "events", "subscription"]
-  },
-];
-
-// Mock data for member details
-const mockMemberHistory = {
-  orders: [
-    { id: "ORD-001", product: "장수박스 1월호", date: "2026-01-12", amount: 159000, status: "배송중" },
-    { id: "ORD-002", product: "프리미엄 홍삼 스틱", date: "2025-12-24", amount: 89000, status: "배송완료" },
-    { id: "ORD-003", product: "유기농 현미 5kg", date: "2025-11-15", amount: 25000, status: "배송완료" },
-  ],
-  reviews: [
-    { id: 1, product: "프리미엄 홍삼 스틱", rating: 5, content: "부모님이 너무 좋아하세요. 포장도 고급스럽고 맛도 진합니다.", date: "2026-01-05" },
-    { id: 2, product: "장수박스 12월호", rating: 4, content: "구성이 알차서 좋았는데 배송이 하루 늦었어요.", date: "2025-12-28" },
-  ],
-  events: [
-    { title: "2026 건강한 설맞이 특별 세미나", date: "2026-01-25", status: "신청완료" },
-    { title: "홍삼 건강법 특강", date: "2025-11-20", status: "참여완료" },
-  ]
-};
-
-function MainPageSettingsPanel({ products, events }: { products: any[], events: any[] }) {
-  const { toast } = useToast();
-  const { data: settings, isLoading } = useMainPageSettings();
-  const updateSettings = useUpdateMainPageSettings();
-  
-  const [localSettings, setLocalSettings] = useState<MainPageSettings>({
-    bestProductsCriteria: "sales",
-    bestProductsManualIds: [],
-    bestProductsLimit: 6,
-    adBannerImage: null,
-    adBannerLink: null,
-    adBannerEnabled: true,
-    newProductsCriteria: "recent",
-    newProductsManualIds: [],
-    newProductsLimit: 6,
-    newProductsDaysThreshold: 30,
-    eventsCriteria: "active",
-    eventsManualIds: [],
-    eventsLimit: 4,
-  });
-
-  const [bestProductSearch, setBestProductSearch] = useState("");
-  const [newProductSearch, setNewProductSearch] = useState("");
-  const [eventSearch, setEventSearch] = useState("");
-
-  useEffect(() => {
-    if (settings) {
-      setLocalSettings(settings);
-    }
-  }, [settings]);
-
-  const handleSave = async () => {
-    try {
-      await updateSettings.mutateAsync(localSettings);
-      toast({ title: "저장 완료", description: "메인 페이지 설정이 저장되었습니다." });
-    } catch (error) {
-      toast({ title: "저장 실패", description: "설정 저장 중 오류가 발생했습니다.", variant: "destructive" });
-    }
-  };
-
-  const toggleProductSelection = (productId: number, field: "bestProductsManualIds" | "newProductsManualIds") => {
-    const currentIds = localSettings[field] || [];
-    if (currentIds.includes(productId)) {
-      setLocalSettings({ ...localSettings, [field]: currentIds.filter(id => id !== productId) });
-    } else {
-      setLocalSettings({ ...localSettings, [field]: [...currentIds, productId] });
-    }
-  };
-
-  const toggleEventSelection = (eventId: number) => {
-    const currentIds = localSettings.eventsManualIds || [];
-    if (currentIds.includes(eventId)) {
-      setLocalSettings({ ...localSettings, eventsManualIds: currentIds.filter(id => id !== eventId) });
-    } else {
-      setLocalSettings({ ...localSettings, eventsManualIds: [...currentIds, eventId] });
-    }
-  };
-
-  if (isLoading) return <div className="text-center py-8 text-gray-500">로딩중...</div>;
-
-  return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-bold text-gray-900">메인 페이지 설정</h2>
-        <Button onClick={handleSave} disabled={updateSettings.isPending}>
-          {updateSettings.isPending ? "저장중..." : "설정 저장"}
-        </Button>
-      </div>
-
-      <div className="space-y-6">
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-            <Star className="w-5 h-5 text-yellow-500" />
-            베스트 상품 설정
-          </h3>
-          <div className="space-y-4">
-            <div>
-              <Label>선택 기준</Label>
-              <Select 
-                value={localSettings.bestProductsCriteria} 
-                onValueChange={(v) => setLocalSettings({ ...localSettings, bestProductsCriteria: v as "sales" | "manual" })}
-              >
-                <SelectTrigger className="w-full mt-1">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="sales">구매순 (자동)</SelectItem>
-                  <SelectItem value="manual">직접 선택</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label>표시 개수</Label>
-              <Input 
-                type="number" 
-                value={localSettings.bestProductsLimit} 
-                onChange={(e) => setLocalSettings({ ...localSettings, bestProductsLimit: parseInt(e.target.value) || 6 })}
-                className="mt-1"
-              />
-            </div>
-            {localSettings.bestProductsCriteria === "manual" && (
-              <div>
-                <Label className="mb-2 block">상품 선택</Label>
-                <Input 
-                  placeholder="상품명으로 검색..."
-                  value={bestProductSearch}
-                  onChange={(e) => setBestProductSearch(e.target.value)}
-                  className="mb-2"
-                />
-                {localSettings.bestProductsManualIds?.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mb-2">
-                    {localSettings.bestProductsManualIds.map(id => {
-                      const product = products?.find((p: any) => p.id === id);
-                      return product ? (
-                        <span key={id} className="inline-flex items-center gap-1 bg-primary/10 text-primary text-xs px-2 py-1 rounded">
-                          {product.name}
-                          <button 
-                            onClick={() => toggleProductSelection(id, "bestProductsManualIds")}
-                            className="hover:text-red-500"
-                          >×</button>
-                        </span>
-                      ) : null;
-                    })}
-                  </div>
-                )}
-                <div className="grid grid-cols-3 gap-2 max-h-48 overflow-y-auto border rounded p-2">
-                  {products?.filter((p: any) => 
-                    p.name.toLowerCase().includes(bestProductSearch.toLowerCase())
-                  ).map((product: any) => (
-                    <label key={product.id} className="flex items-center gap-2 p-2 hover:bg-gray-50 rounded cursor-pointer">
-                      <Checkbox 
-                        checked={localSettings.bestProductsManualIds?.includes(product.id)}
-                        onCheckedChange={() => toggleProductSelection(product.id, "bestProductsManualIds")}
-                      />
-                      <span className="text-sm truncate">{product.name}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-            <Image className="w-5 h-5 text-blue-500" />
-            중간 광고 배너 설정
-          </h3>
-          <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <Checkbox 
-                id="adBannerEnabled"
-                checked={localSettings.adBannerEnabled}
-                onCheckedChange={(checked) => setLocalSettings({ ...localSettings, adBannerEnabled: !!checked })}
-              />
-              <Label htmlFor="adBannerEnabled">광고 배너 활성화</Label>
-            </div>
-            <div>
-              <Label>배너 이미지</Label>
-              <div className="flex gap-2 mt-1">
-                <Input 
-                  value={localSettings.adBannerImage || ""} 
-                  onChange={(e) => setLocalSettings({ ...localSettings, adBannerImage: e.target.value })}
-                  placeholder="이미지 URL 입력"
-                  className="flex-1"
-                />
-                <label className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded cursor-pointer transition-colors text-sm">
-                  <Upload className="w-4 h-4" />
-                  업로드
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={async (e) => {
-                      const file = e.target.files?.[0];
-                      if (!file) return;
-                      const formData = new FormData();
-                      formData.append("file", file);
-                      try {
-                        const res = await fetch("/api/admin/upload", {
-                          method: "POST",
-                          body: formData,
-                          credentials: "include",
-                        });
-                        if (res.ok) {
-                          const { url } = await res.json();
-                          setLocalSettings({ ...localSettings, adBannerImage: url });
-                        }
-                      } catch (error) {
-                        console.error("Upload failed:", error);
-                      }
-                    }}
-                  />
-                </label>
-              </div>
-              {localSettings.adBannerImage && (
-                <div className="mt-2 relative w-full max-w-md h-40 bg-gray-100 rounded overflow-hidden">
-                  <img src={localSettings.adBannerImage} alt="Banner preview" className="w-full h-full object-cover" />
-                </div>
-              )}
-            </div>
-            <div>
-              <Label className="flex items-center gap-1">
-                <Link2 className="w-4 h-4" />
-                배너 링크 URL
-              </Label>
-              <Input 
-                value={localSettings.adBannerLink || ""} 
-                onChange={(e) => setLocalSettings({ ...localSettings, adBannerLink: e.target.value })}
-                placeholder="클릭 시 이동할 URL (예: /subscription)"
-                className="mt-1"
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-            <Package className="w-5 h-5 text-green-500" />
-            신상품 설정
-          </h3>
-          <div className="space-y-4">
-            <div>
-              <Label>선택 기준</Label>
-              <Select 
-                value={localSettings.newProductsCriteria} 
-                onValueChange={(v) => setLocalSettings({ ...localSettings, newProductsCriteria: v as "recent" | "manual" })}
-              >
-                <SelectTrigger className="w-full mt-1">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="recent">최근 등록순 (자동)</SelectItem>
-                  <SelectItem value="manual">직접 선택</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label>표시 개수</Label>
-                <Input 
-                  type="number" 
-                  value={localSettings.newProductsLimit} 
-                  onChange={(e) => setLocalSettings({ ...localSettings, newProductsLimit: parseInt(e.target.value) || 6 })}
-                  className="mt-1"
-                />
-              </div>
-              {localSettings.newProductsCriteria === "recent" && (
-                <div>
-                  <Label>신상품 기준 (일)</Label>
-                  <Input 
-                    type="number" 
-                    value={localSettings.newProductsDaysThreshold} 
-                    onChange={(e) => setLocalSettings({ ...localSettings, newProductsDaysThreshold: parseInt(e.target.value) || 30 })}
-                    className="mt-1"
-                  />
-                </div>
-              )}
-            </div>
-            {localSettings.newProductsCriteria === "manual" && (
-              <div>
-                <Label className="mb-2 block">상품 선택</Label>
-                <Input 
-                  placeholder="상품명으로 검색..."
-                  value={newProductSearch}
-                  onChange={(e) => setNewProductSearch(e.target.value)}
-                  className="mb-2"
-                />
-                {localSettings.newProductsManualIds?.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mb-2">
-                    {localSettings.newProductsManualIds.map(id => {
-                      const product = products?.find((p: any) => p.id === id);
-                      return product ? (
-                        <span key={id} className="inline-flex items-center gap-1 bg-green-100 text-green-700 text-xs px-2 py-1 rounded">
-                          {product.name}
-                          <button 
-                            onClick={() => toggleProductSelection(id, "newProductsManualIds")}
-                            className="hover:text-red-500"
-                          >×</button>
-                        </span>
-                      ) : null;
-                    })}
-                  </div>
-                )}
-                <div className="grid grid-cols-3 gap-2 max-h-48 overflow-y-auto border rounded p-2">
-                  {products?.filter((p: any) => 
-                    p.name.toLowerCase().includes(newProductSearch.toLowerCase())
-                  ).map((product: any) => (
-                    <label key={product.id} className="flex items-center gap-2 p-2 hover:bg-gray-50 rounded cursor-pointer">
-                      <Checkbox 
-                        checked={localSettings.newProductsManualIds?.includes(product.id)}
-                        onCheckedChange={() => toggleProductSelection(product.id, "newProductsManualIds")}
-                      />
-                      <span className="text-sm truncate">{product.name}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-            <Calendar className="w-5 h-5 text-purple-500" />
-            건강 행사 & 일정 설정
-          </h3>
-          <div className="space-y-4">
-            <div>
-              <Label>선택 기준</Label>
-              <Select 
-                value={localSettings.eventsCriteria} 
-                onValueChange={(v) => setLocalSettings({ ...localSettings, eventsCriteria: v as "active" | "manual" })}
-              >
-                <SelectTrigger className="w-full mt-1">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="active">활성화된 행사만 (자동)</SelectItem>
-                  <SelectItem value="manual">직접 선택</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label>표시 개수</Label>
-              <Input 
-                type="number" 
-                value={localSettings.eventsLimit} 
-                onChange={(e) => setLocalSettings({ ...localSettings, eventsLimit: parseInt(e.target.value) || 4 })}
-                className="mt-1"
-              />
-            </div>
-            {localSettings.eventsCriteria === "manual" && (
-              <div>
-                <Label className="mb-2 block">행사 선택</Label>
-                <Input 
-                  placeholder="행사명으로 검색..."
-                  value={eventSearch}
-                  onChange={(e) => setEventSearch(e.target.value)}
-                  className="mb-2"
-                />
-                {localSettings.eventsManualIds?.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mb-2">
-                    {localSettings.eventsManualIds.map(id => {
-                      const event = events?.find((e: any) => e.id === id);
-                      return event ? (
-                        <span key={id} className="inline-flex items-center gap-1 bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded">
-                          {event.title}
-                          <button 
-                            onClick={() => toggleEventSelection(id)}
-                            className="hover:text-red-500"
-                          >×</button>
-                        </span>
-                      ) : null;
-                    })}
-                  </div>
-                )}
-                <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto border rounded p-2">
-                  {events?.filter((e: any) => 
-                    e.title.toLowerCase().includes(eventSearch.toLowerCase())
-                  ).map((event: any) => (
-                    <label key={event.id} className="flex items-center gap-2 p-2 hover:bg-gray-50 rounded cursor-pointer">
-                      <Checkbox 
-                        checked={localSettings.eventsManualIds?.includes(event.id)}
-                        onCheckedChange={() => toggleEventSelection(event.id)}
-                      />
-                      <span className="text-sm truncate">{event.title}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+interface ProductFormData {
+  name: string;
+  categoryId: number;
+  price: number;
+  originalPrice: number;
+  stock: number;
+  status: string;
+  description: string;
+  image: string;
 }
+
+interface CategoryFormData {
+  name: string;
+  slug: string;
+  displayOrder: number;
+  isActive: boolean;
+  image: string;
+}
+
+interface FaqFormData {
+  category: string;
+  question: string;
+  answer: string;
+  isActive: boolean;
+  displayOrder: number;
+}
+
+interface PlanFormData {
+  name: string;
+  slug: string;
+  description: string;
+  price: number;
+  originalPrice: number;
+  features: string[];
+  isPopular: boolean;
+  isActive: boolean;
+}
+
+interface BrandingData {
+  key: string;
+  title?: string | null;
+  subtitle?: string | null;
+  image?: string | null;
+  backgroundColor?: string | null;
+  textColor?: string | null;
+  linkUrl?: string | null;
+  linkText?: string | null;
+  isActive?: boolean;
+  displayOrder?: number;
+}
+
+// ============================================================================
+// Main Component
+// ============================================================================
 
 export default function AdminPage() {
   const [location, setLocation] = useLocation();
@@ -580,26 +123,38 @@ export default function AdminPage() {
     const params = new URLSearchParams(window.location.search);
     return params.get("tab") || "products";
   };
-  
+
   const [activeMenu, setActiveMenu] = useState(getTabFromUrl);
-  
+
+  // URL 변경 감지 (쿼리 파라미터 포함)
   useEffect(() => {
-    const tab = getTabFromUrl();
-    if (tab && tab !== activeMenu) {
-      setActiveMenu(tab);
-    }
-  }, [location]);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [selectedEvent, setSelectedEvent] = useState<any>(null);
-  const [selectedMember, setSelectedMember] = useState<any>(null);
+    const handleLocationChange = () => {
+      const tab = getTabFromUrl();
+      if (tab && tab !== activeMenu) {
+        setActiveMenu(tab);
+      }
+    };
+
+    // 초기 로드 시 탭 설정
+    handleLocationChange();
+
+    // popstate 이벤트로 뒤로가기/앞으로가기 감지
+    window.addEventListener("popstate", handleLocationChange);
+
+    return () => {
+      window.removeEventListener("popstate", handleLocationChange);
+    };
+  }, [location, activeMenu]);
+  const [selectedEvent, setSelectedEvent] = useState<EventType | null>(null);
+  const [selectedMember, setSelectedMember] = useState<Member | null>(null);
   const [productSearchQuery, setProductSearchQuery] = useState("");
   const [productStatusFilter, setProductStatusFilter] = useState("all");
   const [productCategoryFilter, setProductCategoryFilter] = useState("all");
   const [productSortField, setProductSortField] = useState<string>("createdAt");
   const [productSortOrder, setProductSortOrder] = useState<"asc" | "desc">("desc");
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
-  const [editingProduct, setEditingProduct] = useState<any>(null);
-  const [productForm, setProductForm] = useState({
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [productForm, setProductForm] = useState<ProductFormData>({
     name: "",
     categoryId: 0,
     price: 0,
@@ -611,8 +166,8 @@ export default function AdminPage() {
   });
   const [productTab, setProductTab] = useState("products");
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
-  const [editingCategory, setEditingCategory] = useState<any>(null);
-  const [categoryForm, setCategoryForm] = useState({
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  const [categoryForm, setCategoryForm] = useState<CategoryFormData>({
     name: "",
     slug: "",
     displayOrder: 0,
@@ -620,10 +175,10 @@ export default function AdminPage() {
     image: ""
   });
   const [isFaqModalOpen, setIsFaqModalOpen] = useState(false);
-  const [editingFaq, setEditingFaq] = useState<any>(null);
+  const [editingFaq, setEditingFaq] = useState<Faq | null>(null);
   const [faqCategoryFilter, setFaqCategoryFilter] = useState("전체");
   const faqCategories = ["전체", "주문/결제", "배송", "장수박스", "교환/반품", "회원", "적립/쿠폰", "행사/이벤트", "기타"];
-  const [faqForm, setFaqForm] = useState({
+  const [faqForm, setFaqForm] = useState<FaqFormData>({
     category: "",
     question: "",
     answer: "",
@@ -632,7 +187,6 @@ export default function AdminPage() {
   });
 
   const { data: authData, isLoading: authLoading, isFetching: authFetching } = useAdminAuth();
-  const logoutMutation = useAdminLogout();
 
   const { data: products = [], isLoading: productsLoading } = useAdminProducts();
   const { data: categories = [] } = useAdminCategories();
@@ -646,24 +200,24 @@ export default function AdminPage() {
   const [subscriptionTab, setSubscriptionTab] = useState("plans");
   const [draggedPlanId, setDraggedPlanId] = useState<number | null>(null);
   const [isPlanModalOpen, setIsPlanModalOpen] = useState(false);
-  const [editingPlan, setEditingPlan] = useState<any>(null);
-  const [planForm, setPlanForm] = useState({
+  const [editingPlan, setEditingPlan] = useState<SubscriptionPlan | null>(null);
+  const [planForm, setPlanForm] = useState<PlanFormData>({
     name: "",
     slug: "",
     description: "",
     price: 0,
     originalPrice: 0,
-    features: [] as string[],
+    features: [],
     isPopular: false,
     isActive: true,
   });
   const [newFeature, setNewFeature] = useState("");
-  
+
   const { data: events = [], isLoading: eventsLoading } = useAdminEvents();
   const deleteEventMutation = useDeleteEvent();
-  
-  const { data: promotionsData = [], isLoading: promotionsLoading } = useQuery<any[]>({
-    queryKey: ["promotions"],
+
+  const { data: promotionsData = [], isLoading: promotionsLoading } = useQuery<Promotion[]>({
+    queryKey: ["admin", "promotions"],
     queryFn: async () => {
       const res = await fetch("/api/promotions", { credentials: "include" });
       if (!res.ok) throw new Error("Failed to fetch promotions");
@@ -671,22 +225,9 @@ export default function AdminPage() {
     },
     enabled: !!authData?.admin,
   });
-  const [isPromotionModalOpen, setIsPromotionModalOpen] = useState(false);
-  const [editingPromotion, setEditingPromotion] = useState<any>(null);
-  const [promotionForm, setPromotionForm] = useState({
-    slug: "",
-    title: "",
-    subtitle: "",
-    description: "",
-    period: "",
-    heroImage: "",
-    isActive: true,
-  });
-  const [selectedPromotionProducts, setSelectedPromotionProducts] = useState<number[]>([]);
-  const [promotionProductSearch, setPromotionProductSearch] = useState("");
 
   const createPromotionMutation = useMutation({
-    mutationFn: async (data: any) => {
+    mutationFn: async (data: Partial<Promotion>) => {
       const res = await fetch("/api/admin/promotions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -697,12 +238,12 @@ export default function AdminPage() {
       return res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["promotions"] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "promotions"] });
     },
   });
 
   const updatePromotionMutation = useMutation({
-    mutationFn: async ({ id, ...data }: any) => {
+    mutationFn: async ({ id, ...data }: { id: number } & Partial<Promotion>) => {
       const res = await fetch(`/api/admin/promotions/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -713,7 +254,7 @@ export default function AdminPage() {
       return res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["promotions"] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "promotions"] });
     },
   });
 
@@ -729,7 +270,7 @@ export default function AdminPage() {
       return res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["promotions"] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "promotions"] });
     },
   });
 
@@ -743,7 +284,7 @@ export default function AdminPage() {
       return res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["promotions"] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "promotions"] });
     },
   });
 
@@ -751,7 +292,7 @@ export default function AdminPage() {
   const { data: faqsData = [], isLoading: faqsLoading } = useAdminFaqs();
   const { data: adminsData = [], isLoading: adminsLoading } = useAdminList();
   const { data: dashboardStats } = useDashboardStats();
-  const { data: brandingData = [] } = useQuery<any[]>({
+  const { data: brandingData = [] } = useQuery<BrandingData[]>({
     queryKey: ["admin", "branding"],
     queryFn: async () => {
       const res = await fetch("/api/admin/branding", { credentials: "include" });
@@ -760,7 +301,7 @@ export default function AdminPage() {
     },
     enabled: !!authData?.admin,
   });
-  const [editingBranding, setEditingBranding] = useState<any>(null);
+  const [editingBranding, setEditingBranding] = useState<BrandingData | null>(null);
 
   const createProductMutation = useCreateProduct();
   const updateProductMutation = useUpdateProduct();
@@ -772,7 +313,7 @@ export default function AdminPage() {
   const deleteFaqMutation = useDeleteFaq();
 
   const updateBrandingMutation = useMutation({
-    mutationFn: async ({ key, data }: { key: string; data: any }) => {
+    mutationFn: async ({ key, data }: { key: string; data: Partial<BrandingData> }) => {
       const res = await fetch(`/api/admin/branding/${key}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -792,23 +333,6 @@ export default function AdminPage() {
     },
   });
 
-  const handleLogout = async () => {
-    try {
-      await logoutMutation.mutateAsync();
-      toast({
-        title: "로그아웃 완료",
-        description: "관리자 로그인 페이지로 이동합니다.",
-      });
-      setLocation("/admin/login");
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "로그아웃 실패",
-        description: "다시 시도해주세요.",
-      });
-    }
-  };
-
   const resetPlanForm = () => {
     setPlanForm({
       name: "",
@@ -824,7 +348,7 @@ export default function AdminPage() {
     setNewFeature("");
   };
 
-  const openEditPlanModal = (plan: any) => {
+  const openEditPlanModal = (plan: SubscriptionPlan) => {
     setEditingPlan(plan);
     setPlanForm({
       name: plan.name || "",
@@ -1038,7 +562,7 @@ export default function AdminPage() {
     }
   };
 
-  const openEditCategoryModal = (category: any) => {
+  const openEditCategoryModal = (category: Category) => {
     setEditingCategory(category);
     const existingImage = category.image || categoryImageMap[category.slug] || "";
     setCategoryForm({
@@ -1073,7 +597,7 @@ export default function AdminPage() {
     }
     try {
       await createFaqMutation.mutateAsync({
-        category: faqForm.category.trim() || null,
+        category: faqForm.category.trim() || "기타",
         question: faqForm.question.trim(),
         answer: faqForm.answer.trim(),
         isActive: faqForm.isActive,
@@ -1103,10 +627,11 @@ export default function AdminPage() {
       });
       return;
     }
+    if (!editingFaq) return;
     try {
       await updateFaqMutation.mutateAsync({
         id: editingFaq.id,
-        category: faqForm.category.trim() || null,
+        category: faqForm.category.trim() || "기타",
         question: faqForm.question.trim(),
         answer: faqForm.answer.trim(),
         isActive: faqForm.isActive,
@@ -1144,7 +669,7 @@ export default function AdminPage() {
     }
   };
 
-  const openEditFaqModal = (faq: any) => {
+  const openEditFaqModal = (faq: Faq) => {
     setEditingFaq(faq);
     setFaqForm({
       category: faq.category || "",
@@ -1156,7 +681,8 @@ export default function AdminPage() {
     setIsFaqModalOpen(true);
   };
 
-  if (authLoading || authFetching) {
+  // authLoading만 체크 (authFetching은 백그라운드 리페치 시에도 true가 되어 무한 로딩 발생)
+  if (authLoading) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -1187,8 +713,6 @@ export default function AdminPage() {
       </div>
     );
   }
-
-  const currentAdmin = authData.admin;
 
   const getCategoryName = (categoryId: number | null | undefined) => {
     if (!categoryId) return "-";
@@ -1381,7 +905,7 @@ export default function AdminPage() {
           }
         };
 
-        const openEditModal = (product: any) => {
+        const openEditModal = (product: Product) => {
           setEditingProduct(product);
           setProductForm({
             name: product.name || "",
@@ -2149,97 +1673,31 @@ export default function AdminPage() {
                                         <p className="text-xs text-gray-500 mb-1">가입일</p>
                                         <p className="text-sm text-gray-900">{selectedMember?.createdAt ? new Date(selectedMember.createdAt).toLocaleString('ko-KR') : '-'}</p>
                                       </div>
-                                      <div className="col-span-2">
-                                        <p className="text-xs text-gray-500 mb-1">주소</p>
-                                        <p className="text-sm text-gray-900">{selectedMember?.address}</p>
-                                      </div>
                                     </div>
                                   </div>
 
                                   <div className="bg-white p-5 rounded-lg border border-gray-100 shadow-sm">
                                     <h3 className="font-bold text-gray-900 mb-4">구독 정보</h3>
-                                    <div className="flex items-center gap-4">
-                                      <div className="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center text-amber-600">
-                                        <Gift className="w-6 h-6" />
-                                      </div>
-                                      <div>
-                                        <p className="text-sm font-medium text-gray-900">
-                                          현재 <span className="text-primary font-bold">{selectedMember?.subscription}</span> 이용 중
-                                        </p>
-                                        <p className="text-xs text-gray-500">다음 결제일: 2026-02-01</p>
-                                      </div>
-                                    </div>
+                                    <p className="text-sm text-gray-500">구독 정보를 불러오는 중...</p>
                                   </div>
                                 </TabsContent>
 
                                 <TabsContent value="orders" className="mt-0">
-                                  <div className="bg-white rounded-lg border border-gray-100 shadow-sm overflow-hidden">
-                                    <table className="w-full">
-                                      <thead className="bg-gray-50 border-b border-gray-100">
-                                        <tr>
-                                          <th className="text-left text-xs font-medium text-gray-500 px-4 py-2">주문번호</th>
-                                          <th className="text-left text-xs font-medium text-gray-500 px-4 py-2">상품명</th>
-                                          <th className="text-left text-xs font-medium text-gray-500 px-4 py-2">금액</th>
-                                          <th className="text-left text-xs font-medium text-gray-500 px-4 py-2">상태</th>
-                                        </tr>
-                                      </thead>
-                                      <tbody className="divide-y divide-gray-100">
-                                        {mockMemberHistory.orders.map((order, i) => (
-                                          <tr key={i}>
-                                            <td className="px-4 py-3 text-xs font-mono text-gray-500">{order.id}</td>
-                                            <td className="px-4 py-3 text-sm text-gray-900">
-                                              {order.product}
-                                              <div className="text-xs text-gray-400 mt-0.5">{order.date}</div>
-                                            </td>
-                                            <td className="px-4 py-3 text-sm text-gray-900">{order.amount.toLocaleString()}원</td>
-                                            <td className="px-4 py-3">
-                                              <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-full">
-                                                {order.status}
-                                              </span>
-                                            </td>
-                                          </tr>
-                                        ))}
-                                      </tbody>
-                                    </table>
+                                  <div className="bg-white rounded-lg border border-gray-100 shadow-sm p-6 text-center">
+                                    <p className="text-sm text-gray-500">주문 내역을 불러오는 중...</p>
                                   </div>
                                 </TabsContent>
 
-                                <TabsContent value="reviews" className="mt-0 space-y-4">
-                                  {mockMemberHistory.reviews.map((review, i) => (
-                                    <div key={i} className="bg-white p-4 rounded-lg border border-gray-100 shadow-sm">
-                                      <div className="flex justify-between items-start mb-2">
-                                        <div>
-                                          <p className="text-xs text-gray-500 mb-1">{review.product}</p>
-                                          <div className="flex text-amber-400">
-                                            {[...Array(5)].map((_, i) => (
-                                              <Star 
-                                                key={i} 
-                                                className={`w-3.5 h-3.5 ${i < review.rating ? "fill-current" : "text-gray-200 fill-gray-200"}`} 
-                                              />
-                                            ))}
-                                          </div>
-                                        </div>
-                                        <span className="text-xs text-gray-400">{review.date}</span>
-                                      </div>
-                                      <p className="text-sm text-gray-600 line-clamp-2">{review.content}</p>
-                                    </div>
-                                  ))}
+                                <TabsContent value="reviews" className="mt-0">
+                                  <div className="bg-white rounded-lg border border-gray-100 shadow-sm p-6 text-center">
+                                    <p className="text-sm text-gray-500">리뷰 내역을 불러오는 중...</p>
+                                  </div>
                                 </TabsContent>
 
-                                <TabsContent value="events" className="mt-0 space-y-3">
-                                  {mockMemberHistory.events.map((event, i) => (
-                                    <div key={i} className="bg-white p-4 rounded-lg border border-gray-100 shadow-sm flex items-center justify-between">
-                                      <div>
-                                        <h4 className="text-sm font-bold text-gray-900">{event.title}</h4>
-                                        <p className="text-xs text-gray-500 mt-1">{event.date}</p>
-                                      </div>
-                                      <span className={`text-xs px-2 py-1 rounded-full ${
-                                        event.status === "신청완료" ? "bg-green-100 text-green-700" : "bg-blue-100 text-blue-700"
-                                      }`}>
-                                        {event.status}
-                                      </span>
-                                    </div>
-                                  ))}
+                                <TabsContent value="events" className="mt-0">
+                                  <div className="bg-white rounded-lg border border-gray-100 shadow-sm p-6 text-center">
+                                    <p className="text-sm text-gray-500">행사 참여 내역을 불러오는 중...</p>
+                                  </div>
                                 </TabsContent>
                               </div>
                             </Tabs>
@@ -2665,68 +2123,6 @@ export default function AdminPage() {
 
       case "promotions":
         if (promotionsLoading) return <div className="text-center py-8 text-gray-500">로딩중...</div>;
-        
-        const resetPromotionForm = () => {
-          setPromotionForm({
-            slug: "",
-            title: "",
-            subtitle: "",
-            description: "",
-            period: "",
-            heroImage: "",
-            isActive: true,
-          });
-          setSelectedPromotionProducts([]);
-          setEditingPromotion(null);
-        };
-
-        const openEditPromotionModal = async (promotion: any) => {
-          setEditingPromotion(promotion);
-          setPromotionForm({
-            slug: promotion.slug || "",
-            title: promotion.title || "",
-            subtitle: promotion.subtitle || "",
-            description: promotion.description || "",
-            period: promotion.period || "",
-            heroImage: promotion.heroImage || "",
-            isActive: promotion.isActive !== false,
-          });
-          try {
-            const res = await fetch(`/api/promotions/${promotion.id}`, { credentials: "include" });
-            if (res.ok) {
-              const data = await res.json();
-              setSelectedPromotionProducts(data.products?.map((p: any) => p.id) || []);
-            }
-          } catch (e) {
-            setSelectedPromotionProducts([]);
-          }
-          setIsPromotionModalOpen(true);
-        };
-
-        const handleSavePromotion = async () => {
-          if (!promotionForm.title.trim()) {
-            toast({ variant: "destructive", title: "입력 오류", description: "이벤트명을 입력해주세요." });
-            return;
-          }
-          const slug = promotionForm.slug.trim() || promotionForm.title.toLowerCase().replace(/[^a-z0-9가-힣]/gi, '-').replace(/-+/g, '-');
-          try {
-            if (editingPromotion) {
-              await updatePromotionMutation.mutateAsync({ id: editingPromotion.id, ...promotionForm, slug });
-              await updatePromotionProductsMutation.mutateAsync({ id: editingPromotion.id, productIds: selectedPromotionProducts });
-              toast({ title: "수정 완료", description: "이벤트가 수정되었습니다." });
-            } else {
-              const created = await createPromotionMutation.mutateAsync({ ...promotionForm, slug });
-              if (created?.id) {
-                await updatePromotionProductsMutation.mutateAsync({ id: created.id, productIds: selectedPromotionProducts });
-              }
-              toast({ title: "등록 완료", description: "이벤트가 등록되었습니다." });
-            }
-            setIsPromotionModalOpen(false);
-            resetPromotionForm();
-          } catch (error) {
-            toast({ variant: "destructive", title: "저장 실패", description: "다시 시도해주세요." });
-          }
-        };
 
         const handleDeletePromotion = async (id: number) => {
           if (!confirm("정말 이 이벤트를 삭제하시겠습니까?")) return;
@@ -2738,143 +2134,14 @@ export default function AdminPage() {
           }
         };
 
-        const togglePromotionProduct = (productId: number) => {
-          if (selectedPromotionProducts.includes(productId)) {
-            setSelectedPromotionProducts(selectedPromotionProducts.filter(id => id !== productId));
-          } else {
-            setSelectedPromotionProducts([...selectedPromotionProducts, productId]);
-          }
-        };
-
-        const filteredProductsForPromotion = products.filter((p: any) =>
-          p.name.toLowerCase().includes(promotionProductSearch.toLowerCase())
-        );
-
         return (
           <div>
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-bold text-gray-900">이벤트관 관리</h2>
-              <Button onClick={() => { resetPromotionForm(); setIsPromotionModalOpen(true); }}>
+              <Button onClick={() => setLocation("/admin/promotions/new")}>
                 + 이벤트 등록
               </Button>
             </div>
-
-            <Dialog open={isPromotionModalOpen} onOpenChange={(isOpen) => { if (!isOpen) { setIsPromotionModalOpen(false); resetPromotionForm(); } }}>
-              <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-                <DialogHeader>
-                  <DialogTitle>{editingPromotion ? "이벤트 수정" : "이벤트 등록"}</DialogTitle>
-                  <DialogDescription>이벤트 정보를 입력하고 상품을 선택하세요.</DialogDescription>
-                </DialogHeader>
-                <div className="space-y-4 py-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label>이벤트명 *</Label>
-                      <Input
-                        value={promotionForm.title}
-                        onChange={(e) => setPromotionForm({ ...promotionForm, title: e.target.value })}
-                        placeholder="2026 설 선물세트"
-                        className="mt-1"
-                      />
-                    </div>
-                    <div>
-                      <Label>슬러그 (URL)</Label>
-                      <Input
-                        value={promotionForm.slug}
-                        onChange={(e) => setPromotionForm({ ...promotionForm, slug: e.target.value })}
-                        placeholder="seol-gift"
-                        className="mt-1"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <Label>부제목</Label>
-                    <Input
-                      value={promotionForm.subtitle}
-                      onChange={(e) => setPromotionForm({ ...promotionForm, subtitle: e.target.value })}
-                      placeholder="새해 첫 선물로, 특별함과 다양함을 담은 세트를 추천해요."
-                      className="mt-1"
-                    />
-                  </div>
-                  <div>
-                    <Label>기간</Label>
-                    <Input
-                      value={promotionForm.period}
-                      onChange={(e) => setPromotionForm({ ...promotionForm, period: e.target.value })}
-                      placeholder="1. 12(월) ~ 2. 27(목)"
-                      className="mt-1"
-                    />
-                  </div>
-                  <div>
-                    <Label>히어로 이미지 URL</Label>
-                    <Input
-                      value={promotionForm.heroImage}
-                      onChange={(e) => setPromotionForm({ ...promotionForm, heroImage: e.target.value })}
-                      placeholder="https://..."
-                      className="mt-1"
-                    />
-                    {promotionForm.heroImage && (
-                      <img src={promotionForm.heroImage} alt="Hero preview" className="mt-2 w-full h-32 object-cover rounded-lg" />
-                    )}
-                  </div>
-                  <div>
-                    <Label>설명</Label>
-                    <textarea
-                      value={promotionForm.description}
-                      onChange={(e) => setPromotionForm({ ...promotionForm, description: e.target.value })}
-                      placeholder="이벤트 상세 설명"
-                      className="mt-1 w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-primary min-h-[80px]"
-                    />
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Checkbox 
-                      id="promotionActive"
-                      checked={promotionForm.isActive}
-                      onCheckedChange={(checked) => setPromotionForm({ ...promotionForm, isActive: !!checked })}
-                    />
-                    <Label htmlFor="promotionActive">활성화</Label>
-                  </div>
-                  <div>
-                    <Label className="mb-2 block">상품 선택</Label>
-                    <Input
-                      placeholder="상품명으로 검색..."
-                      value={promotionProductSearch}
-                      onChange={(e) => setPromotionProductSearch(e.target.value)}
-                      className="mb-2"
-                    />
-                    {selectedPromotionProducts.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mb-2">
-                        {selectedPromotionProducts.map(id => {
-                          const product = products?.find((p: any) => p.id === id);
-                          return product ? (
-                            <span key={id} className="inline-flex items-center gap-1 bg-primary/10 text-primary text-xs px-2 py-1 rounded">
-                              {product.name}
-                              <button onClick={() => togglePromotionProduct(id)} className="hover:text-red-500">×</button>
-                            </span>
-                          ) : null;
-                        })}
-                      </div>
-                    )}
-                    <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto border rounded p-2">
-                      {filteredProductsForPromotion.map((product: any) => (
-                        <label key={product.id} className="flex items-center gap-2 p-2 hover:bg-gray-50 rounded cursor-pointer">
-                          <Checkbox
-                            checked={selectedPromotionProducts.includes(product.id)}
-                            onCheckedChange={() => togglePromotionProduct(product.id)}
-                          />
-                          <span className="text-sm truncate">{product.name}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-                <div className="flex justify-end gap-2">
-                  <Button variant="outline" onClick={() => { setIsPromotionModalOpen(false); resetPromotionForm(); }}>취소</Button>
-                  <Button onClick={handleSavePromotion} disabled={createPromotionMutation.isPending || updatePromotionMutation.isPending}>
-                    {createPromotionMutation.isPending || updatePromotionMutation.isPending ? "저장중..." : "저장"}
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
 
             <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
               <table className="w-full">
@@ -2888,7 +2155,7 @@ export default function AdminPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {promotionsData.map((promo: any) => (
+                  {promotionsData.map((promo) => (
                     <tr key={promo.id} className="border-b border-gray-100 hover:bg-gray-50">
                       <td className="px-4 py-3">
                         <div>
@@ -2905,7 +2172,7 @@ export default function AdminPage() {
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex gap-2">
-                          <button onClick={() => openEditPromotionModal(promo)} className="text-sm text-primary hover:underline">수정</button>
+                          <button onClick={() => setLocation(`/admin/promotions/${promo.id}`)} className="text-sm text-primary hover:underline">수정</button>
                           <button onClick={() => handleDeletePromotion(promo.id)} className="text-sm text-red-500 hover:underline">삭제</button>
                         </div>
                       </td>
@@ -2952,25 +2219,11 @@ export default function AdminPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {mockPayments.map((payment) => (
-                    <tr key={payment.id} className="border-b border-gray-100 hover:bg-gray-50">
-                      <td className="px-4 py-3 text-sm text-gray-900 font-mono">{payment.id}</td>
-                      <td className="px-4 py-3 text-sm text-gray-600">{payment.member}</td>
-                      <td className="px-4 py-3 text-sm text-gray-900">{payment.amount.toLocaleString()}원</td>
-                      <td className="px-4 py-3 text-sm text-gray-600">{payment.method}</td>
-                      <td className="px-4 py-3 text-sm text-gray-600">{payment.date}</td>
-                      <td className="px-4 py-3">
-                        <span className={`text-xs px-2 py-1 rounded-full ${
-                          payment.status === "완료" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
-                        }`}>
-                          {payment.status}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <button className="text-sm text-primary hover:underline">상세</button>
-                      </td>
-                    </tr>
-                  ))}
+                  <tr>
+                    <td colSpan={7} className="px-4 py-8 text-center text-sm text-gray-500">
+                      결제 내역이 없습니다.
+                    </td>
+                  </tr>
                 </tbody>
               </table>
             </div>
@@ -3005,27 +2258,11 @@ export default function AdminPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {mockShipping.map((ship) => (
-                    <tr key={ship.id} className="border-b border-gray-100 hover:bg-gray-50">
-                      <td className="px-4 py-3 text-sm text-gray-900 font-mono">{ship.id}</td>
-                      <td className="px-4 py-3 text-sm text-gray-600">{ship.member}</td>
-                      <td className="px-4 py-3 text-sm text-gray-600 max-w-[200px] truncate">{ship.address}</td>
-                      <td className="px-4 py-3 text-sm text-gray-600 font-mono">{ship.trackingNo}</td>
-                      <td className="px-4 py-3 text-sm text-gray-600">{ship.date}</td>
-                      <td className="px-4 py-3">
-                        <span className={`text-xs px-2 py-1 rounded-full ${
-                          ship.status === "배송완료" ? "bg-green-100 text-green-700" 
-                          : ship.status === "배송중" ? "bg-blue-100 text-blue-700"
-                          : "bg-amber-100 text-amber-700"
-                        }`}>
-                          {ship.status}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <button className="text-sm text-primary hover:underline">추적</button>
-                      </td>
-                    </tr>
-                  ))}
+                  <tr>
+                    <td colSpan={7} className="px-4 py-8 text-center text-sm text-gray-500">
+                      배송 내역이 없습니다.
+                    </td>
+                  </tr>
                 </tbody>
               </table>
             </div>
@@ -3316,7 +2553,7 @@ export default function AdminPage() {
                     <div className="pt-2">
                       <label className="block text-sm font-bold text-gray-900 mb-3">접근 권한 설정</label>
                       <div className="grid grid-cols-2 gap-3 bg-gray-50 p-4 rounded-lg border border-gray-100">
-                        {menuItems.filter(item => item.id !== "settings").map((item) => (
+                        {adminMenuItems.filter(item => item.id !== "settings").map((item) => (
                           <div key={item.id} className="flex items-center space-x-2">
                             <Checkbox id={`perm-${item.id}`} />
                             <Label 
@@ -3366,7 +2603,7 @@ export default function AdminPage() {
                               <span className="bg-gray-100 text-gray-700 px-1.5 py-0.5 rounded text-xs">전체 권한</span>
                             ) : (
                               permissions.map((perm: string) => {
-                                const label = menuItems.find(m => m.id === perm)?.label || perm;
+                                const label = adminMenuItems.find(m => m.id === perm)?.label || perm;
                                 return (
                                   <span key={perm} className="bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded text-xs">
                                     {label.replace(" 관리", "")}
@@ -3524,7 +2761,7 @@ export default function AdminPage() {
                   <p className="text-sm text-gray-500 mb-6">메인 페이지 히어로 섹션과 배너 이미지를 설정합니다.</p>
                   
                   <div className="space-y-6">
-                    {brandingData.map((item: any) => (
+                    {brandingData.map((item) => (
                       <div key={item.key} className="border border-gray-200 rounded-lg p-4">
                         <div className="flex items-center justify-between mb-4">
                           <div>
@@ -3660,10 +2897,10 @@ export default function AdminPage() {
                           <p className="text-xs text-gray-500 mt-1">이미지 클릭 시 이동할 페이지 주소</p>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Checkbox 
+                          <Checkbox
                             id="branding-active"
                             checked={editingBranding.isActive}
-                            onCheckedChange={(checked) => setEditingBranding({ ...editingBranding, isActive: checked })}
+                            onCheckedChange={(checked) => setEditingBranding({ ...editingBranding, isActive: checked === true })}
                           />
                           <Label htmlFor="branding-active">활성화</Label>
                         </div>
@@ -3694,74 +2931,19 @@ export default function AdminPage() {
     }
   };
 
+  const handleNavigate = (path: string) => {
+    // URL에서 탭 추출
+    const url = new URL(path, window.location.origin);
+    const tab = url.searchParams.get("tab");
+    if (tab) {
+      setActiveMenu(tab);
+    }
+    setLocation(path);
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      {/* Sidebar */}
-      <div className={`fixed inset-y-0 left-0 bg-white border-r border-gray-200 z-50 transition-all duration-300 ${
-        sidebarOpen ? "w-64" : "w-20"
-      }`}>
-        <div className="flex items-center justify-between p-4 border-b border-gray-100 h-16">
-          {sidebarOpen ? (
-            <h1 className="text-xl font-bold text-primary">웰닉스 관리자</h1>
-          ) : (
-            <span className="text-xl font-bold text-primary mx-auto">W</span>
-          )}
-          <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-1 rounded hover:bg-gray-100">
-            {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
-        </div>
-
-        <nav className="p-4 space-y-1">
-          {menuItems.map((item) => (
-            <button
-              key={item.id}
-              onClick={() => setActiveMenu(item.id)}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
-                activeMenu === item.id 
-                  ? "bg-primary text-white" 
-                  : "text-gray-600 hover:bg-gray-100"
-              }`}
-            >
-              <item.icon className="w-5 h-5 flex-shrink-0" />
-              {sidebarOpen && <span className="font-medium">{item.label}</span>}
-            </button>
-          ))}
-        </nav>
-
-        <div className="absolute bottom-4 left-4 right-4">
-          {sidebarOpen && (
-            <div className="mb-3 px-3 py-2 bg-gray-50 rounded-lg">
-              <p className="text-xs text-gray-500">로그인됨</p>
-              <p className="text-sm font-medium text-gray-900 truncate">{currentAdmin.name}</p>
-              <p className="text-xs text-gray-500 truncate">{currentAdmin.email}</p>
-            </div>
-          )}
-          {sidebarOpen ? (
-            <button 
-              onClick={handleLogout}
-              disabled={logoutMutation.isPending}
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 hover:bg-gray-100 disabled:opacity-50"
-              data-testid="button-admin-logout"
-            >
-              <LogOut className="w-5 h-5 flex-shrink-0" />
-              <span className="font-medium">{logoutMutation.isPending ? "로그아웃 중..." : "로그아웃"}</span>
-            </button>
-          ) : (
-            <button 
-              onClick={handleLogout}
-              disabled={logoutMutation.isPending}
-              className="w-full flex justify-center py-2.5 rounded-lg text-gray-600 hover:bg-gray-100 disabled:opacity-50"
-              data-testid="button-admin-logout-small"
-            >
-              <LogOut className="w-5 h-5" />
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className={`flex-1 transition-all duration-300 ${sidebarOpen ? "ml-64" : "ml-20"}`}>
-        <header className="bg-white border-b border-gray-200 h-16 sticky top-0 z-40 px-6 flex items-center justify-between">
+    <AdminLayout activeTab={activeMenu} onNavigate={handleNavigate}>
+      <header className="bg-white border-b border-gray-200 h-16 sticky top-0 z-40 px-6 flex items-center justify-between">
           <div className="relative w-96">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input 
@@ -3805,7 +2987,6 @@ export default function AdminPage() {
 
           {renderContent()}
         </main>
-      </div>
-    </div>
+    </AdminLayout>
   );
 }

@@ -10,9 +10,6 @@ const AppContainerContext = createContext<AppContainerContextType | null>(null);
 
 export function useAppContainer() {
   const context = useContext(AppContainerContext);
-  if (!context) {
-    throw new Error("useAppContainer must be used within AppLayout");
-  }
   return context;
 }
 
@@ -28,12 +25,16 @@ export function AppLayout({ children, hideNav = false }: AppLayoutProps) {
     <AppContainerContext.Provider value={{ containerRef }}>
       <div className="min-h-screen bg-background flex justify-center">
         <PromoSidebar />
-        
-        <div ref={containerRef} className="w-full max-w-[430px] relative flex flex-col">
+
+        {/* 웹앱 컨테이너 - 다이얼로그 포털의 타겟 */}
+        <div
+          ref={containerRef}
+          className="w-full max-w-[430px] relative flex flex-col isolate"
+        >
           <main className="bg-white shadow-xl min-h-screen relative flex-1 overflow-x-hidden">
             {children}
           </main>
-          
+
           {!hideNav && (
             <div className="fixed bottom-0 w-full max-w-[430px] z-50">
               <BottomNav />

@@ -3,6 +3,7 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { AdminUIProvider } from "@/contexts/AdminUIContext";
 import Home from "@/pages/Home";
 import SearchPage from "@/pages/SearchPage";
 import GiftsPage from "@/pages/GiftsPage";
@@ -33,6 +34,7 @@ import ProductDetailPage from "@/pages/ProductDetailPage";
 import ProductGalleryPage from "@/pages/ProductGalleryPage";
 import AdminProductFormPage from "@/pages/AdminProductFormPage";
 import AdminEventFormPage from "@/pages/AdminEventFormPage";
+import AdminPromotionFormPage from "@/pages/AdminPromotionFormPage";
 import PromotionPage from "@/pages/PromotionPage";
 import NotFound from "@/pages/not-found";
 
@@ -52,6 +54,8 @@ function Router() {
       <Route path="/admin/products/:id" component={AdminProductFormPage} />
       <Route path="/admin/events/new" component={AdminEventFormPage} />
       <Route path="/admin/events/:id" component={AdminEventFormPage} />
+      <Route path="/admin/promotions/new" component={AdminPromotionFormPage} />
+      <Route path="/admin/promotions/:id" component={AdminPromotionFormPage} />
       <Route path="/mypage/reviews" component={MyReviewsPage} />
       <Route path="/corporate-inquiry" component={CorporateInquiryPage} />
       <Route path="/mypage/wishlist" component={MyWishlistPage} />
@@ -80,8 +84,10 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <Toaster />
-        <Router />
+        <AdminUIProvider>
+          <Toaster />
+          <Router />
+        </AdminUIProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );
