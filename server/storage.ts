@@ -163,7 +163,7 @@ export interface IStorage {
   createNotification(notification: InsertNotification): Promise<Notification>;
   markNotificationRead(id: number): Promise<boolean>;
   markAllNotificationsRead(memberId: number): Promise<boolean>;
-  getNotificationHistory(): Promise<{ date: string; title: string; content: string; sentCount: number; createdAt: string }[]>;
+  getNotificationHistory(): Promise<{ date: string; title: string; content: string; sentCount: number; createdAt: string; targetType: string }[]>;
 
   // Notices
   getNotice(id: number): Promise<Notice | undefined>;
@@ -806,18 +806,19 @@ export class DatabaseStorage implements IStorage {
     return true;
   }
 
-  async getNotificationHistory(): Promise<{ date: string; title: string; content: string; sentCount: number; createdAt: string }[]> {
+  async getNotificationHistory(): Promise<{ date: string; title: string; content: string; sentCount: number; createdAt: string; targetType: string }[]> {
     const result = await db
       .select({
         date: sql<string>`DATE(${notifications.createdAt})`.as("date"),
         title: notifications.title,
         content: notifications.content,
+        targetType: notifications.targetType,
         sentCount: sql<number>`count(*)`.as("sentCount"),
         maxCreatedAt: sql<string>`MAX(${notifications.createdAt})`.as("maxCreatedAt"),
       })
       .from(notifications)
       .where(eq(notifications.notificationType, "promotion"))
-      .groupBy(sql`DATE(${notifications.createdAt})`, notifications.title, notifications.content)
+      .groupBy(sql`DATE(${notifications.createdAt})`, notifications.title, notifications.content, notifications.targetType)
       .orderBy(desc(sql`MAX(${notifications.createdAt})`));
     
     return result.map(r => ({
@@ -826,6 +827,7 @@ export class DatabaseStorage implements IStorage {
       content: r.content,
       sentCount: Number(r.sentCount),
       createdAt: r.maxCreatedAt || '',
+      targetType: r.targetType || '',
     }));
   }
 

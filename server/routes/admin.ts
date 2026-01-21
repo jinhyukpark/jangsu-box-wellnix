@@ -416,6 +416,7 @@ router.post("/api/admin/notifications/send", requireAdmin, async (req: Request, 
           title,
           content,
           notificationType: "promotion",
+          targetType,
           isRead: false,
           link: null
         });

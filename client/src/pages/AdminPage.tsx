@@ -407,7 +407,14 @@ function AdminNotificationsContent() {
     }
   };
 
-  const { data: history = [] } = useQuery<{ date: string; title: string; content: string; sentCount: number; createdAt: string }[]>({
+  const targetTypeLabels: Record<string, string> = {
+    all: "전체 사용자",
+    purchased: "구매고객",
+    not_purchased: "미구매 고객",
+    select: "고객 선택"
+  };
+
+  const { data: history = [] } = useQuery<{ date: string; title: string; content: string; sentCount: number; createdAt: string; targetType: string }[]>({
     queryKey: ["admin", "notification-history"],
     queryFn: async () => {
       const res = await fetch("/api/admin/notifications/history", { credentials: "include" });
@@ -554,6 +561,7 @@ function AdminNotificationsContent() {
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">날짜</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">발송 대상</th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">제목</th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">내용</th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">발송 수</th>
@@ -562,7 +570,7 @@ function AdminNotificationsContent() {
             <tbody className="divide-y divide-gray-200">
               {history.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-4 py-8 text-center text-sm text-gray-500">
+                  <td colSpan={5} className="px-4 py-8 text-center text-sm text-gray-500">
                     발송된 알림이 없습니다.
                   </td>
                 </tr>
@@ -570,6 +578,7 @@ function AdminNotificationsContent() {
                 history.map((item, idx) => (
                   <tr key={idx} className="hover:bg-gray-50">
                     <td className="px-4 py-3 text-sm text-gray-900 whitespace-nowrap">{item.date}</td>
+                    <td className="px-4 py-3 text-sm text-gray-900">{targetTypeLabels[item.targetType] || item.targetType || "-"}</td>
                     <td className="px-4 py-3 text-sm text-gray-900">{item.title}</td>
                     <td className="px-4 py-3 text-sm text-gray-600 max-w-xs truncate">{item.content}</td>
                     <td className="px-4 py-3 text-sm text-gray-900">{item.sentCount}명</td>

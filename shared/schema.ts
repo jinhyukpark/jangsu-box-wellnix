@@ -524,6 +524,7 @@ export const notifications = pgTable("notifications", {
   title: varchar("title", { length: 200 }).notNull(),
   content: text("content"),
   notificationType: varchar("notification_type", { length: 50 }),
+  targetType: varchar("target_type", { length: 50 }),
   isRead: boolean("is_read").default(false),
   link: text("link"),
   createdAt: timestamp("created_at").defaultNow(),
