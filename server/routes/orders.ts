@@ -28,14 +28,19 @@ router.get("/api/cart", requireAuth, async (req: Request, res: Response) => {
 
 router.post("/api/cart", requireAuth, async (req: Request, res: Response) => {
   try {
+    const { productId, quantity, options } = req.body;
+    if (!productId) {
+      return res.status(400).json({ error: "상품 ID가 필요합니다" });
+    }
     const item = await storage.addToCart({
       memberId: req.session.memberId!,
-      productId: req.body.productId,
-      quantity: req.body.quantity || 1,
-      options: req.body.options,
+      productId: Number(productId),
+      quantity: quantity || 1,
+      options: options || null,
     });
     res.json(item);
   } catch (error) {
+    console.error("Add to cart error:", error);
     res.status(400).json({ error: "장바구니 추가에 실패했습니다" });
   }
 });
