@@ -37,6 +37,7 @@ export interface IStorage {
   createMember(member: InsertMember): Promise<Member>;
   updateMember(id: number, data: Partial<InsertMember>): Promise<Member | undefined>;
   getAllMembers(): Promise<Member[]>;
+  getMembersWithOrders(): Promise<{ id: number }[]>;
 
   // Admins
   getAdmin(id: number): Promise<Admin | undefined>;
@@ -239,6 +240,14 @@ export class DatabaseStorage implements IStorage {
 
   async getAllMembers(): Promise<Member[]> {
     return db.select().from(members).orderBy(desc(members.createdAt));
+  }
+
+  async getMembersWithOrders(): Promise<{ id: number }[]> {
+    const result = await db
+      .selectDistinct({ id: orders.memberId })
+      .from(orders)
+      .where(sql`${orders.memberId} IS NOT NULL`);
+    return result.map(r => ({ id: r.id! }));
   }
 
   // Admins

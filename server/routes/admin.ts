@@ -376,4 +376,48 @@ router.get("/api/admin/cart/stats", requireAdmin, async (req: Request, res: Resp
   }
 });
 
+router.post("/api/admin/notifications/send", requireAdmin, async (req: Request, res: Response) => {
+  try {
+    const { targetType, channels, title, content, memberIds } = req.body;
+    
+    let targetMembers: { id: number }[] = [];
+    
+    if (targetType === "all") {
+      const allMembers = await storage.getAllMembers();
+      targetMembers = allMembers.map(m => ({ id: m.id }));
+    } else if (targetType === "purchased") {
+      const purchasedMembers = await storage.getMembersWithOrders();
+      targetMembers = purchasedMembers;
+    } else if (targetType === "not_purchased") {
+      const allMembers = await storage.getAllMembers();
+      const purchasedMembers = await storage.getMembersWithOrders();
+      const purchasedIds = new Set(purchasedMembers.map(m => m.id));
+      targetMembers = allMembers.filter(m => !purchasedIds.has(m.id)).map(m => ({ id: m.id }));
+    } else if (targetType === "select" && memberIds?.length > 0) {
+      targetMembers = memberIds.map((id: number) => ({ id }));
+    }
+
+    let sentCount = 0;
+    
+    for (const member of targetMembers) {
+      if (channels.app) {
+        await storage.createNotification({
+          memberId: member.id,
+          title,
+          content,
+          notificationType: "promotion",
+          isRead: false,
+          link: null
+        });
+        sentCount++;
+      }
+    }
+
+    res.json({ success: true, sentCount, channels });
+  } catch (error) {
+    console.error("Admin notification send error:", error);
+    res.status(500).json({ error: "알림 발송에 실패했습니다" });
+  }
+});
+
 export default router;

@@ -320,6 +320,226 @@ function AdminCartContent() {
 }
 
 // ============================================================================
+// Admin Notifications Content
+// ============================================================================
+
+function AdminNotificationsContent() {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [targetType, setTargetType] = useState<"all" | "purchased" | "not_purchased" | "select">("all");
+  const [channels, setChannels] = useState({ email: false, sms: false, app: true });
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
+  const [selectedMemberIds, setSelectedMemberIds] = useState<number[]>([]);
+  const [isSending, setIsSending] = useState(false);
+  const [memberSearch, setMemberSearch] = useState("");
+
+  const { data: members = [] } = useQuery<{ id: number; name: string; email: string; }[]>({
+    queryKey: ["admin", "members-simple"],
+    queryFn: async () => {
+      const res = await fetch("/api/admin/members", { credentials: "include" });
+      if (!res.ok) return [];
+      return res.json();
+    },
+  });
+
+  const filteredMembers = members.filter(m => 
+    m.name?.toLowerCase().includes(memberSearch.toLowerCase()) ||
+    m.email?.toLowerCase().includes(memberSearch.toLowerCase())
+  );
+
+  const handleToggleMember = (id: number) => {
+    setSelectedMemberIds(prev => 
+      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    );
+  };
+
+  const handleSend = async () => {
+    if (!title.trim()) {
+      toast({ variant: "destructive", title: "알림 제목을 입력해주세요." });
+      return;
+    }
+    if (!content.trim()) {
+      toast({ variant: "destructive", title: "알림 내용을 입력해주세요." });
+      return;
+    }
+    if (!channels.app) {
+      toast({ variant: "destructive", title: "앱 알림을 선택해주세요." });
+      return;
+    }
+    if (targetType === "select" && selectedMemberIds.length === 0) {
+      toast({ variant: "destructive", title: "발송 대상 회원을 선택해주세요." });
+      return;
+    }
+
+    setIsSending(true);
+    try {
+      const res = await fetch("/api/admin/notifications/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          targetType,
+          channels,
+          title,
+          content,
+          memberIds: targetType === "select" ? selectedMemberIds : undefined
+        })
+      });
+
+      if (!res.ok) throw new Error("Failed to send notification");
+      
+      const result = await res.json();
+      toast({ 
+        title: "알림 발송 완료", 
+        description: `${result.sentCount}명에게 알림이 발송되었습니다.` 
+      });
+      
+      setTitle("");
+      setContent("");
+      setSelectedMemberIds([]);
+      setChannels({ email: false, sms: false, app: true });
+    } catch (error) {
+      toast({ variant: "destructive", title: "알림 발송에 실패했습니다." });
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-xl font-bold text-gray-900">알림 발송</h2>
+      </div>
+
+      <div className="grid grid-cols-2 gap-6">
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <h3 className="text-lg font-bold text-gray-900 mb-4">발송 설정</h3>
+          
+          <div className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">발송 대상</label>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { value: "all", label: "전체 사용자" },
+                  { value: "purchased", label: "구매고객" },
+                  { value: "not_purchased", label: "미구매 고객" },
+                  { value: "select", label: "고객 선택" }
+                ].map(opt => (
+                  <button
+                    key={opt.value}
+                    onClick={() => setTargetType(opt.value as typeof targetType)}
+                    className={`py-2 px-4 rounded-lg text-sm font-medium transition-colors ${
+                      targetType === opt.value 
+                        ? "bg-primary text-white" 
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {targetType === "select" && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  회원 선택 ({selectedMemberIds.length}명 선택됨)
+                </label>
+                <input
+                  type="text"
+                  placeholder="회원 검색..."
+                  value={memberSearch}
+                  onChange={(e) => setMemberSearch(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm mb-2"
+                />
+                <div className="max-h-48 overflow-y-auto border border-gray-200 rounded-lg">
+                  {filteredMembers.slice(0, 50).map(member => (
+                    <label
+                      key={member.id}
+                      className="flex items-center px-3 py-2 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-0"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selectedMemberIds.includes(member.id)}
+                        onChange={() => handleToggleMember(member.id)}
+                        className="mr-3"
+                      />
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">{member.name || "-"}</p>
+                        <p className="text-xs text-gray-500">{member.email}</p>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">발송 채널</label>
+              <div className="flex gap-4">
+                {[
+                  { key: "app", label: "앱 알림", disabled: false },
+                  { key: "email", label: "이메일 (준비중)", disabled: true },
+                  { key: "sms", label: "문자 (준비중)", disabled: true }
+                ].map(ch => (
+                  <label key={ch.key} className={`flex items-center gap-2 ${ch.disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}>
+                    <input
+                      type="checkbox"
+                      disabled={ch.disabled}
+                      checked={channels[ch.key as keyof typeof channels]}
+                      onChange={(e) => setChannels(prev => ({ ...prev, [ch.key]: e.target.checked }))}
+                      className="w-4 h-4 text-primary rounded"
+                    />
+                    <span className="text-sm text-gray-700">{ch.label}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <h3 className="text-lg font-bold text-gray-900 mb-4">알림 내용</h3>
+          
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">제목</label>
+              <input
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="알림 제목을 입력하세요"
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">내용</label>
+              <textarea
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                placeholder="알림 내용을 입력하세요"
+                rows={6}
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm resize-none"
+              />
+            </div>
+
+            <button
+              onClick={handleSend}
+              disabled={isSending}
+              className="w-full py-3 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 disabled:opacity-50 transition-colors"
+            >
+              {isSending ? "발송 중..." : "알림 발송하기"}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================================
 // Main Component
 // ============================================================================
 
@@ -3139,6 +3359,9 @@ export default function AdminPage() {
 
       case "cart":
         return <AdminCartContent />;
+
+      case "notifications":
+        return <AdminNotificationsContent />;
 
       default:
         return null;
