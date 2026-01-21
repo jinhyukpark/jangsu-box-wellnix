@@ -399,12 +399,22 @@ function AdminNotificationsContent() {
       setContent("");
       setSelectedMemberIds([]);
       setChannels({ email: false, sms: false, app: true });
+      queryClient.invalidateQueries({ queryKey: ["admin", "notification-history"] });
     } catch (error) {
       toast({ variant: "destructive", title: "알림 발송에 실패했습니다." });
     } finally {
       setIsSending(false);
     }
   };
+
+  const { data: history = [] } = useQuery<{ date: string; title: string; content: string; sentCount: number; createdAt: string }[]>({
+    queryKey: ["admin", "notification-history"],
+    queryFn: async () => {
+      const res = await fetch("/api/admin/notifications/history", { credentials: "include" });
+      if (!res.ok) return [];
+      return res.json();
+    },
+  });
 
   return (
     <div>
@@ -533,6 +543,41 @@ function AdminNotificationsContent() {
               {isSending ? "발송 중..." : "알림 발송하기"}
             </button>
           </div>
+        </div>
+      </div>
+
+      {/* 발송 히스토리 */}
+      <div className="mt-8">
+        <h2 className="text-xl font-bold text-gray-900 mb-4">발송 히스토리</h2>
+        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+          <table className="w-full">
+            <thead className="bg-gray-50 border-b border-gray-200">
+              <tr>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">날짜</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">제목</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">내용</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">발송 수</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {history.length === 0 ? (
+                <tr>
+                  <td colSpan={4} className="px-4 py-8 text-center text-sm text-gray-500">
+                    발송된 알림이 없습니다.
+                  </td>
+                </tr>
+              ) : (
+                history.map((item, idx) => (
+                  <tr key={idx} className="hover:bg-gray-50">
+                    <td className="px-4 py-3 text-sm text-gray-900 whitespace-nowrap">{item.date}</td>
+                    <td className="px-4 py-3 text-sm text-gray-900">{item.title}</td>
+                    <td className="px-4 py-3 text-sm text-gray-600 max-w-xs truncate">{item.content}</td>
+                    <td className="px-4 py-3 text-sm text-gray-900">{item.sentCount}명</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

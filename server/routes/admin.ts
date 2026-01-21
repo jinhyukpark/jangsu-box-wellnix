@@ -376,6 +376,16 @@ router.get("/api/admin/cart/stats", requireAdmin, async (req: Request, res: Resp
   }
 });
 
+router.get("/api/admin/notifications/history", requireAdmin, async (req: Request, res: Response) => {
+  try {
+    const history = await storage.getNotificationHistory();
+    res.json(history);
+  } catch (error) {
+    console.error("Admin notification history error:", error);
+    res.status(500).json({ error: "알림 히스토리를 가져오는데 실패했습니다" });
+  }
+});
+
 router.post("/api/admin/notifications/send", requireAdmin, async (req: Request, res: Response) => {
   try {
     const { targetType, channels, title, content, memberIds } = req.body;
