@@ -83,7 +83,7 @@ export default function MyPage() {
               기업문의
             </button>
             <button 
-              onClick={() => setLocation("/mypage/notifications")}
+              onClick={() => setLocation("/notifications")}
               className="p-2 relative" 
               data-testid="notifications"
             >
