@@ -1,5 +1,7 @@
 import { Heart, Star } from "lucide-react";
 import { Link } from "wouter";
+import { useQueryClient } from "@tanstack/react-query";
+import { useCallback } from "react";
 
 interface ProductCardProps {
   id: string;
@@ -14,18 +16,35 @@ interface ProductCardProps {
 
 export function ProductCard({ id, name, price, originalPrice, image, rating, reviewCount, badge }: ProductCardProps) {
   const discount = originalPrice ? Math.round((1 - price / originalPrice) * 100) : 0;
+  const queryClient = useQueryClient();
+
+  const prefetchProduct = useCallback(() => {
+    queryClient.prefetchQuery({
+      queryKey: ["/api/products", id],
+      queryFn: async () => {
+        const res = await fetch(`/api/products/${id}`);
+        if (!res.ok) throw new Error("Failed to fetch");
+        return res.json();
+      },
+      staleTime: 1000 * 60 * 5,
+    });
+  }, [id, queryClient]);
   
   return (
     <Link 
       href={`/products/${id}`}
       className="flex-shrink-0 w-40 group cursor-pointer block"
       data-testid={`product-card-${id}`}
+      onMouseEnter={prefetchProduct}
+      onTouchStart={prefetchProduct}
     >
       <div className="relative mb-2 rounded overflow-hidden bg-gray-50">
         <img 
           src={image} 
           alt={name}
           draggable={false}
+          loading="lazy"
+          decoding="async"
           className="w-full aspect-square object-cover group-hover:scale-105 transition-transform duration-300 select-none pointer-events-none"
         />
         {badge && (

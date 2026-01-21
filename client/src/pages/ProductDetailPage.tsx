@@ -26,6 +26,7 @@ export default function ProductDetailPage() {
       if (!res.ok) throw new Error("상품을 불러올 수 없습니다");
       return res.json();
     },
+    staleTime: 1000 * 60 * 5,
   });
 
   const { data: reviews = [], isLoading: isReviewsLoading } = useQuery({
@@ -211,6 +212,9 @@ export default function ProductDetailPage() {
                   src={currentImage}
                   alt={product.name}
                   className="w-full h-full object-cover"
+                  loading="eager"
+                  decoding="async"
+                  fetchPriority="high"
                 />
                 {totalImages > 1 && (
                   <>
