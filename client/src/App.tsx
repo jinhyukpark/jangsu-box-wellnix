@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AdminUIProvider } from "@/contexts/AdminUIContext";
+import { PullToRefresh } from "@/components/PullToRefresh";
 import Home from "@/pages/Home";
 import SearchPage from "@/pages/SearchPage";
 import GiftsPage from "@/pages/GiftsPage";
@@ -86,7 +87,9 @@ function App() {
       <TooltipProvider>
         <AdminUIProvider>
           <Toaster />
-          <Router />
+          <PullToRefresh>
+            <Router />
+          </PullToRefresh>
         </AdminUIProvider>
       </TooltipProvider>
     </QueryClientProvider>
