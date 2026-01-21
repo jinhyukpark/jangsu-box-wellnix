@@ -89,9 +89,6 @@ export default function NotificationsPage() {
     if (!notification.isRead) {
       markReadMutation.mutate(notification.id);
     }
-    if (notification.link) {
-      setLocation(notification.link);
-    }
   };
 
   const unreadCount = notifications.filter(n => !n.isRead).length;
