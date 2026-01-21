@@ -1,0 +1,17 @@
+{
+  "name": "웰닉스",
+  "short_name": "웰닉스",
+  "description": "장수를 위한 건강 선물",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#16a34a",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}
