@@ -68,11 +68,19 @@ export default function MyPage() {
             >
               기업문의
             </button>
-            <button className="p-2 relative" data-testid="notifications">
+            <button 
+              onClick={() => setLocation("/mypage/notifications")}
+              className="p-2 relative" 
+              data-testid="notifications"
+            >
               <Bell className="w-5 h-5 text-gray-600" />
               <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
             </button>
-            <button className="p-2 relative" data-testid="cart">
+            <button 
+              onClick={() => setLocation("/cart")}
+              className="p-2 relative" 
+              data-testid="cart"
+            >
               <ShoppingCart className="w-5 h-5 text-gray-600" />
               <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-primary text-white text-xs font-bold rounded-full flex items-center justify-center">3</span>
             </button>
