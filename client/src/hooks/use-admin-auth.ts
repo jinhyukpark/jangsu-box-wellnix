@@ -29,8 +29,9 @@ export function useAdminLogin() {
     mutationFn: async (credentials) => {
       return apiClient.post<AdminLoginResponse>("/admin/auth/login", credentials);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin", "auth"] });
+    onSuccess: (data) => {
+      // 로그인 성공 시 즉시 캐시 업데이트 (깜빡임 방지)
+      queryClient.setQueryData<AdminAuthResponse>(["admin", "auth"], { admin: data.admin });
     },
   });
 }
