@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(pkill:*)",
-      "Bash(lsof:*)"
+      "Bash(lsof:*)",
+      "Bash(npx drizzle-kit push:*)"
     ]
   }
 }

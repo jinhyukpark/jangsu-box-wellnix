@@ -1,5 +1,5 @@
 import { useLocation } from "wouter";
-import { Bell, ShoppingCart, ChevronRight, Gift, Package, Heart, Star, Truck, Award } from "lucide-react";
+import { Bell, ShoppingCart, ChevronRight, Gift, Package, Heart, Star, Truck, Award, Loader2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { AppLayout } from "@/components/AppLayout";
 import { LoginForm } from "@/components/LoginForm";
@@ -17,7 +17,7 @@ const recentOrders = [
 
 export default function MyPage() {
   const [, setLocation] = useLocation();
-  const { user, isAuthenticated, login, register, logout, isLoginLoading, isRegisterLoading } = useAuth();
+  const { user, isAuthenticated, isLoading: isAuthLoading, login, register, logout, isLoginLoading, isRegisterLoading } = useAuth();
 
   const { data: cartItems = [] } = useQuery<any[]>({
     queryKey: ["/api/cart"],
@@ -107,7 +107,12 @@ export default function MyPage() {
       </header>
 
       <div className="pb-24">
-        {!isAuthenticated ? (
+        {isAuthLoading ? (
+          <div className="flex flex-col items-center justify-center py-20">
+            <Loader2 className="w-8 h-8 animate-spin text-primary mb-4" />
+            <p className="text-gray-500">로그인 상태 확인 중...</p>
+          </div>
+        ) : !isAuthenticated ? (
           <>
             <LoginForm onLogin={handleAuth} isLoading={isLoginLoading || isRegisterLoading} />
 
