@@ -44,3 +44,9 @@ integrations = ["javascript_object_storage:2.0.0"]
 
 [objectStorage]
 defaultBucketID = "replit-objstore-e05a3043-92db-429d-9457-bb132c41aefb"
+
+[userenv]
+
+[userenv.development]
+VITE_API_BASE_URL = "/api"
+PORT = "5000"
