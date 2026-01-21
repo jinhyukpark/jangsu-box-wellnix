@@ -90,15 +90,17 @@ export function Header() {
               <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
             </button>
           </Link>
-          <button 
-            className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors relative"
-            data-testid="header-cart"
-          >
-            <ShoppingCart className="w-5 h-5 text-gray-600" />
-            <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-primary text-white text-xs font-bold rounded-full flex items-center justify-center">
-              3
-            </span>
-          </button>
+          <Link href="/cart">
+            <button 
+              className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors relative"
+              data-testid="header-cart"
+            >
+              <ShoppingCart className="w-5 h-5 text-gray-600" />
+              <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-primary text-white text-xs font-bold rounded-full flex items-center justify-center">
+                3
+              </span>
+            </button>
+          </Link>
         </div>
       </div>
       
