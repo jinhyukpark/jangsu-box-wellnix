@@ -17,12 +17,17 @@ export function PullToRefresh({
   const startY = useRef(0);
   const isDragging = useRef(false);
 
+  const getScrollTop = useCallback(() => {
+    const root = document.getElementById("root");
+    return root ? root.scrollTop : 0;
+  }, []);
+
   const handleTouchStart = useCallback((e: TouchEvent) => {
-    if (window.scrollY === 0) {
+    if (getScrollTop() === 0) {
       startY.current = e.touches[0].clientY;
       isDragging.current = true;
     }
-  }, []);
+  }, [getScrollTop]);
 
   const handleTouchMove = useCallback((e: TouchEvent) => {
     if (!isDragging.current || isRefreshing) return;
@@ -30,12 +35,12 @@ export function PullToRefresh({
     const currentY = e.touches[0].clientY;
     const diff = currentY - startY.current;
     
-    if (diff > 0 && window.scrollY === 0) {
+    if (diff > 0 && getScrollTop() === 0) {
       e.preventDefault();
       const distance = Math.min(diff * 0.5, threshold * 1.5);
       setPullDistance(distance);
     }
-  }, [isRefreshing, threshold]);
+  }, [isRefreshing, threshold, getScrollTop]);
 
   const handleTouchEnd = useCallback(() => {
     if (!isDragging.current) return;
@@ -56,14 +61,17 @@ export function PullToRefresh({
   }, [pullDistance, threshold, isRefreshing, onRefresh]);
 
   useEffect(() => {
-    document.addEventListener("touchstart", handleTouchStart, { passive: true });
-    document.addEventListener("touchmove", handleTouchMove, { passive: false });
-    document.addEventListener("touchend", handleTouchEnd, { passive: true });
+    const root = document.getElementById("root");
+    if (!root) return;
+
+    root.addEventListener("touchstart", handleTouchStart, { passive: true });
+    root.addEventListener("touchmove", handleTouchMove, { passive: false });
+    root.addEventListener("touchend", handleTouchEnd, { passive: true });
 
     return () => {
-      document.removeEventListener("touchstart", handleTouchStart);
-      document.removeEventListener("touchmove", handleTouchMove);
-      document.removeEventListener("touchend", handleTouchEnd);
+      root.removeEventListener("touchstart", handleTouchStart);
+      root.removeEventListener("touchmove", handleTouchMove);
+      root.removeEventListener("touchend", handleTouchEnd);
     };
   }, [handleTouchStart, handleTouchMove, handleTouchEnd]);
 
