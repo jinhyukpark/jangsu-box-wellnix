@@ -345,4 +345,35 @@ router.put("/api/admin/main-page-settings", requireAdmin, async (req: Request, r
   }
 });
 
+// Admin Cart Management
+router.get("/api/admin/cart", requireAdmin, async (req: Request, res: Response) => {
+  try {
+    const { startDate, endDate } = req.query;
+    let start: Date | undefined;
+    let end: Date | undefined;
+    
+    if (startDate && endDate) {
+      start = new Date(startDate as string);
+      end = new Date(endDate as string);
+      end.setHours(23, 59, 59, 999);
+    }
+    
+    const cartItems = await storage.getAllCartItemsAdmin(start, end);
+    res.json(cartItems);
+  } catch (error) {
+    console.error("Admin cart fetch error:", error);
+    res.status(500).json({ error: "장바구니 목록을 가져오는데 실패했습니다" });
+  }
+});
+
+router.get("/api/admin/cart/stats", requireAdmin, async (req: Request, res: Response) => {
+  try {
+    const stats = await storage.getCartStatsByMember();
+    res.json(stats);
+  } catch (error) {
+    console.error("Admin cart stats error:", error);
+    res.status(500).json({ error: "장바구니 통계를 가져오는데 실패했습니다" });
+  }
+});
+
 export default router;

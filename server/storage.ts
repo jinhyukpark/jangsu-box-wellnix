@@ -103,6 +103,8 @@ export interface IStorage {
   updateCartItem(id: number, quantity: number): Promise<CartItem | undefined>;
   removeFromCart(id: number): Promise<boolean>;
   clearCart(memberId: number): Promise<boolean>;
+  getAllCartItemsAdmin(startDate?: Date, endDate?: Date): Promise<any[]>;
+  getCartStatsByMember(): Promise<any[]>;
 
   // Orders
   getOrder(id: number): Promise<Order | undefined>;
@@ -506,6 +508,93 @@ export class DatabaseStorage implements IStorage {
   async clearCart(memberId: number): Promise<boolean> {
     await db.delete(cartItems).where(eq(cartItems.memberId, memberId));
     return true;
+  }
+
+  async getAllCartItemsAdmin(startDate?: Date, endDate?: Date): Promise<any[]> {
+    let query = db
+      .select({
+        id: cartItems.id,
+        memberId: cartItems.memberId,
+        productId: cartItems.productId,
+        quantity: cartItems.quantity,
+        createdAt: cartItems.createdAt,
+        memberName: members.name,
+        memberEmail: members.email,
+        productName: products.name,
+        productPrice: products.price,
+        productImage: products.image,
+      })
+      .from(cartItems)
+      .leftJoin(members, eq(cartItems.memberId, members.id))
+      .leftJoin(products, eq(cartItems.productId, products.id))
+      .orderBy(desc(cartItems.createdAt));
+
+    if (startDate && endDate) {
+      return db
+        .select({
+          id: cartItems.id,
+          memberId: cartItems.memberId,
+          productId: cartItems.productId,
+          quantity: cartItems.quantity,
+          createdAt: cartItems.createdAt,
+          memberName: members.name,
+          memberEmail: members.email,
+          productName: products.name,
+          productPrice: products.price,
+          productImage: products.image,
+        })
+        .from(cartItems)
+        .leftJoin(members, eq(cartItems.memberId, members.id))
+        .leftJoin(products, eq(cartItems.productId, products.id))
+        .where(and(gte(cartItems.createdAt, startDate), lte(cartItems.createdAt, endDate)))
+        .orderBy(desc(cartItems.createdAt));
+    }
+
+    return query;
+  }
+
+  async getCartStatsByMember(): Promise<any[]> {
+    const allCartItems = await db
+      .select({
+        memberId: cartItems.memberId,
+        memberName: members.name,
+        memberEmail: members.email,
+        productId: cartItems.productId,
+        quantity: cartItems.quantity,
+        createdAt: cartItems.createdAt,
+        productPrice: products.price,
+      })
+      .from(cartItems)
+      .leftJoin(members, eq(cartItems.memberId, members.id))
+      .leftJoin(products, eq(cartItems.productId, products.id));
+
+    const allOrders = await db
+      .select({
+        memberId: orders.memberId,
+        orderItems: orderItems,
+      })
+      .from(orders)
+      .leftJoin(orderItems, eq(orders.id, orderItems.orderId));
+
+    const memberStats: Record<number, any> = {};
+
+    for (const item of allCartItems) {
+      if (!item.memberId) continue;
+      if (!memberStats[item.memberId]) {
+        memberStats[item.memberId] = {
+          memberId: item.memberId,
+          memberName: item.memberName,
+          memberEmail: item.memberEmail,
+          cartItemCount: 0,
+          cartTotalAmount: 0,
+          purchasedCount: 0,
+        };
+      }
+      memberStats[item.memberId].cartItemCount += item.quantity || 1;
+      memberStats[item.memberId].cartTotalAmount += (item.productPrice || 0) * (item.quantity || 1);
+    }
+
+    return Object.values(memberStats);
   }
 
   // Orders

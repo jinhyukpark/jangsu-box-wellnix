@@ -111,6 +111,215 @@ interface BrandingData {
 }
 
 // ============================================================================
+// Admin Cart Content Component
+// ============================================================================
+
+interface CartItemData {
+  id: number;
+  memberId: number;
+  productId: number;
+  quantity: number;
+  createdAt: string;
+  memberName: string | null;
+  memberEmail: string | null;
+  productName: string | null;
+  productPrice: number | null;
+  productImage: string | null;
+}
+
+interface CartStats {
+  memberId: number;
+  memberName: string | null;
+  memberEmail: string | null;
+  cartItemCount: number;
+  cartTotalAmount: number;
+}
+
+function AdminCartContent() {
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [viewMode, setViewMode] = useState<"items" | "stats">("stats");
+
+  const { data: cartItems = [], isLoading: itemsLoading, refetch: refetchItems } = useQuery<CartItemData[]>({
+    queryKey: ["admin", "cart", startDate, endDate],
+    queryFn: async () => {
+      let url = "/api/admin/cart";
+      if (startDate && endDate) {
+        url += `?startDate=${startDate}&endDate=${endDate}`;
+      }
+      const res = await fetch(url, { credentials: "include" });
+      if (!res.ok) throw new Error("Failed to fetch cart items");
+      return res.json();
+    },
+  });
+
+  const { data: cartStats = [], isLoading: statsLoading } = useQuery<CartStats[]>({
+    queryKey: ["admin", "cart", "stats"],
+    queryFn: async () => {
+      const res = await fetch("/api/admin/cart/stats", { credentials: "include" });
+      if (!res.ok) throw new Error("Failed to fetch cart stats");
+      return res.json();
+    },
+  });
+
+  const handleSearch = () => {
+    refetchItems();
+  };
+
+  const formatDate = (dateString: string) => {
+    if (!dateString) return "-";
+    const date = new Date(dateString);
+    return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, "0")}.${String(date.getDate()).padStart(2, "0")}`;
+  };
+
+  const formatPrice = (price: number | null) => {
+    if (price === null) return "-";
+    return `${price.toLocaleString()}원`;
+  };
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-xl font-bold text-gray-900">장바구니 관리</h2>
+      </div>
+
+      <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as "items" | "stats")} className="mb-4">
+        <TabsList className="bg-gray-100">
+          <TabsTrigger value="stats" className="data-[state=active]:bg-white">회원별 통계</TabsTrigger>
+          <TabsTrigger value="items" className="data-[state=active]:bg-white">장바구니 상품 목록</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="stats" className="mt-4">
+          {statsLoading ? (
+            <div className="text-center py-8 text-gray-500">로딩중...</div>
+          ) : cartStats.length === 0 ? (
+            <div className="text-center py-16 text-gray-400">
+              장바구니에 상품이 없습니다.
+            </div>
+          ) : (
+            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b border-gray-200">
+                  <tr>
+                    <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">회원</th>
+                    <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">이메일</th>
+                    <th className="text-center px-4 py-3 text-sm font-medium text-gray-600">장바구니 상품 수</th>
+                    <th className="text-right px-4 py-3 text-sm font-medium text-gray-600">예상 금액</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {cartStats.map((stat) => (
+                    <tr key={stat.memberId} className="border-b border-gray-100 hover:bg-gray-50">
+                      <td className="px-4 py-3 text-sm text-gray-900 font-medium">
+                        {stat.memberName || "-"}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-600">
+                        {stat.memberEmail || "-"}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-center">
+                        <span className="px-2 py-1 bg-primary/10 text-primary rounded-full font-medium">
+                          {stat.cartItemCount}개
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-sm text-right font-medium text-gray-900">
+                        {formatPrice(stat.cartTotalAmount)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="items" className="mt-4">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="flex items-center gap-2">
+              <label className="text-sm text-gray-600">시작일:</label>
+              <Input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="w-40"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <label className="text-sm text-gray-600">종료일:</label>
+              <Input
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="w-40"
+              />
+            </div>
+            <Button onClick={handleSearch} className="bg-primary text-white">
+              검색
+            </Button>
+          </div>
+
+          {itemsLoading ? (
+            <div className="text-center py-8 text-gray-500">로딩중...</div>
+          ) : cartItems.length === 0 ? (
+            <div className="text-center py-16 text-gray-400">
+              장바구니에 상품이 없습니다.
+            </div>
+          ) : (
+            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden overflow-x-auto">
+              <table className="w-full min-w-[800px]">
+                <thead className="bg-gray-50 border-b border-gray-200">
+                  <tr>
+                    <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">상품</th>
+                    <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">회원</th>
+                    <th className="text-center px-4 py-3 text-sm font-medium text-gray-600">수량</th>
+                    <th className="text-right px-4 py-3 text-sm font-medium text-gray-600">가격</th>
+                    <th className="text-center px-4 py-3 text-sm font-medium text-gray-600">추가일</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {cartItems.map((item) => (
+                    <tr key={item.id} className="border-b border-gray-100 hover:bg-gray-50">
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-3">
+                          {item.productImage && (
+                            <img 
+                              src={item.productImage} 
+                              alt={item.productName || ""} 
+                              className="w-12 h-12 object-cover rounded"
+                            />
+                          )}
+                          <span className="text-sm font-medium text-gray-900">
+                            {item.productName || "-"}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div>
+                          <p className="text-sm font-medium text-gray-900">{item.memberName || "-"}</p>
+                          <p className="text-xs text-gray-500">{item.memberEmail || "-"}</p>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-center text-sm text-gray-900">
+                        {item.quantity}개
+                      </td>
+                      <td className="px-4 py-3 text-right text-sm font-medium text-gray-900">
+                        {formatPrice(item.productPrice)}
+                      </td>
+                      <td className="px-4 py-3 text-center text-sm text-gray-500">
+                        {formatDate(item.createdAt)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}
+
+// ============================================================================
 // Main Component
 // ============================================================================
 
@@ -2927,6 +3136,9 @@ export default function AdminPage() {
             </Tabs>
           </div>
         );
+
+      case "cart":
+        return <AdminCartContent />;
 
       default:
         return null;
