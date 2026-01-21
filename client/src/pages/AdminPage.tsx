@@ -681,8 +681,9 @@ export default function AdminPage() {
     setIsFaqModalOpen(true);
   };
 
-  // authLoading만 체크 (authFetching은 백그라운드 리페치 시에도 true가 되어 무한 로딩 발생)
-  if (authLoading) {
+  // 로딩 중이거나 아직 데이터를 받지 못한 경우 로딩 표시
+  // authData가 undefined인 경우는 아직 쿼리가 완료되지 않은 상태
+  if (authLoading || authData === undefined) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -690,7 +691,8 @@ export default function AdminPage() {
     );
   }
 
-  if (!authData?.admin) {
+  // authData가 존재하지만 admin이 없는 경우에만 권한없음 표시
+  if (authData && !authData.admin) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
         <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-8 max-w-md w-full text-center">
