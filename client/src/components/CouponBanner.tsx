@@ -10,7 +10,7 @@ export function CouponBanner() {
     <div className="bg-amber-500 text-white px-4 py-2.5 flex items-center justify-between">
       <div className="flex-1 text-center">
         <span className="text-sm font-medium">
-          🎁 카카오톡 채널 추가하고 <strong>20% 쿠폰</strong> 받기
+          🎁 카카오톡 채널 추가하고 <strong>10% 쿠폰</strong> 받기
         </span>
       </div>
       <button 
