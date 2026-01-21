@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useParams, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
-import { ChevronLeft, Home, ShoppingCart, Star, Heart, Gift, ChevronDown, ChevronUp, Play } from "lucide-react";
+import { ChevronLeft, Home, ShoppingCart, Star, Heart, Gift, ChevronDown, ChevronUp, Play, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
@@ -18,6 +18,7 @@ export default function ProductDetailPage() {
   const [showRefundInfo, setShowRefundInfo] = useState(false);
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [quantity, setQuantity] = useState(1);
+  const [activeTab, setActiveTab] = useState("description");
 
   const { data: product, isLoading: isProductLoading } = useQuery({
     queryKey: ["/api/products", id],
@@ -36,10 +37,11 @@ export default function ProductDetailPage() {
       if (!res.ok) return [];
       return res.json();
     },
-    enabled: !!id,
+    enabled: !!id && activeTab === "reviews",
+    staleTime: 1000 * 60 * 5,
   });
 
-  const isLoading = isProductLoading || isReviewsLoading;
+  const isLoading = isProductLoading;
 
   const allMedia: { type: 'image' | 'video'; url: string }[] = reviews.flatMap((r: any) => {
     const images = Array.isArray(r.images) ? r.images : [];
@@ -291,7 +293,7 @@ export default function ProductDetailPage() {
         </div>
       </div>
 
-      <Tabs defaultValue="description" className="w-full">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="w-full grid grid-cols-3 bg-white border-b border-gray-200 rounded-none h-12 p-0">
           <TabsTrigger 
             value="description" 
@@ -303,7 +305,7 @@ export default function ProductDetailPage() {
             value="reviews" 
             className="h-full data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none bg-transparent -mb-px"
           >
-            상품 리뷰 ({reviews.length})
+            상품 리뷰 ({product.reviewCount || 0})
           </TabsTrigger>
           <TabsTrigger 
             value="info" 
@@ -412,6 +414,12 @@ export default function ProductDetailPage() {
         <TabsContent value="reviews" className="p-4">
           <h3 className="text-lg font-bold text-gray-900 mb-4">상품 리뷰</h3>
           
+          {isReviewsLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            </div>
+          ) : (
+          <>
           <div className="flex items-center gap-6 mb-6">
             <div className="text-center">
               <p className="text-sm text-gray-500">구매자 평점</p>
@@ -538,6 +546,8 @@ export default function ProductDetailPage() {
               </div>
             ))}
           </div>
+          </>
+          )}
         </TabsContent>
 
         <TabsContent value="info" className="p-4">
