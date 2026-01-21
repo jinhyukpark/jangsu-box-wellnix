@@ -521,11 +521,11 @@ export type MemberCoupon = typeof memberCoupons.$inferSelect;
 export const notifications = pgTable("notifications", {
   id: serial("id").primaryKey(),
   memberId: integer("member_id").references(() => members.id).notNull(),
-  type: varchar("type", { length: 50 }).notNull(),
   title: varchar("title", { length: 200 }).notNull(),
   content: text("content"),
-  link: text("link"),
+  notificationType: varchar("notification_type", { length: 50 }),
   isRead: boolean("is_read").default(false),
+  link: text("link"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

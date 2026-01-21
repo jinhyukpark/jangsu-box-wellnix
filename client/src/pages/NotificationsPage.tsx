@@ -9,7 +9,7 @@ import { apiRequest } from "@/lib/queryClient";
 interface Notification {
   id: number;
   memberId: number;
-  type: string;
+  notificationType: string | null;
   title: string;
   content: string | null;
   link: string | null;
@@ -17,7 +17,7 @@ interface Notification {
   createdAt: string;
 }
 
-function getNotificationIcon(type: string) {
+function getNotificationIcon(type: string | null) {
   switch (type) {
     case "order":
       return <Package className="w-5 h-5" />;
@@ -201,7 +201,7 @@ export default function NotificationsPage() {
                 <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
                   notification.isRead ? "bg-gray-100 text-gray-500" : "bg-primary/10 text-primary"
                 }`}>
-                  {getNotificationIcon(notification.type)}
+                  {getNotificationIcon(notification.notificationType)}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-2">
