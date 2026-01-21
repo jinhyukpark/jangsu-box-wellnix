@@ -1,11 +1,22 @@
 import { useState } from "react";
 import { useParams, useLocation } from "wouter";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ChevronLeft, Home, ShoppingCart, Star, Heart, Gift, ChevronDown, ChevronUp, Play, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { AppLayout } from "@/components/AppLayout";
+import { useAuth } from "@/hooks/use-auth";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 
@@ -13,12 +24,15 @@ export default function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const { user, isAuthenticated } = useAuth();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showShippingInfo, setShowShippingInfo] = useState(false);
   const [showRefundInfo, setShowRefundInfo] = useState(false);
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState("description");
+  const [showCartDialog, setShowCartDialog] = useState(false);
 
   const { data: product, isLoading: isProductLoading } = useQuery({
     queryKey: ["/api/products", id],
@@ -52,11 +66,64 @@ export default function ProductDetailPage() {
     ];
   }).slice(0, 20);
 
+  const addToCartMutation = useMutation({
+    mutationFn: async ({ productId, quantity }: { productId: number; quantity: number }) => {
+      const res = await fetch("/api/cart", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ productId, quantity }),
+      });
+      if (!res.ok) throw new Error("장바구니 추가 실패");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["cart"] });
+    },
+  });
+
+  const handleHeaderCartClick = async () => {
+    if (!isAuthenticated) {
+      setLocation("/mypage");
+      return;
+    }
+    
+    try {
+      await addToCartMutation.mutateAsync({ 
+        productId: parseInt(id!), 
+        quantity: 1 
+      });
+      setShowCartDialog(true);
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "오류",
+        description: "장바구니에 담는 중 오류가 발생했습니다.",
+      });
+    }
+  };
+
   const handleAddToCart = () => {
-    toast({
-      title: "장바구니에 담았습니다",
-      description: `${product?.name} ${quantity}개가 장바구니에 추가되었습니다.`,
-    });
+    if (!isAuthenticated) {
+      setLocation("/mypage");
+      return;
+    }
+    
+    addToCartMutation.mutate(
+      { productId: parseInt(id!), quantity },
+      {
+        onSuccess: () => {
+          setShowCartDialog(true);
+        },
+        onError: () => {
+          toast({
+            variant: "destructive",
+            title: "오류",
+            description: "장바구니에 담는 중 오류가 발생했습니다.",
+          });
+        },
+      }
+    );
   };
 
   const handleBuyNow = () => {
@@ -190,8 +257,17 @@ export default function ProductDetailPage() {
               <button onClick={() => setLocation("/")} className="p-1" data-testid="button-home">
                 <Home className="w-5 h-5 text-gray-600" />
               </button>
-              <button onClick={() => setLocation("/mypage")} className="p-1" data-testid="button-cart">
-                <ShoppingCart className="w-5 h-5 text-gray-600" />
+              <button 
+                onClick={handleHeaderCartClick} 
+                className="p-1" 
+                data-testid="button-cart"
+                disabled={addToCartMutation.isPending}
+              >
+                {addToCartMutation.isPending ? (
+                  <Loader2 className="w-5 h-5 text-gray-600 animate-spin" />
+                ) : (
+                  <ShoppingCart className="w-5 h-5 text-gray-600" />
+                )}
               </button>
             </div>
           </div>
@@ -661,6 +737,26 @@ export default function ProductDetailPage() {
         </div>
       </div>
       </div>
+
+      <AlertDialog open={showCartDialog} onOpenChange={setShowCartDialog}>
+        <AlertDialogContent className="max-w-[350px] rounded-xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle>장바구니에 담았습니다</AlertDialogTitle>
+            <AlertDialogDescription>
+              장바구니로 이동하시겠습니까?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>계속 쇼핑하기</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={() => setLocation("/cart")}
+              className="bg-primary hover:bg-primary/90"
+            >
+              장바구니로 이동
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AppLayout>
   );
 }
