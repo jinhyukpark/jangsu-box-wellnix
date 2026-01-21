@@ -35,13 +35,17 @@ export async function registerRoutes(
     ssl: { rejectUnauthorized: false },
   });
 
+  // 세션 테이블이 올바른 스키마로 생성되도록 확인
+  const sessionStore = new PgSession({
+    pool,
+    tableName: "sessions",
+    createTableIfMissing: true,
+    // v9에서는 options 컬럼이 필요 없음
+  });
+
   app.use(
     session({
-      store: new PgSession({
-        pool,
-        tableName: "sessions",
-        createTableIfMissing: true,
-      }),
+      store: sessionStore,
       secret: process.env.SESSION_SECRET || "wellnix-secret-key-2024",
       resave: false,
       saveUninitialized: false,

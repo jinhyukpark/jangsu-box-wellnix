@@ -1,3 +1,5 @@
+// 환경 변수 로드 (가장 먼저 실행되어야 함)
+import "./env";
 import { drizzle } from "drizzle-orm/node-postgres";
 import pg from "pg";
 import * as schema from "@shared/schema";

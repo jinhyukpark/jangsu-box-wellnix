@@ -210,12 +210,18 @@
 }
 
 @keyframes slideUp {
-  from { 
-    opacity: 0; 
-    transform: translateY(20px); 
+  from {
+    opacity: 0;
+    transform: translateY(20px);
   }
-  to { 
-    opacity: 1; 
-    transform: translateY(0); 
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
+}
+
+/* Sonner toast를 앱 컨테이너 내에 표시 */
+[data-sonner-toaster] {
+  --width: 380px !important;
+  right: auto !important;
 }

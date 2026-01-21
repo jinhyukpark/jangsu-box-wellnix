@@ -2,6 +2,7 @@ import { Bell, ShoppingCart, Search } from "lucide-react";
 import { useRef, useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "@/hooks/use-auth";
 
 const defaultMenuItems = [
   { label: "홈", href: "/" },
@@ -17,6 +18,20 @@ export function Header() {
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
+  const { user } = useAuth();
+
+  const { data: cartItems = [] } = useQuery<any[]>({
+    queryKey: ["/api/cart"],
+    queryFn: async () => {
+      const res = await fetch("/api/cart");
+      if (!res.ok) return [];
+      return res.json();
+    },
+    enabled: !!user,
+    staleTime: 30000,
+  });
+
+  const cartCount = cartItems.length;
 
   const { data: promotions = [] } = useQuery<any[]>({
     queryKey: ["/api/promotions"],
@@ -91,14 +106,16 @@ export function Header() {
             </button>
           </Link>
           <Link href="/cart">
-            <button 
+            <button
               className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors relative"
               data-testid="header-cart"
             >
               <ShoppingCart className="w-5 h-5 text-gray-600" />
-              <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-primary text-white text-xs font-bold rounded-full flex items-center justify-center">
-                3
-              </span>
+              {cartCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-primary text-white text-xs font-bold rounded-full flex items-center justify-center">
+                  {cartCount > 99 ? "99+" : cartCount}
+                </span>
+              )}
             </button>
           </Link>
         </div>

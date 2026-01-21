@@ -19,8 +19,17 @@ interface RegisterData {
 async function fetchCurrentUser(): Promise<AuthMember | null> {
   const res = await fetch("/api/auth/me", { credentials: "include" });
   if (!res.ok) return null;
-  const data = await res.json();
-  return data.member;
+  
+  const text = await res.text();
+  if (!text) return null;
+  
+  try {
+    const data = JSON.parse(text);
+    return data.member || null;
+  } catch (e) {
+    console.error("JSON 파싱 오류:", text);
+    return null;
+  }
 }
 
 async function login(data: LoginData): Promise<AuthMember> {
@@ -30,11 +39,29 @@ async function login(data: LoginData): Promise<AuthMember> {
     body: JSON.stringify(data),
     credentials: "include",
   });
-  if (!res.ok) {
-    const error = await res.json();
-    throw new Error(error.error || "로그인에 실패했습니다");
+  
+  // 응답 본문 확인
+  const text = await res.text();
+  if (!text) {
+    throw new Error("서버에서 응답이 없습니다. 잠시 후 다시 시도해주세요.");
   }
-  const result = await res.json();
+  
+  let result;
+  try {
+    result = JSON.parse(text);
+  } catch (e) {
+    console.error("JSON 파싱 오류:", text);
+    throw new Error("서버 응답을 처리할 수 없습니다. 잠시 후 다시 시도해주세요.");
+  }
+  
+  if (!res.ok) {
+    throw new Error(result.error || result.message || "로그인에 실패했습니다");
+  }
+  
+  if (!result.member) {
+    throw new Error("로그인 정보를 받아올 수 없습니다.");
+  }
+  
   return result.member;
 }
 
@@ -45,11 +72,29 @@ async function register(data: RegisterData): Promise<AuthMember> {
     body: JSON.stringify(data),
     credentials: "include",
   });
-  if (!res.ok) {
-    const error = await res.json();
-    throw new Error(error.error || "회원가입에 실패했습니다");
+  
+  // 응답 본문 확인
+  const text = await res.text();
+  if (!text) {
+    throw new Error("서버에서 응답이 없습니다. 잠시 후 다시 시도해주세요.");
   }
-  const result = await res.json();
+  
+  let result;
+  try {
+    result = JSON.parse(text);
+  } catch (e) {
+    console.error("JSON 파싱 오류:", text);
+    throw new Error("서버 응답을 처리할 수 없습니다. 잠시 후 다시 시도해주세요.");
+  }
+  
+  if (!res.ok) {
+    throw new Error(result.error || result.message || "회원가입에 실패했습니다");
+  }
+  
+  if (!result.member) {
+    throw new Error("회원가입 정보를 받아올 수 없습니다.");
+  }
+  
   return result.member;
 }
 

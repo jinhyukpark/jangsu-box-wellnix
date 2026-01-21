@@ -1,5 +1,6 @@
 import { useLocation } from "wouter";
 import { Bell, ShoppingCart, ChevronRight, Gift, Package, Heart, Star, Truck, Award } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import { AppLayout } from "@/components/AppLayout";
 import { LoginForm } from "@/components/LoginForm";
 import { images } from "@/lib/images";
@@ -17,6 +18,19 @@ const recentOrders = [
 export default function MyPage() {
   const [, setLocation] = useLocation();
   const { user, isAuthenticated, login, register, logout, isLoginLoading, isRegisterLoading } = useAuth();
+
+  const { data: cartItems = [] } = useQuery<any[]>({
+    queryKey: ["/api/cart"],
+    queryFn: async () => {
+      const res = await fetch("/api/cart");
+      if (!res.ok) return [];
+      return res.json();
+    },
+    enabled: !!user,
+    staleTime: 30000,
+  });
+
+  const cartCount = cartItems.length;
 
   const handleMenuClick = (item: string) => {
     if (item === "회원정보 수정") {
@@ -76,13 +90,17 @@ export default function MyPage() {
               <Bell className="w-5 h-5 text-gray-600" />
               <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
             </button>
-            <button 
+            <button
               onClick={() => setLocation("/cart")}
-              className="p-2 relative" 
+              className="p-2 relative"
               data-testid="cart"
             >
               <ShoppingCart className="w-5 h-5 text-gray-600" />
-              <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-primary text-white text-xs font-bold rounded-full flex items-center justify-center">3</span>
+              {cartCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-primary text-white text-xs font-bold rounded-full flex items-center justify-center">
+                  {cartCount > 99 ? "99+" : cartCount}
+                </span>
+              )}
             </button>
           </div>
         </div>

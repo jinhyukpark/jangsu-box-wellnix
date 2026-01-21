@@ -78,7 +78,7 @@ export default function ProductDetailPage() {
       return res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["cart"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
     },
   });
 

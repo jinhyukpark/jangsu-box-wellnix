@@ -1,8 +1,5 @@
-// Replit 환경이 아닐 때만 .env 파일 로드 (외부 개발 환경용)
-import dotenv from "dotenv";
-if (!process.env.REPL_ID) {
-  dotenv.config();
-}
+// 환경 변수 로드 (Replit/로컬 자동 감지)
+import "./env";
 
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
