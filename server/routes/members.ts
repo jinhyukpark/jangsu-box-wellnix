@@ -86,6 +86,17 @@ router.get("/api/notifications", requireAuth, async (req: Request, res: Response
   res.json(notifications);
 });
 
+router.get("/api/notifications/unread-count", requireAuth, async (req: Request, res: Response) => {
+  const notifications = await storage.getNotifications(req.session.memberId!);
+  const unreadCount = notifications.filter(n => !n.isRead).length;
+  res.json({ count: unreadCount });
+});
+
+router.put("/api/notifications/read-all", requireAuth, async (req: Request, res: Response) => {
+  await storage.markAllNotificationsRead(req.session.memberId!);
+  res.json({ success: true });
+});
+
 router.put("/api/notifications/:id/read", requireAuth, async (req: Request, res: Response) => {
   await storage.markNotificationRead(parseInt(req.params.id));
   res.json({ success: true });

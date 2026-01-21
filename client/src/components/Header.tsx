@@ -33,6 +33,19 @@ export function Header() {
 
   const cartCount = cartItems.length;
 
+  const { data: unreadNotifications = { count: 0 } } = useQuery<{ count: number }>({
+    queryKey: ["/api/notifications/unread-count"],
+    queryFn: async () => {
+      const res = await fetch("/api/notifications/unread-count");
+      if (!res.ok) return { count: 0 };
+      return res.json();
+    },
+    enabled: !!user,
+    staleTime: 30000,
+  });
+
+  const unreadCount = unreadNotifications.count;
+
   const { data: promotions = [] } = useQuery<any[]>({
     queryKey: ["/api/promotions"],
     queryFn: async () => {
@@ -96,13 +109,15 @@ export function Header() {
               <Search className="w-5 h-5 text-gray-600" />
             </button>
           </Link>
-          <Link href="/mypage/notifications">
+          <Link href="/notifications">
             <button 
               className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors relative"
               data-testid="header-notifications"
             >
               <Bell className="w-5 h-5 text-gray-600" />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
+              {unreadCount > 0 && (
+                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
+              )}
             </button>
           </Link>
           <Link href="/cart">
