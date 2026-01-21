@@ -464,6 +464,8 @@ export default function ProductDetailPage() {
                         src={media.url} 
                         alt={`리뷰 미디어 ${index + 1}`}
                         className="w-full h-full object-cover"
+                        loading="lazy"
+                        decoding="async"
                       />
                     )}
                   </div>
@@ -505,6 +507,8 @@ export default function ProductDetailPage() {
                         src={img} 
                         alt={`리뷰 이미지 ${idx + 1}`}
                         className="w-16 h-16 rounded-lg object-cover flex-shrink-0"
+                        loading="lazy"
+                        decoding="async"
                       />
                     ))}
                     {(review.videos || []).map((video: string, idx: number) => (
