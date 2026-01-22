@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Calendar, MapPin, Users, ShoppingCart } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { SEO } from "@/components/SEO";
+import { useAuth } from "@/hooks/use-auth";
 import type { Event } from "@shared/schema";
 
 const months = [
@@ -23,6 +24,20 @@ export default function EventsPage() {
   const [selectedMonth, setSelectedMonth] = useState("2026-01");
   const [selectedCategory, setSelectedCategory] = useState("전체");
   const [selectedStatus, setSelectedStatus] = useState("전체");
+  const { user } = useAuth();
+
+  const { data: cartItems = [] } = useQuery<any[]>({
+    queryKey: ["/api/cart"],
+    queryFn: async () => {
+      const res = await fetch("/api/cart");
+      if (!res.ok) return [];
+      return res.json();
+    },
+    enabled: !!user,
+    staleTime: 30000,
+  });
+
+  const cartCount = cartItems.length;
 
   const { data: events = [], isLoading } = useQuery<Event[]>({
     queryKey: ["/api/events"],
@@ -72,15 +87,17 @@ export default function EventsPage() {
       <header className="sticky top-0 z-50 bg-white border-b border-gray-100">
         <div className="p-4 pb-2 flex items-center justify-between">
           <h1 className="text-xl font-bold text-gray-900">건강 행사</h1>
-          <button 
+          <button
             onClick={() => setLocation("/cart")}
             className="relative p-2 hover:bg-gray-100 rounded-lg transition-colors"
             data-testid="cart-button"
           >
             <ShoppingCart className="w-5 h-5 text-gray-700" />
-            <span className="absolute -top-1 -right-1 w-5 h-5 bg-primary text-white text-xs font-bold rounded-full flex items-center justify-center">
-              2
-            </span>
+            {cartCount > 0 && (
+              <span className="absolute -top-1 -right-1 w-5 h-5 bg-primary text-white text-xs font-bold rounded-full flex items-center justify-center">
+                {cartCount > 99 ? "99+" : cartCount}
+              </span>
+            )}
           </button>
         </div>
         <div className="px-4 pb-2 flex gap-2 overflow-x-auto scrollbar-hide">

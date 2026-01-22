@@ -52,7 +52,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import type { Product, Category, Event as EventType, SubscriptionPlan, Member, Faq, Promotion } from "@shared/schema";
+import type { Product, Category, Event as EventType, SubscriptionPlan, Member, Faq, Promotion, SubscriptionBanner } from "@shared/schema";
 import { MainPageSettingsPanel } from "@/components/admin/MainPageSettingsPanel";
 
 // ============================================================================
@@ -695,6 +695,134 @@ export default function AdminPage() {
     isActive: true,
   });
   const [newFeature, setNewFeature] = useState("");
+
+  // Subscription Banners
+  const { data: subscriptionBanners = [], isLoading: bannersLoading } = useQuery<SubscriptionBanner[]>({
+    queryKey: ["admin", "subscription-banners"],
+    queryFn: async () => {
+      const res = await fetch("/api/admin/subscription-banners", { credentials: "include" });
+      if (!res.ok) throw new Error("Failed to fetch banners");
+      return res.json();
+    },
+    enabled: !!authData?.admin,
+  });
+  const [isBannerModalOpen, setIsBannerModalOpen] = useState(false);
+  const [editingBanner, setEditingBanner] = useState<SubscriptionBanner | null>(null);
+  const [bannerForm, setBannerForm] = useState({
+    image: "",
+    link: "",
+    isActive: true,
+  });
+  const [isBannerUploading, setIsBannerUploading] = useState(false);
+
+  const createBannerMutation = useMutation({
+    mutationFn: async (data: typeof bannerForm) => {
+      const res = await fetch("/api/admin/subscription-banners", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error("Failed to create banner");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "subscription-banners"] });
+      setIsBannerModalOpen(false);
+      resetBannerForm();
+      toast({ title: "등록 완료", description: "배너가 등록되었습니다." });
+    },
+  });
+
+  const updateBannerMutation = useMutation({
+    mutationFn: async ({ id, ...data }: { id: number } & typeof bannerForm) => {
+      const res = await fetch(`/api/admin/subscription-banners/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error("Failed to update banner");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "subscription-banners"] });
+      setIsBannerModalOpen(false);
+      resetBannerForm();
+      toast({ title: "수정 완료", description: "배너가 수정되었습니다." });
+    },
+  });
+
+  const deleteBannerMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const res = await fetch(`/api/admin/subscription-banners/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      if (!res.ok) throw new Error("Failed to delete banner");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "subscription-banners"] });
+      toast({ title: "삭제 완료", description: "배너가 삭제되었습니다." });
+    },
+  });
+
+  const resetBannerForm = () => {
+    setBannerForm({ image: "", link: "", isActive: true });
+    setEditingBanner(null);
+  };
+
+  const openEditBannerModal = (banner: SubscriptionBanner) => {
+    setEditingBanner(banner);
+    setBannerForm({
+      image: banner.image,
+      link: banner.link || "",
+      isActive: banner.isActive ?? true,
+    });
+    setIsBannerModalOpen(true);
+  };
+
+  const handleBannerSubmit = () => {
+    if (!bannerForm.image) {
+      toast({ variant: "destructive", title: "입력 오류", description: "이미지를 업로드해주세요." });
+      return;
+    }
+    if (editingBanner) {
+      updateBannerMutation.mutate({ id: editingBanner.id, ...bannerForm });
+    } else {
+      createBannerMutation.mutate(bannerForm);
+    }
+  };
+
+  const handleDeleteBanner = (id: number) => {
+    if (!confirm("정말 이 배너를 삭제하시겠습니까?")) return;
+    deleteBannerMutation.mutate(id);
+  };
+
+  const handleBannerUpload = async (file: File) => {
+    setIsBannerUploading(true);
+    const formData = new FormData();
+    formData.append("file", file);
+    try {
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+        credentials: "include",
+      });
+      if (res.ok) {
+        const { url } = await res.json();
+        setBannerForm((prev) => ({ ...prev, image: url }));
+        toast({ title: "업로드 완료", description: "이미지가 업로드되었습니다." });
+      } else {
+        throw new Error("업로드 실패");
+      }
+    } catch {
+      toast({ variant: "destructive", title: "업로드 실패", description: "이미지 업로드 중 오류가 발생했습니다." });
+    } finally {
+      setIsBannerUploading(false);
+    }
+  };
 
   const { data: events = [], isLoading: eventsLoading } = useAdminEvents();
   const deleteEventMutation = useDeleteEvent();
@@ -2214,6 +2342,9 @@ export default function AdminPage() {
                 <TabsTrigger value="subscribers" className="data-[state=active]:bg-white rounded-md px-4 py-2">
                   구독자 관리
                 </TabsTrigger>
+                <TabsTrigger value="banners" className="data-[state=active]:bg-white rounded-md px-4 py-2">
+                  장수 베너이미지
+                </TabsTrigger>
               </TabsList>
 
               <TabsContent value="plans">
@@ -2500,6 +2631,155 @@ export default function AdminPage() {
                     </tbody>
                   </table>
                 </div>
+              </TabsContent>
+
+              <TabsContent value="banners">
+                <div className="flex justify-end mb-4">
+                  <Button
+                    onClick={() => { resetBannerForm(); setIsBannerModalOpen(true); }}
+                    className="bg-primary text-white hover:bg-primary/90"
+                  >
+                    + 배너 등록
+                  </Button>
+                </div>
+
+                {bannersLoading ? (
+                  <div className="text-center py-8 text-gray-500">로딩중...</div>
+                ) : (
+                  <div className="grid gap-4">
+                    <p className="text-sm text-gray-500 mb-2">
+                      장수박스 구독 페이지 상단의 카루셀 배너 이미지를 관리합니다. 2개 이상일 경우 자동 슬라이드됩니다.
+                    </p>
+                    {subscriptionBanners.map((banner) => (
+                      <div
+                        key={banner.id}
+                        className={`bg-white rounded-lg border-2 p-4 ${banner.isActive ? 'border-gray-200' : 'border-gray-100 opacity-60'}`}
+                      >
+                        <div className="flex gap-4">
+                          <div className="w-48 h-32 bg-gray-100 rounded overflow-hidden flex-shrink-0">
+                            <img
+                              src={banner.image}
+                              alt="배너 이미지"
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-start justify-between">
+                              <div>
+                                <h4 className="font-bold text-gray-900">배너 #{banner.id}</h4>
+                                {banner.link && (
+                                  <p className="text-xs text-primary mt-2">링크: {banner.link}</p>
+                                )}
+                              </div>
+                              <span className={`text-xs px-2 py-1 rounded ${banner.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
+                                {banner.isActive ? '활성' : '비활성'}
+                              </span>
+                            </div>
+                            <div className="flex gap-2 mt-4">
+                              <button
+                                onClick={() => openEditBannerModal(banner)}
+                                className="text-sm text-primary hover:underline"
+                              >
+                                수정
+                              </button>
+                              <button
+                                onClick={() => handleDeleteBanner(banner.id)}
+                                className="text-sm text-red-500 hover:underline"
+                              >
+                                삭제
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    {subscriptionBanners.length === 0 && (
+                      <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-200">
+                        <p className="text-gray-500">등록된 배너가 없습니다.</p>
+                        <Button
+                          onClick={() => { resetBannerForm(); setIsBannerModalOpen(true); }}
+                          className="mt-4 bg-primary text-white hover:bg-primary/90"
+                        >
+                          첫 배너 등록하기
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                <Dialog open={isBannerModalOpen} onOpenChange={(open) => { if (!open) { setIsBannerModalOpen(false); resetBannerForm(); } }}>
+                  <DialogContent className="sm:max-w-[500px] bg-white">
+                    <DialogHeader>
+                      <DialogTitle className="text-xl font-bold text-gray-900">
+                        {editingBanner ? '배너 수정' : '새 배너 등록'}
+                      </DialogTitle>
+                      <DialogDescription className="text-gray-500">
+                        장수박스 구독 페이지 상단 카루셀에 표시될 배너를 등록합니다.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 pt-4">
+                      <div>
+                        <Label>배너 이미지 *</Label>
+                        <div className="flex gap-2 mt-1">
+                          <Input
+                            value={bannerForm.image}
+                            onChange={(e) => setBannerForm({ ...bannerForm, image: e.target.value })}
+                            placeholder="이미지 URL 입력 또는 업로드"
+                            className="flex-1"
+                          />
+                          <label className={`inline-flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded cursor-pointer transition-colors text-sm ${isBannerUploading ? "opacity-50 cursor-not-allowed" : ""}`}>
+                            <Upload className="w-4 h-4" />
+                            {isBannerUploading ? "업로드중..." : "업로드"}
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              disabled={isBannerUploading}
+                              onChange={async (e) => {
+                                const file = e.target.files?.[0];
+                                if (!file) return;
+                                await handleBannerUpload(file);
+                              }}
+                            />
+                          </label>
+                        </div>
+                        {bannerForm.image && (
+                          <div className="mt-2 w-full h-40 bg-gray-100 rounded overflow-hidden">
+                            <img src={bannerForm.image} alt="배너 미리보기" className="w-full h-full object-cover" />
+                          </div>
+                        )}
+                      </div>
+                      <div>
+                        <Label>링크 URL (선택)</Label>
+                        <Input
+                          value={bannerForm.link}
+                          onChange={(e) => setBannerForm({ ...bannerForm, link: e.target.value })}
+                          placeholder="클릭 시 이동할 URL"
+                        />
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Checkbox
+                          id="banner-active"
+                          checked={bannerForm.isActive}
+                          onCheckedChange={(checked) => setBannerForm({ ...bannerForm, isActive: !!checked })}
+                        />
+                        <Label htmlFor="banner-active">활성화</Label>
+                      </div>
+                    </div>
+                    <div className="flex justify-end gap-2 mt-6">
+                      <Button variant="outline" onClick={() => { setIsBannerModalOpen(false); resetBannerForm(); }}>
+                        취소
+                      </Button>
+                      <Button
+                        onClick={handleBannerSubmit}
+                        disabled={createBannerMutation.isPending || updateBannerMutation.isPending}
+                        className="bg-primary text-white hover:bg-primary/90"
+                      >
+                        {editingBanner ? '수정' : '등록'}
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
               </TabsContent>
             </Tabs>
           </div>

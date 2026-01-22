@@ -36,17 +36,22 @@ export function ProductCard({ id, name, price, originalPrice, image, rating, rev
       className="flex-shrink-0 w-40 group cursor-pointer block"
       data-testid={`product-card-${id}`}
       onMouseEnter={prefetchProduct}
-      onTouchStart={prefetchProduct}
     >
       <div className="relative mb-2 rounded overflow-hidden bg-gray-50">
-        <img 
-          src={image} 
-          alt={name}
-          draggable={false}
-          loading="lazy"
-          decoding="async"
-          className="w-full aspect-square object-cover group-hover:scale-105 transition-transform duration-300 select-none pointer-events-none"
-        />
+        {image ? (
+          <img 
+            src={image} 
+            alt={name}
+            draggable={false}
+            loading="lazy"
+            decoding="async"
+            className="w-full aspect-square object-cover group-hover:scale-105 transition-transform duration-300 select-none pointer-events-none"
+          />
+        ) : (
+          <div className="w-full aspect-square bg-gray-100 flex items-center justify-center">
+            <span className="text-gray-400 text-xs">이미지 없음</span>
+          </div>
+        )}
         {badge && (
           <span className="absolute top-2 left-2 bg-primary text-white text-xs font-semibold px-2 py-1 rounded-lg">
             {badge}

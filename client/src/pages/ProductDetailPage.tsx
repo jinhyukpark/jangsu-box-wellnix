@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useParams, useLocation } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { ChevronLeft, Home, ShoppingCart, Star, Heart, Gift, ChevronDown, ChevronUp, Play, Loader2 } from "lucide-react";
+import { ChevronLeft, Home, ShoppingCart, Star, Heart, Gift, ChevronDown, ChevronUp, Play, Loader2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
@@ -11,12 +11,13 @@ import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
-  AlertDialogContent,
+  AlertDialogAppContent,
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Textarea } from "@/components/ui/textarea";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 
@@ -33,6 +34,10 @@ export default function ProductDetailPage() {
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState("description");
   const [showCartDialog, setShowCartDialog] = useState(false);
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewContent, setReviewContent] = useState("");
 
   const { data: product, isLoading: isProductLoading } = useQuery({
     queryKey: ["/api/products", id],
@@ -79,6 +84,39 @@ export default function ProductDetailPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
+    },
+  });
+
+  const createReviewMutation = useMutation({
+    mutationFn: async ({ productId, rating, content }: { productId: number; rating: number; content: string }) => {
+      const res = await fetch("/api/reviews", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ productId, rating, content }),
+      });
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || "리뷰 작성에 실패했습니다");
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/products", id, "reviews"] });
+      setShowReviewModal(false);
+      setReviewRating(5);
+      setReviewContent("");
+      toast({
+        title: "리뷰 등록 완료",
+        description: "소중한 리뷰 감사합니다!",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        variant: "destructive",
+        title: "오류",
+        description: error.message,
+      });
     },
   });
 
@@ -138,6 +176,30 @@ export default function ProductDetailPage() {
     toast({
       title: "선물하기",
       description: "선물 받는 분의 정보를 입력해주세요.",
+    });
+  };
+
+  const handleWriteReview = () => {
+    if (!isAuthenticated) {
+      setShowLoginPrompt(true);
+      return;
+    }
+    setShowReviewModal(true);
+  };
+
+  const handleSubmitReview = () => {
+    if (!reviewContent.trim()) {
+      toast({
+        variant: "destructive",
+        title: "오류",
+        description: "리뷰 내용을 입력해주세요.",
+      });
+      return;
+    }
+    createReviewMutation.mutate({
+      productId: parseInt(id!),
+      rating: reviewRating,
+      content: reviewContent,
     });
   };
 
@@ -246,8 +308,8 @@ export default function ProductDetailPage() {
 
   return (
     <AppLayout hideNav>
-      <div className="h-screen bg-white flex flex-col">
-        <div className="shrink-0 bg-white border-b border-gray-100 z-50">
+      <div className="min-h-screen bg-white">
+        <div className="sticky top-0 bg-white border-b border-gray-100 z-50">
           <div className="flex items-center justify-between px-4 py-3">
             <button onClick={() => window.history.back()} className="p-1" data-testid="button-back">
               <ChevronLeft className="w-6 h-6 text-gray-700" />
@@ -273,7 +335,7 @@ export default function ProductDetailPage() {
           </div>
         </div>
 
-      <div className="flex-1 overflow-y-auto">
+      <div>
       <div className="relative">
         {(() => {
           const allProductImages = [
@@ -558,9 +620,88 @@ export default function ProductDetailPage() {
             </div>
           )}
 
-          <Button variant="outline" className="w-full mb-6" data-testid="button-write-review">
-            상품 리뷰 작성하기
-          </Button>
+          {!showReviewModal ? (
+            <Button
+              variant="outline"
+              className="w-full mb-6"
+              data-testid="button-write-review"
+              onClick={handleWriteReview}
+            >
+              상품 리뷰 작성하기
+            </Button>
+          ) : (
+            <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+              <div className="flex items-center justify-between mb-4">
+                <h4 className="font-bold text-gray-900">리뷰 작성</h4>
+                <button
+                  onClick={() => {
+                    setShowReviewModal(false);
+                    setReviewRating(5);
+                    setReviewContent("");
+                  }}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">별점</label>
+                  <div className="flex gap-1">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        type="button"
+                        onClick={() => setReviewRating(star)}
+                        className="p-0.5 hover:scale-110 transition-transform"
+                      >
+                        <Star
+                          className={`w-7 h-7 ${star <= reviewRating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {reviewRating === 5 ? "아주 좋아요!" :
+                     reviewRating === 4 ? "좋아요" :
+                     reviewRating === 3 ? "보통이에요" :
+                     reviewRating === 2 ? "별로예요" : "매우 별로예요"}
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">리뷰 내용</label>
+                  <Textarea
+                    placeholder="상품에 대한 솔직한 리뷰를 작성해주세요. (최소 10자)"
+                    value={reviewContent}
+                    onChange={(e) => setReviewContent(e.target.value)}
+                    rows={4}
+                    className="resize-none bg-white"
+                  />
+                  <p className="text-xs text-gray-400 mt-1 text-right">{reviewContent.length}자</p>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => {
+                      setShowReviewModal(false);
+                      setReviewRating(5);
+                      setReviewContent("");
+                    }}
+                  >
+                    취소
+                  </Button>
+                  <Button
+                    onClick={handleSubmitReview}
+                    disabled={createReviewMutation.isPending || reviewContent.length < 10}
+                    className="flex-1 bg-primary hover:bg-primary/90"
+                  >
+                    {createReviewMutation.isPending ? "등록 중..." : "리뷰 등록"}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="space-y-4">
             {reviews.map((review: any) => (
@@ -713,10 +854,10 @@ export default function ProductDetailPage() {
         </TabsContent>
       </Tabs>
 
-        <div className="h-4" />
+        <div className="h-24" />
       </div>
-      
-      <div className="shrink-0 bg-white border-t border-gray-200 p-4">
+
+      <div className="fixed bottom-0 left-0 right-0 lg:left-auto lg:right-auto lg:w-[430px] lg:mx-auto bg-white border-t border-gray-200 p-4 z-50">
         <div className="flex gap-3">
           <Button 
             variant="outline" 
@@ -739,7 +880,7 @@ export default function ProductDetailPage() {
       </div>
 
       <AlertDialog open={showCartDialog} onOpenChange={setShowCartDialog}>
-        <AlertDialogContent className="max-w-[350px] rounded-xl">
+        <AlertDialogAppContent className="max-w-[350px] rounded-xl">
           <AlertDialogHeader>
             <AlertDialogTitle>장바구니에 담았습니다</AlertDialogTitle>
             <AlertDialogDescription>
@@ -748,14 +889,35 @@ export default function ProductDetailPage() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>계속 쇼핑하기</AlertDialogCancel>
-            <AlertDialogAction 
+            <AlertDialogAction
               onClick={() => setLocation("/cart")}
               className="bg-primary hover:bg-primary/90"
             >
               장바구니로 이동
             </AlertDialogAction>
           </AlertDialogFooter>
-        </AlertDialogContent>
+        </AlertDialogAppContent>
+      </AlertDialog>
+
+      {/* Login Prompt Dialog */}
+      <AlertDialog open={showLoginPrompt} onOpenChange={setShowLoginPrompt}>
+        <AlertDialogAppContent className="max-w-[350px] rounded-xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle>로그인이 필요합니다</AlertDialogTitle>
+            <AlertDialogDescription>
+              리뷰를 작성하려면 로그인이 필요합니다. 로그인 페이지로 이동하시겠습니까?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>취소</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => setLocation("/login")}
+              className="bg-primary hover:bg-primary/90"
+            >
+              로그인하기
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogAppContent>
       </AlertDialog>
     </AppLayout>
   );

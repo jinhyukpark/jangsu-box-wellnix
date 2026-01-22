@@ -1,11 +1,43 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useMemo } from "react";
 import { ArrowLeft, ShoppingCart, Gift, ChevronRight, Heart, Calendar, Users, Sparkles } from "lucide-react";
-import { useLocation } from "wouter";
+import { useLocation, Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { AppLayout } from "@/components/AppLayout";
 import { SEO } from "@/components/SEO";
 import { images } from "@/lib/images";
-import type { SubscriptionPlan } from "@shared/schema";
+import { useAuth } from "@/hooks/use-auth";
+import type { SubscriptionPlan, SubscriptionBanner } from "@shared/schema";
+
+// Skeleton components
+function HeroBannerSkeleton() {
+  return (
+    <div className="relative h-56 overflow-hidden bg-gray-200">
+      <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 animate-pulse" />
+    </div>
+  );
+}
+
+function PlanCardSkeleton() {
+  return (
+    <div className="w-full p-4 rounded-lg border-2 border-gray-200 bg-white">
+      <div className="flex items-start justify-between mb-3">
+        <div className="flex-1">
+          <div className="h-5 w-24 bg-gray-200 rounded animate-pulse mb-2" />
+          <div className="h-4 w-40 bg-gray-100 rounded animate-pulse" />
+        </div>
+        <div className="text-right">
+          <div className="h-4 w-16 bg-gray-100 rounded animate-pulse mb-1" />
+          <div className="h-6 w-24 bg-gray-200 rounded animate-pulse" />
+        </div>
+      </div>
+      <div className="flex gap-1">
+        <div className="h-5 w-16 bg-gray-100 rounded animate-pulse" />
+        <div className="h-5 w-20 bg-gray-100 rounded animate-pulse" />
+        <div className="h-5 w-14 bg-gray-100 rounded animate-pulse" />
+      </div>
+    </div>
+  );
+}
 
 const giftBoxImage = images.premiumKoreanHealthGiftBox;
 const happySeniorsImage = images.happySeniorsReceivingGift;
@@ -22,7 +54,8 @@ const monthlyStories = [
   { id: "3", month: "3월", theme: "봄맞이 활력충전", highlight: "유기농 꿀 & 견과류", image: giftBoxImage },
 ];
 
-const heroSlides = [
+// Fallback slides when no banners are configured
+const defaultHeroSlides = [
   { image: happySeniorsImage, title: "선물은 역시,\n장수박스", subtitle: "부모님께 매달 건강과 사랑을 전하세요" },
   { image: giftBoxImage, title: "프리미엄 건강식품\n정기배송", subtitle: "전문가가 엄선한 최고급 건강식품" },
 ];
@@ -31,13 +64,52 @@ export default function SubscriptionPage() {
   const [, setLocation] = useLocation();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [currentSlide, setCurrentSlide] = useState(0);
+  const { user } = useAuth();
+
+  const { data: cartItems = [] } = useQuery<any[]>({
+    queryKey: ["/api/cart"],
+    queryFn: async () => {
+      const res = await fetch("/api/cart");
+      if (!res.ok) return [];
+      return res.json();
+    },
+    enabled: !!user,
+    staleTime: 30000,
+  });
+
+  const cartCount = cartItems.length;
+
+  // Fetch subscription banners from API
+  const { data: apiBanners = [], isLoading: bannersLoading } = useQuery<SubscriptionBanner[]>({
+    queryKey: ["/api/subscription-banners"],
+    queryFn: async () => {
+      const res = await fetch("/api/subscription-banners");
+      if (!res.ok) throw new Error("Failed to fetch banners");
+      return res.json();
+    },
+    staleTime: 1000 * 60 * 5, // 5분간 캐시 유지
+  });
+
+  // Use API banners if available, otherwise use default slides
+  const heroSlides = useMemo(() => {
+    if (apiBanners.length > 0) {
+      return apiBanners.map(banner => ({
+        image: banner.image,
+        title: "",
+        subtitle: "",
+      }));
+    }
+    return defaultHeroSlides;
+  }, [apiBanners]);
 
   useEffect(() => {
+    // Only auto-slide if there are 2+ slides
+    if (heroSlides.length < 2) return;
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
     }, 5000);
     return () => clearInterval(timer);
-  }, []);
+  }, [heroSlides.length]);
 
   const { data: subscriptionPlans = [], isLoading: plansLoading } = useQuery<SubscriptionPlan[]>({
     queryKey: ["/api/subscription-plans"],
@@ -48,12 +120,19 @@ export default function SubscriptionPage() {
     },
   });
 
-  const handleWheel = (e: React.WheelEvent) => {
-    if (scrollRef.current) {
+  // Handle horizontal scroll with mouse wheel (non-passive to allow preventDefault)
+  useEffect(() => {
+    const scrollContainer = scrollRef.current;
+    if (!scrollContainer) return;
+
+    const handleWheel = (e: WheelEvent) => {
       e.preventDefault();
-      scrollRef.current.scrollLeft += e.deltaY;
-    }
-  };
+      scrollContainer.scrollLeft += e.deltaY;
+    };
+
+    scrollContainer.addEventListener('wheel', handleWheel, { passive: false });
+    return () => scrollContainer.removeEventListener('wheel', handleWheel);
+  }, []);
 
   return (
     <AppLayout>
@@ -76,47 +155,68 @@ export default function SubscriptionPage() {
             >
               기업문의
             </button>
-            <button className="relative p-2">
-              <ShoppingCart className="w-6 h-6 text-gray-600" />
-              <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-primary text-white text-xs font-bold rounded-full flex items-center justify-center">3</span>
-            </button>
+            <Link href="/cart">
+              <button className="relative p-2">
+                <ShoppingCart className="w-6 h-6 text-gray-600" />
+                {cartCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-primary text-white text-xs font-bold rounded-full flex items-center justify-center">
+                    {cartCount > 99 ? "99+" : cartCount}
+                  </span>
+                )}
+              </button>
+            </Link>
           </div>
         </div>
       </header>
 
       <div className="pb-24">
-        <div className="relative h-56 overflow-hidden">
-          {heroSlides.map((slide, index) => (
-            <div
-              key={index}
-              className={`absolute inset-0 transition-opacity duration-500 ${
-                index === currentSlide ? "opacity-100" : "opacity-0"
-              }`}
-            >
-              <img src={slide.image} alt="장수박스" className="w-full h-full object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-              <div className="absolute bottom-0 left-0 right-0 p-5">
-                <p className="text-amber-300 text-sm font-medium mb-1">매달 찾아가는 건강 선물</p>
-                <h2 className="text-white text-2xl font-bold mb-2 whitespace-pre-line">{slide.title}</h2>
-                <p className="text-white/70 text-sm">{slide.subtitle}</p>
-              </div>
-            </div>
-          ))}
-          <div className="absolute bottom-4 right-4 bg-white/20 backdrop-blur px-2 py-1 rounded text-white text-xs">
-            {currentSlide + 1} / {heroSlides.length}
-          </div>
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5">
-            {heroSlides.map((_, index) => (
-              <button
+        {bannersLoading ? (
+          <HeroBannerSkeleton />
+        ) : (
+          <div className="relative h-56 overflow-hidden">
+            {heroSlides.map((slide, index) => (
+              <div
                 key={index}
-                onClick={() => setCurrentSlide(index)}
-                className={`w-2 h-2 rounded-full transition-all ${
-                  index === currentSlide ? "bg-white w-4" : "bg-white/50"
+                className={`absolute inset-0 transition-opacity duration-500 ${
+                  index === currentSlide ? "opacity-100" : "opacity-0"
                 }`}
-              />
+              >
+                <img src={slide.image} alt="장수박스" className="w-full h-full object-cover" />
+                {/* Only show overlay if there's title or subtitle */}
+                {(slide.title || slide.subtitle) && (
+                  <>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+                    <div className="absolute bottom-0 left-0 right-0 p-5">
+                      <p className="text-amber-300 text-sm font-medium mb-1">매달 찾아가는 건강 선물</p>
+                      {slide.title && <h2 className="text-white text-2xl font-bold mb-2 whitespace-pre-line">{slide.title}</h2>}
+                      {slide.subtitle && <p className="text-white/70 text-sm">{slide.subtitle}</p>}
+                    </div>
+                  </>
+                )}
+              </div>
             ))}
+            {/* Only show slide counter if more than 1 slide */}
+            {heroSlides.length > 1 && (
+              <div className="absolute bottom-4 right-4 bg-white/20 backdrop-blur px-2 py-1 rounded text-white text-xs">
+                {currentSlide + 1} / {heroSlides.length}
+              </div>
+            )}
+            {/* Only show pagination dots if more than 1 slide */}
+            {heroSlides.length > 1 && (
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5">
+                {heroSlides.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentSlide(index)}
+                    className={`w-2 h-2 rounded-full transition-all ${
+                      index === currentSlide ? "bg-white w-4" : "bg-white/50"
+                    }`}
+                  />
+                ))}
+              </div>
+            )}
           </div>
-        </div>
+        )}
 
         <button 
           onClick={() => setLocation("/jangsu-brand")}
@@ -162,7 +262,11 @@ export default function SubscriptionPage() {
           
           <div className="space-y-3">
             {plansLoading ? (
-              <div className="text-center py-8 text-gray-500">로딩중...</div>
+              <>
+                <PlanCardSkeleton />
+                <PlanCardSkeleton />
+                <PlanCardSkeleton />
+              </>
             ) : subscriptionPlans.filter(p => p.isActive).map((plan) => (
               <button
                 key={plan.id}
@@ -201,9 +305,8 @@ export default function SubscriptionPage() {
 
         <div className="p-4">
           <h3 className="font-bold text-gray-900 mb-4">매월 장수박스 이야기</h3>
-          <div 
+          <div
             ref={scrollRef}
-            onWheel={handleWheel}
             className="flex gap-3 overflow-x-auto scrollbar-hide pb-2"
           >
             {monthlyStories.map((story) => (

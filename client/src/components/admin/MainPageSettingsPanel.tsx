@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { Star, Image, Link2, Package, Calendar, Upload } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Star, Image, Link2, Package, Calendar, Upload, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,6 +26,9 @@ export function MainPageSettingsPanel({ products, events }: MainPageSettingsPane
   const updateSettings = useUpdateMainPageSettings();
 
   const [localSettings, setLocalSettings] = useState<MainPageSettings>({
+    heroImage: null,
+    heroLink: null,
+    heroEnabled: true,
     bestProductsCriteria: "sales",
     bestProductsManualIds: [],
     bestProductsLimit: 6,
@@ -41,6 +44,69 @@ export function MainPageSettingsPanel({ products, events }: MainPageSettingsPane
     eventsLimit: 4,
   });
 
+  const heroImageInputRef = useRef<HTMLInputElement>(null);
+  const adBannerImageInputRef = useRef<HTMLInputElement>(null);
+  const [isHeroUploading, setIsHeroUploading] = useState(false);
+  const [isAdBannerUploading, setIsAdBannerUploading] = useState(false);
+  
+  const handleHeroUpload = async (file: File) => {
+    setIsHeroUploading(true);
+    const formData = new FormData();
+    formData.append("file", file);
+    try {
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+        credentials: "include",
+      });
+      if (res.ok) {
+        const { url } = await res.json();
+        setLocalSettings((prev) => ({ ...prev, heroImage: url }));
+        toast({ title: "업로드 완료", description: "히어로 배너 이미지가 업로드되었습니다." });
+      } else {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || "업로드 실패");
+      }
+    } catch (error) {
+      toast({ 
+        title: "업로드 실패", 
+        description: error instanceof Error ? error.message : "이미지 업로드 중 오류가 발생했습니다.", 
+        variant: "destructive" 
+      });
+    } finally {
+      setIsHeroUploading(false);
+    }
+  };
+
+  const handleAdBannerUpload = async (file: File) => {
+    setIsAdBannerUploading(true);
+    const formData = new FormData();
+    formData.append("file", file);
+    try {
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+        credentials: "include",
+      });
+      if (res.ok) {
+        const { url } = await res.json();
+        setLocalSettings((prev) => ({ ...prev, adBannerImage: url }));
+        toast({ title: "업로드 완료", description: "광고 배너 이미지가 업로드되었습니다." });
+      } else {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || "업로드 실패");
+      }
+    } catch (error) {
+      toast({ 
+        title: "업로드 실패", 
+        description: error instanceof Error ? error.message : "이미지 업로드 중 오류가 발생했습니다.", 
+        variant: "destructive" 
+      });
+    } finally {
+      setIsAdBannerUploading(false);
+    }
+  };
+
   const [bestProductSearch, setBestProductSearch] = useState("");
   const [newProductSearch, setNewProductSearch] = useState("");
   const [eventSearch, setEventSearch] = useState("");
@@ -53,7 +119,9 @@ export function MainPageSettingsPanel({ products, events }: MainPageSettingsPane
 
   const handleSave = async () => {
     try {
-      await updateSettings.mutateAsync(localSettings);
+      const result = await updateSettings.mutateAsync(localSettings);
+      // Immediately update local state with server response
+      setLocalSettings(result);
       toast({ title: "저장 완료", description: "메인 페이지 설정이 저장되었습니다." });
     } catch {
       toast({ title: "저장 실패", description: "설정 저장 중 오류가 발생했습니다.", variant: "destructive" });
@@ -90,6 +158,102 @@ export function MainPageSettingsPanel({ products, events }: MainPageSettingsPane
       </div>
 
       <div className="space-y-6">
+        {/* 상단 히어로 배너 설정 */}
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+            <Image className="w-5 h-5 text-primary" />
+            상단 히어로 배너 설정
+          </h3>
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="heroEnabled"
+                checked={localSettings.heroEnabled}
+                onCheckedChange={(checked) => setLocalSettings({ ...localSettings, heroEnabled: !!checked })}
+              />
+              <Label htmlFor="heroEnabled">히어로 배너 활성화</Label>
+            </div>
+            <div>
+              <Label>배너 이미지</Label>
+              <div className="flex gap-2 mt-1">
+                <Input
+                  value={localSettings.heroImage || ""}
+                  onChange={(e) => setLocalSettings({ ...localSettings, heroImage: e.target.value })}
+                  placeholder="이미지 URL 입력 또는 업로드"
+                  className="flex-1"
+                />
+                <label className={`inline-flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded cursor-pointer transition-colors text-sm ${isHeroUploading ? "opacity-50 cursor-not-allowed" : ""}`}>
+                  <Upload className="w-4 h-4" />
+                  {isHeroUploading ? "업로드중..." : "업로드"}
+                  <input
+                    ref={heroImageInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    disabled={isHeroUploading}
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      await handleHeroUpload(file);
+                    }}
+                  />
+                </label>
+                {localSettings.heroImage && (
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => {
+                      setLocalSettings({ ...localSettings, heroImage: null });
+                      if (heroImageInputRef.current) {
+                        heroImageInputRef.current.value = "";
+                      }
+                    }}
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                )}
+              </div>
+              {localSettings.heroImage && (
+                <div className="mt-2 relative w-full max-w-2xl h-64 bg-gray-100 rounded overflow-hidden border border-gray-200">
+                  <img 
+                    src={localSettings.heroImage} 
+                    alt="히어로 배너 미리보기" 
+                    className="w-full h-full object-cover" 
+                  />
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="sm"
+                    className="absolute top-2 right-2"
+                    onClick={() => {
+                      setLocalSettings({ ...localSettings, heroImage: null });
+                      if (heroImageInputRef.current) {
+                        heroImageInputRef.current.value = "";
+                      }
+                    }}
+                  >
+                    <X className="w-4 h-4 mr-1" />
+                    삭제
+                  </Button>
+                </div>
+              )}
+            </div>
+            <div>
+              <Label className="flex items-center gap-1">
+                <Link2 className="w-4 h-4" />
+                배너 링크 URL (선택사항)
+              </Label>
+              <Input
+                value={localSettings.heroLink || ""}
+                onChange={(e) => setLocalSettings({ ...localSettings, heroLink: e.target.value })}
+                placeholder="클릭 시 이동할 URL (예: /subscription, /events)"
+                className="mt-1"
+              />
+            </div>
+          </div>
+        </div>
+
         {/* 베스트 상품 설정 */}
         <div className="bg-white rounded-lg border border-gray-200 p-6">
           <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
@@ -185,41 +349,59 @@ export function MainPageSettingsPanel({ products, events }: MainPageSettingsPane
                 <Input
                   value={localSettings.adBannerImage || ""}
                   onChange={(e) => setLocalSettings({ ...localSettings, adBannerImage: e.target.value })}
-                  placeholder="이미지 URL 입력"
+                  placeholder="이미지 URL 입력 또는 업로드"
                   className="flex-1"
                 />
-                <label className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded cursor-pointer transition-colors text-sm">
+                <label className={`inline-flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded cursor-pointer transition-colors text-sm ${isAdBannerUploading ? "opacity-50 cursor-not-allowed" : ""}`}>
                   <Upload className="w-4 h-4" />
-                  업로드
+                  {isAdBannerUploading ? "업로드중..." : "업로드"}
                   <input
+                    ref={adBannerImageInputRef}
                     type="file"
                     accept="image/*"
                     className="hidden"
+                    disabled={isAdBannerUploading}
                     onChange={async (e) => {
                       const file = e.target.files?.[0];
                       if (!file) return;
-                      const formData = new FormData();
-                      formData.append("file", file);
-                      try {
-                        const res = await fetch("/api/admin/upload", {
-                          method: "POST",
-                          body: formData,
-                          credentials: "include",
-                        });
-                        if (res.ok) {
-                          const { url } = await res.json();
-                          setLocalSettings({ ...localSettings, adBannerImage: url });
-                        }
-                      } catch (error) {
-                        console.error("Upload failed:", error);
-                      }
+                      await handleAdBannerUpload(file);
                     }}
                   />
                 </label>
+                {localSettings.adBannerImage && (
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => {
+                      setLocalSettings({ ...localSettings, adBannerImage: null });
+                      if (adBannerImageInputRef.current) {
+                        adBannerImageInputRef.current.value = "";
+                      }
+                    }}
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                )}
               </div>
               {localSettings.adBannerImage && (
-                <div className="mt-2 relative w-full max-w-md h-40 bg-gray-100 rounded overflow-hidden">
-                  <img src={localSettings.adBannerImage} alt="Banner preview" className="w-full h-full object-cover" />
+                <div className="mt-2 relative w-full max-w-md h-40 bg-gray-100 rounded overflow-hidden border border-gray-200">
+                  <img src={localSettings.adBannerImage} alt="광고 배너 미리보기" className="w-full h-full object-cover" />
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="sm"
+                    className="absolute top-2 right-2"
+                    onClick={() => {
+                      setLocalSettings({ ...localSettings, adBannerImage: null });
+                      if (adBannerImageInputRef.current) {
+                        adBannerImageInputRef.current.value = "";
+                      }
+                    }}
+                  >
+                    <X className="w-4 h-4 mr-1" />
+                    삭제
+                  </Button>
                 </div>
               )}
             </div>

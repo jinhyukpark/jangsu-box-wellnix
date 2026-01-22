@@ -3,6 +3,7 @@ import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog"
 
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
+import { useAppContainer } from "@/components/AppLayout"
 
 const AlertDialog = AlertDialogPrimitive.Root
 
@@ -42,6 +43,58 @@ const AlertDialogContent = React.forwardRef<
   </AlertDialogPortal>
 ))
 AlertDialogContent.displayName = AlertDialogPrimitive.Content.displayName
+
+// App-centered content - centers within the app container
+const AlertDialogAppContent = React.forwardRef<
+  React.ElementRef<typeof AlertDialogPrimitive.Content>,
+  React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Content>
+>(({ className, style, ...props }, ref) => {
+  const appContainer = useAppContainer();
+  const [position, setPosition] = React.useState({ left: "50%", width: "100vw" });
+
+  React.useEffect(() => {
+    const updatePosition = () => {
+      if (appContainer?.containerRef?.current) {
+        const rect = appContainer.containerRef.current.getBoundingClientRect();
+        setPosition({
+          left: `${rect.left + rect.width / 2}px`,
+          width: `${rect.width}px`,
+        });
+      }
+    };
+
+    updatePosition();
+    window.addEventListener("resize", updatePosition);
+    return () => window.removeEventListener("resize", updatePosition);
+  }, [appContainer]);
+
+  return (
+    <AlertDialogPortal>
+      {/* Overlay - covers only app area */}
+      <AlertDialogPrimitive.Overlay
+        className="fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0"
+        style={{
+          left: appContainer?.containerRef?.current ? `${appContainer.containerRef.current.getBoundingClientRect().left}px` : 0,
+          width: position.width,
+        }}
+      />
+      {/* Content - centered within app area */}
+      <AlertDialogPrimitive.Content
+        ref={ref}
+        className={cn(
+          "fixed top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 sm:rounded-lg",
+          className
+        )}
+        style={{
+          left: position.left,
+          ...style,
+        }}
+        {...props}
+      />
+    </AlertDialogPortal>
+  );
+})
+AlertDialogAppContent.displayName = "AlertDialogAppContent"
 
 const AlertDialogHeader = ({
   className,
@@ -130,6 +183,7 @@ export {
   AlertDialogOverlay,
   AlertDialogTrigger,
   AlertDialogContent,
+  AlertDialogAppContent,
   AlertDialogHeader,
   AlertDialogFooter,
   AlertDialogTitle,

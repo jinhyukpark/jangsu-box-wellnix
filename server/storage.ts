@@ -28,6 +28,7 @@ import {
   type MainPageSettings, type InsertMainPageSettings, mainPageSettings,
   type Promotion, type InsertPromotion, promotions,
   type PromotionProduct, type InsertPromotionProduct, promotionProducts,
+  type SubscriptionBanner, type InsertSubscriptionBanner, subscriptionBanners,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -215,6 +216,15 @@ export interface IStorage {
   getPromotionProducts(promotionId: number): Promise<PromotionProduct[]>;
   getPromotionWithProducts(id: number): Promise<{ promotion: Promotion; products: Product[] } | undefined>;
   setPromotionProducts(promotionId: number, productIds: number[]): Promise<void>;
+
+  // Subscription Banners
+  getSubscriptionBanner(id: number): Promise<SubscriptionBanner | undefined>;
+  getAllSubscriptionBanners(): Promise<SubscriptionBanner[]>;
+  getActiveSubscriptionBanners(): Promise<SubscriptionBanner[]>;
+  createSubscriptionBanner(banner: InsertSubscriptionBanner): Promise<SubscriptionBanner>;
+  updateSubscriptionBanner(id: number, data: Partial<InsertSubscriptionBanner>): Promise<SubscriptionBanner | undefined>;
+  deleteSubscriptionBanner(id: number): Promise<boolean>;
+  reorderSubscriptionBanners(orders: { id: number; displayOrder: number }[]): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -807,18 +817,18 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getNotificationHistory(): Promise<{ date: string; title: string; content: string; sentCount: number; createdAt: string; targetType: string }[]> {
+    // target_type 컬럼이 DB에 없을 수 있으므로 제외하고 조회
     const result = await db
       .select({
         date: sql<string>`DATE(${notifications.createdAt})`.as("date"),
         title: notifications.title,
         content: notifications.content,
-        targetType: notifications.targetType,
         sentCount: sql<number>`count(*)`.as("sentCount"),
         maxCreatedAt: sql<string>`MAX(${notifications.createdAt})`.as("maxCreatedAt"),
       })
       .from(notifications)
       .where(eq(notifications.notificationType, "promotion"))
-      .groupBy(sql`DATE(${notifications.createdAt})`, notifications.title, notifications.content, notifications.targetType)
+      .groupBy(sql`DATE(${notifications.createdAt})`, notifications.title, notifications.content)
       .orderBy(desc(sql`MAX(${notifications.createdAt})`));
     
     return result.map(r => ({
@@ -827,7 +837,7 @@ export class DatabaseStorage implements IStorage {
       content: r.content,
       sentCount: Number(r.sentCount),
       createdAt: r.maxCreatedAt || '',
-      targetType: r.targetType || '',
+      targetType: '', // target_type 컬럼이 없으므로 빈 문자열 반환
     }));
   }
 
@@ -970,7 +980,8 @@ export class DatabaseStorage implements IStorage {
 
   // Main Page Settings
   async getMainPageSettings(): Promise<MainPageSettings | undefined> {
-    const [settings] = await db.select().from(mainPageSettings).limit(1);
+    // Order by id desc to get the most recent record in case of multiple rows
+    const [settings] = await db.select().from(mainPageSettings).orderBy(desc(mainPageSettings.id)).limit(1);
     return settings;
   }
 
@@ -978,7 +989,7 @@ export class DatabaseStorage implements IStorage {
     const existing = await this.getMainPageSettings();
     // Remove timestamp fields from data to avoid type conflicts
     const { createdAt, updatedAt, id, ...cleanData } = data as any;
-    
+
     if (existing) {
       const [updated] = await db.update(mainPageSettings)
         .set({ ...cleanData, updatedAt: new Date() })
@@ -1048,7 +1059,7 @@ export class DatabaseStorage implements IStorage {
   async setPromotionProducts(promotionId: number, productIds: number[]): Promise<void> {
     // Delete existing associations
     await db.delete(promotionProducts).where(eq(promotionProducts.promotionId, promotionId));
-    
+
     // Insert new associations
     if (productIds.length > 0) {
       const values = productIds.map((productId, index) => ({
@@ -1057,6 +1068,48 @@ export class DatabaseStorage implements IStorage {
         displayOrder: index,
       }));
       await db.insert(promotionProducts).values(values);
+    }
+  }
+
+  // Subscription Banners
+  async getSubscriptionBanner(id: number): Promise<SubscriptionBanner | undefined> {
+    const [banner] = await db.select().from(subscriptionBanners).where(eq(subscriptionBanners.id, id));
+    return banner;
+  }
+
+  async getAllSubscriptionBanners(): Promise<SubscriptionBanner[]> {
+    return db.select().from(subscriptionBanners).orderBy(asc(subscriptionBanners.displayOrder));
+  }
+
+  async getActiveSubscriptionBanners(): Promise<SubscriptionBanner[]> {
+    return db.select().from(subscriptionBanners)
+      .where(eq(subscriptionBanners.isActive, true))
+      .orderBy(asc(subscriptionBanners.displayOrder));
+  }
+
+  async createSubscriptionBanner(banner: InsertSubscriptionBanner): Promise<SubscriptionBanner> {
+    const [created] = await db.insert(subscriptionBanners).values(banner).returning();
+    return created;
+  }
+
+  async updateSubscriptionBanner(id: number, data: Partial<InsertSubscriptionBanner>): Promise<SubscriptionBanner | undefined> {
+    const [updated] = await db.update(subscriptionBanners)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(subscriptionBanners.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteSubscriptionBanner(id: number): Promise<boolean> {
+    await db.delete(subscriptionBanners).where(eq(subscriptionBanners.id, id));
+    return true;
+  }
+
+  async reorderSubscriptionBanners(orders: { id: number; displayOrder: number }[]): Promise<void> {
+    for (const { id, displayOrder } of orders) {
+      await db.update(subscriptionBanners)
+        .set({ displayOrder, updatedAt: new Date() })
+        .where(eq(subscriptionBanners.id, id));
     }
   }
 }

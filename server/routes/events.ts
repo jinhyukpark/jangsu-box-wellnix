@@ -6,8 +6,13 @@ import { requireAdmin } from "../middleware";
 const router = Router();
 
 router.get("/api/events", async (req: Request, res: Response) => {
-  const events = await storage.getAllEvents();
-  res.json(events);
+  try {
+    const events = await storage.getAllEvents();
+    res.json(events);
+  } catch (error) {
+    console.error("Get events error:", error);
+    res.status(500).json({ error: "행사 목록을 불러올 수 없습니다" });
+  }
 });
 
 router.get("/api/events/:id", async (req: Request, res: Response) => {

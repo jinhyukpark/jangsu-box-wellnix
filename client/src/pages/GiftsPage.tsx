@@ -6,6 +6,7 @@ import { AppLayout } from "@/components/AppLayout";
 import { images } from "@/lib/images";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/use-auth";
 
 const categoryImageMap: Record<string, string> = {
   "hongsam": images.koreanRedGinsengRoots,
@@ -52,14 +53,28 @@ export default function GiftsPage() {
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
   const [, setLocation] = useLocation();
   const scrollRef = useRef<HTMLDivElement>(null);
-  
+  const { user } = useAuth();
+
   const [sortBy, setSortBy] = useState<SortOption>("popular");
   const [showSortDropdown, setShowSortDropdown] = useState(false);
   const [showFilterModal, setShowFilterModal] = useState(false);
-  
+
   const [filterOnlyDiscount, setFilterOnlyDiscount] = useState(false);
   const [filterPriceOption, setFilterPriceOption] = useState<string>("all");
   const [filterMinRating, setFilterMinRating] = useState(0);
+
+  const { data: cartItems = [] } = useQuery<any[]>({
+    queryKey: ["/api/cart"],
+    queryFn: async () => {
+      const res = await fetch("/api/cart");
+      if (!res.ok) return [];
+      return res.json();
+    },
+    enabled: !!user,
+    staleTime: 30000,
+  });
+
+  const cartCount = cartItems.length;
 
   const priceOptions = [
     { value: "all", label: "전체", min: 0, max: Infinity },
@@ -168,12 +183,16 @@ export default function GiftsPage() {
                 <Search className="w-5 h-5 text-gray-600" />
               </button>
             </Link>
-            <button className="relative p-2" data-testid="cart-btn">
-              <ShoppingCart className="w-6 h-6 text-gray-600" />
-              <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-primary text-white text-xs font-bold rounded-full flex items-center justify-center">
-                3
-              </span>
-            </button>
+            <Link href="/cart">
+              <button className="relative p-2" data-testid="cart-btn">
+                <ShoppingCart className="w-6 h-6 text-gray-600" />
+                {cartCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-primary text-white text-xs font-bold rounded-full flex items-center justify-center">
+                    {cartCount > 99 ? "99+" : cartCount}
+                  </span>
+                )}
+              </button>
+            </Link>
           </div>
         </div>
         

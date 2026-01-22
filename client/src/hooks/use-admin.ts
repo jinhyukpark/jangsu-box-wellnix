@@ -282,6 +282,9 @@ export function useDashboardStats() {
 
 export interface MainPageSettings {
   id?: number;
+  heroImage: string | null;
+  heroLink: string | null;
+  heroEnabled: boolean;
   bestProductsCriteria: "sales" | "manual";
   bestProductsManualIds: number[];
   bestProductsLimit: number;
@@ -307,8 +310,12 @@ export function useMainPageSettings() {
 export function useUpdateMainPageSettings() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data: Partial<MainPageSettings>) => 
+    mutationFn: (data: Partial<MainPageSettings>) =>
       fetchWithAuth("/api/admin/main-page-settings", { method: "PUT", body: JSON.stringify(data) }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin", "main-page-settings"] }),
+    onSuccess: () => {
+      // 관리자 캐시와 사용자 캐시 모두 무효화
+      queryClient.invalidateQueries({ queryKey: ["admin", "main-page-settings"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/main-page-settings"] });
+    },
   });
 }

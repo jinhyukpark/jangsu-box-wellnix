@@ -40,6 +40,9 @@ export function EventSection() {
       if (!res.ok) throw new Error("Failed to fetch events");
       return res.json();
     },
+    retry: 2,
+    retryDelay: 1000,
+    staleTime: 1000 * 60 * 5, // 5분간 캐시 유지
   });
 
   const { data: settings } = useQuery<MainPageSettings>({
@@ -49,6 +52,9 @@ export function EventSection() {
       if (!res.ok) throw new Error("Failed to fetch settings");
       return res.json();
     },
+    retry: 2,
+    retryDelay: 1000,
+    staleTime: 1000 * 60 * 5, // 5분간 캐시 유지
   });
 
   const getFilteredEvents = () => {
@@ -105,10 +111,11 @@ export function EventSection() {
               className="flex-shrink-0 w-80 snap-start rounded-lg overflow-hidden bg-white border border-gray-100 shadow-sm cursor-pointer hover:shadow-md transition-shadow"
             >
               <div className="relative h-36 overflow-hidden">
-                <img 
-                  src={event.image || images.seniorsHealthTourEvent} 
+                <img
+                  src={event.image || images.seniorsHealthTourEvent}
                   alt={event.title}
                   draggable={false}
+                  loading="lazy"
                   className="w-full h-full object-cover select-none pointer-events-none"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />

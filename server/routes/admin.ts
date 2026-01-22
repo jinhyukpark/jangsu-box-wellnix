@@ -291,6 +291,9 @@ router.get("/api/admin/main-page-settings", requireAdmin, async (req: Request, r
   try {
     const settings = await storage.getMainPageSettings();
     res.json(settings || {
+      heroImage: null,
+      heroLink: null,
+      heroEnabled: true,
       bestProductsCriteria: "sales",
       bestProductsManualIds: [],
       bestProductsLimit: 6,
@@ -315,6 +318,9 @@ router.get("/api/main-page-settings", async (req: Request, res: Response) => {
   try {
     const settings = await storage.getMainPageSettings();
     res.json(settings || {
+      heroImage: null,
+      heroLink: null,
+      heroEnabled: true,
       bestProductsCriteria: "sales",
       bestProductsManualIds: [],
       bestProductsLimit: 6,

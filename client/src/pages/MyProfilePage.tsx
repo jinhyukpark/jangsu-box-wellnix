@@ -1,36 +1,53 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, User, Phone, Mail, Shield, Check, Edit2 } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { SEO } from "@/components/SEO";
 import { toast } from "sonner";
+import { useAuth } from "@/hooks/use-auth";
 
-type AuthProvider = "kakao" | "naver";
-
-interface UserProfile {
-  id: string;
-  name: string;
-  phone: string;
-  email: string;
-  authProvider: AuthProvider;
-  joinDate: string;
-}
-
-const mockUser: UserProfile = {
-  id: "wellnix_kim123",
-  name: "김건강",
-  phone: "010-1234-5678",
-  email: "kim@example.com",
-  authProvider: "kakao",
-  joinDate: "2025-01-16"
-};
+type AuthProvider = "kakao" | "naver" | "email";
 
 export default function MyProfilePage() {
   const [, setLocation] = useLocation();
-  const [user, setUser] = useState<UserProfile>(mockUser);
+  const { user, isLoading, refetch } = useAuth();
+  const queryClient = useQueryClient();
   const [isEditing, setIsEditing] = useState(false);
-  const [editName, setEditName] = useState(user.name);
-  const [editPhone, setEditPhone] = useState(user.phone);
+  const [editName, setEditName] = useState("");
+  const [editPhone, setEditPhone] = useState("");
+
+  useEffect(() => {
+    if (user) {
+      setEditName(user.name || "");
+      setEditPhone(user.phone || "");
+    }
+  }, [user]);
+
+  const updateProfileMutation = useMutation({
+    mutationFn: async (data: { name: string; phone: string }) => {
+      const res = await fetch("/api/members/me", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+        credentials: "include",
+      });
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || "회원정보 수정에 실패했습니다");
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["auth", "me"] });
+      refetch();
+      setIsEditing(false);
+      toast.success("회원정보가 수정되었습니다.");
+    },
+    onError: (error: Error) => {
+      toast.error(error.message);
+    },
+  });
 
   const handleSave = () => {
     if (!editName.trim()) {
@@ -42,18 +59,12 @@ export default function MyProfilePage() {
       return;
     }
 
-    setUser(prev => ({
-      ...prev,
-      name: editName,
-      phone: editPhone
-    }));
-    setIsEditing(false);
-    toast.success("회원정보가 수정되었습니다.");
+    updateProfileMutation.mutate({ name: editName, phone: editPhone });
   };
 
   const handleCancel = () => {
-    setEditName(user.name);
-    setEditPhone(user.phone);
+    setEditName(user?.name || "");
+    setEditPhone(user?.phone || "");
     setIsEditing(false);
   };
 
@@ -69,13 +80,14 @@ export default function MyProfilePage() {
     setEditPhone(formatted);
   };
 
-  const getAuthProviderInfo = (provider: AuthProvider) => {
+  const getAuthProviderInfo = (provider: AuthProvider | string | null | undefined) => {
     switch (provider) {
       case "kakao":
         return {
           name: "카카오",
           bgColor: "bg-[#FEE500]",
           textColor: "text-[#3C1E1E]",
+          isSocial: true,
           icon: (
             <svg viewBox="0 0 24 24" className="w-4 h-4" fill="#3C1E1E">
               <path d="M12 3C6.477 3 2 6.477 2 10.5c0 2.47 1.607 4.647 4.031 5.903-.162.606-.583 2.19-.667 2.531-.104.422.155.416.326.303.135-.09 2.145-1.456 3.013-2.046.429.061.869.093 1.297.093 5.523 0 10-3.477 10-7.784C20 6.477 17.523 3 12 3z"/>
@@ -87,16 +99,49 @@ export default function MyProfilePage() {
           name: "네이버",
           bgColor: "bg-[#03C75A]",
           textColor: "text-white",
+          isSocial: true,
           icon: (
             <svg viewBox="0 0 24 24" className="w-4 h-4" fill="white">
               <path d="M16.273 12.845L7.376 0H0v24h7.726V11.156L16.624 24H24V0h-7.727v12.845z"/>
             </svg>
           )
         };
+      default:
+        return {
+          name: "이메일",
+          bgColor: "bg-primary",
+          textColor: "text-white",
+          isSocial: false,
+          icon: (
+            <Mail className="w-4 h-4 text-white" />
+          )
+        };
     }
   };
 
-  const authInfo = getAuthProviderInfo(user.authProvider);
+  const authInfo = getAuthProviderInfo(user?.authProvider);
+
+  const formatJoinDate = (date: Date | string | null | undefined) => {
+    if (!date) return "-";
+    const d = new Date(date);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  };
+
+  if (isLoading) {
+    return (
+      <AppLayout>
+        <SEO title="회원정보 수정" description="웰닉스 회원정보를 수정하세요." />
+        <div className="flex items-center justify-center h-64">
+          <div className="text-gray-500">로딩중...</div>
+        </div>
+      </AppLayout>
+    );
+  }
+
+  if (!user) {
+    setLocation("/login");
+    return null;
+  }
 
   return (
     <AppLayout>
@@ -120,8 +165,12 @@ export default function MyProfilePage() {
       <div className="pb-24">
         <div className="p-4">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-16 h-16 bg-gradient-to-br from-primary to-primary/70 rounded-full flex items-center justify-center">
-              <User className="w-8 h-8 text-white" />
+            <div className="w-16 h-16 bg-gradient-to-br from-primary to-primary/70 rounded-full flex items-center justify-center overflow-hidden">
+              {user.profileImage ? (
+                <img src={user.profileImage} alt={user.name} className="w-full h-full object-cover" />
+              ) : (
+                <User className="w-8 h-8 text-white" />
+              )}
             </div>
             <div>
               <p className="font-bold text-lg text-gray-900">{user.name}</p>
@@ -134,25 +183,27 @@ export default function MyProfilePage() {
             </div>
           </div>
 
-          <div className="bg-amber-50 border border-amber-100 rounded-lg p-3 mb-6">
-            <div className="flex items-start gap-2">
-              <Shield className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="text-sm font-medium text-amber-800">소셜 로그인 회원</p>
-                <p className="text-xs text-amber-600 mt-0.5">
-                  {authInfo.name} 계정으로 로그인하셨습니다. 비밀번호 변경은 {authInfo.name}에서 진행해주세요.
-                </p>
+          {authInfo.isSocial && (
+            <div className="bg-amber-50 border border-amber-100 rounded-lg p-3 mb-6">
+              <div className="flex items-start gap-2">
+                <Shield className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm font-medium text-amber-800">소셜 로그인 회원</p>
+                  <p className="text-xs text-amber-600 mt-0.5">
+                    {authInfo.name} 계정으로 로그인하셨습니다. 비밀번호 변경은 {authInfo.name}에서 진행해주세요.
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-600 mb-2">아이디</label>
+              <label className="block text-sm font-medium text-gray-600 mb-2">회원번호</label>
               <div className="relative">
                 <input
                   type="text"
-                  value={user.id}
+                  value={`#${user.id}`}
                   disabled
                   className="w-full px-4 py-3 bg-gray-100 border border-gray-200 rounded-lg text-gray-500 cursor-not-allowed"
                   data-testid="input-id"
@@ -161,7 +212,6 @@ export default function MyProfilePage() {
                   변경불가
                 </span>
               </div>
-              <p className="text-xs text-gray-400 mt-1">아이디는 변경할 수 없습니다.</p>
             </div>
 
             <div>
@@ -177,7 +227,7 @@ export default function MyProfilePage() {
                 />
               ) : (
                 <div className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-800">
-                  {user.name}
+                  {user.name || "-"}
                 </div>
               )}
             </div>
@@ -201,7 +251,7 @@ export default function MyProfilePage() {
                 <div className="relative">
                   <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                   <div className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-800">
-                    {user.phone}
+                    {user.phone || "-"}
                   </div>
                 </div>
               )}
@@ -219,13 +269,15 @@ export default function MyProfilePage() {
                   data-testid="input-email"
                 />
               </div>
-              <p className="text-xs text-gray-400 mt-1">{authInfo.name} 계정에 연결된 이메일입니다.</p>
+              {authInfo.isSocial && (
+                <p className="text-xs text-gray-400 mt-1">{authInfo.name} 계정에 연결된 이메일입니다.</p>
+              )}
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-600 mb-2">가입일</label>
               <div className="w-full px-4 py-3 bg-gray-100 border border-gray-200 rounded-lg text-gray-500">
-                {user.joinDate}
+                {formatJoinDate(user.createdAt)}
               </div>
             </div>
           </div>
@@ -243,11 +295,18 @@ export default function MyProfilePage() {
               </button>
               <button
                 onClick={handleSave}
-                className="flex-1 py-3 bg-primary text-white font-semibold rounded-lg hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
+                disabled={updateProfileMutation.isPending}
+                className="flex-1 py-3 bg-primary text-white font-semibold rounded-lg hover:bg-primary/90 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 data-testid="btn-save"
               >
-                <Check className="w-5 h-5" />
-                저장하기
+                {updateProfileMutation.isPending ? (
+                  "저장중..."
+                ) : (
+                  <>
+                    <Check className="w-5 h-5" />
+                    저장하기
+                  </>
+                )}
               </button>
             </div>
           ) : (

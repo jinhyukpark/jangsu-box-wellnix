@@ -1,6 +1,6 @@
 import { Router, Request, Response } from "express";
 import { storage } from "../storage";
-import { insertSubscriptionSchema, insertSubscriptionPlanSchema } from "@shared/schema";
+import { insertSubscriptionSchema, insertSubscriptionPlanSchema, insertSubscriptionBannerSchema } from "@shared/schema";
 import { requireAuth, requireAdmin } from "../middleware";
 import { z } from "zod";
 
@@ -115,6 +115,91 @@ router.delete("/api/admin/subscription-plans/:id", requireAdmin, async (req: Req
 router.get("/api/monthly-boxes", async (req: Request, res: Response) => {
   const boxes = await storage.getAllMonthlyBoxes();
   res.json(boxes);
+});
+
+// ============================================================================
+// 장수박스 배너 이미지 API (Subscription Banners)
+// ============================================================================
+
+// Public - 활성화된 배너만 가져오기
+router.get("/api/subscription-banners", async (req: Request, res: Response) => {
+  try {
+    const banners = await storage.getActiveSubscriptionBanners();
+    res.json(banners);
+  } catch (error) {
+    console.error("Get subscription banners error:", error);
+    res.status(500).json({ error: "배너를 불러올 수 없습니다" });
+  }
+});
+
+// Admin - 모든 배너 가져오기
+router.get("/api/admin/subscription-banners", requireAdmin, async (req: Request, res: Response) => {
+  try {
+    const banners = await storage.getAllSubscriptionBanners();
+    res.json(banners);
+  } catch (error) {
+    console.error("Get admin subscription banners error:", error);
+    res.status(500).json({ error: "배너를 불러올 수 없습니다" });
+  }
+});
+
+// Admin - 배너 생성
+router.post("/api/admin/subscription-banners", requireAdmin, async (req: Request, res: Response) => {
+  try {
+    const validatedData = insertSubscriptionBannerSchema.parse(req.body);
+    const banner = await storage.createSubscriptionBanner(validatedData);
+    res.json(banner);
+  } catch (error) {
+    console.error("Create subscription banner error:", error);
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ error: "입력 데이터가 올바르지 않습니다", details: error.errors });
+    }
+    res.status(400).json({ error: "배너 등록에 실패했습니다" });
+  }
+});
+
+// Admin - 배너 수정
+router.put("/api/admin/subscription-banners/:id", requireAdmin, async (req: Request, res: Response) => {
+  try {
+    const validatedData = insertSubscriptionBannerSchema.partial().parse(req.body);
+    const banner = await storage.updateSubscriptionBanner(parseInt(req.params.id), validatedData);
+    if (!banner) {
+      return res.status(404).json({ error: "배너를 찾을 수 없습니다" });
+    }
+    res.json(banner);
+  } catch (error) {
+    console.error("Update subscription banner error:", error);
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ error: "입력 데이터가 올바르지 않습니다", details: error.errors });
+    }
+    res.status(400).json({ error: "배너 수정에 실패했습니다" });
+  }
+});
+
+// Admin - 배너 순서 변경
+router.put("/api/admin/subscription-banners/reorder", requireAdmin, async (req: Request, res: Response) => {
+  try {
+    const { orders } = req.body;
+    if (!Array.isArray(orders)) {
+      return res.status(400).json({ error: "orders 배열이 필요합니다" });
+    }
+    await storage.reorderSubscriptionBanners(orders);
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Reorder subscription banners error:", error);
+    res.status(400).json({ error: "배너 순서 변경에 실패했습니다" });
+  }
+});
+
+// Admin - 배너 삭제
+router.delete("/api/admin/subscription-banners/:id", requireAdmin, async (req: Request, res: Response) => {
+  try {
+    await storage.deleteSubscriptionBanner(parseInt(req.params.id));
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Delete subscription banner error:", error);
+    res.status(400).json({ error: "배너 삭제에 실패했습니다" });
+  }
 });
 
 export default router;

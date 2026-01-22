@@ -688,6 +688,11 @@ export type SiteBranding = typeof siteBranding.$inferSelect;
 export const mainPageSettings = pgTable("main_page_settings", {
   id: serial("id").primaryKey(),
   
+  // 상단 히어로 배너 설정
+  heroImage: text("hero_image"),
+  heroLink: text("hero_link"),
+  heroEnabled: boolean("hero_enabled").default(true),
+  
   // 베스트 상품 설정
   bestProductsCriteria: varchar("best_products_criteria", { length: 20 }).default("sales"), // "sales" | "manual"
   bestProductsManualIds: jsonb("best_products_manual_ids").$type<number[]>().default([]),
@@ -772,6 +777,29 @@ export const insertPromotionProductSchema = createInsertSchema(promotionProducts
 
 export type InsertPromotionProduct = z.infer<typeof insertPromotionProductSchema>;
 export type PromotionProduct = typeof promotionProducts.$inferSelect;
+
+// ============================================================================
+// 장수박스 배너 이미지 (Subscription Banners)
+// ============================================================================
+
+export const subscriptionBanners = pgTable("subscription_banners", {
+  id: serial("id").primaryKey(),
+  image: text("image").notNull(),
+  link: text("link"),
+  displayOrder: integer("display_order").default(0),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertSubscriptionBannerSchema = createInsertSchema(subscriptionBanners).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertSubscriptionBanner = z.infer<typeof insertSubscriptionBannerSchema>;
+export type SubscriptionBanner = typeof subscriptionBanners.$inferSelect;
 
 // ============================================================================
 // Relations

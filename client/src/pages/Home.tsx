@@ -10,8 +10,28 @@ import { EventSection } from "@/components/EventSection";
 import { AppLayout } from "@/components/AppLayout";
 import { CustomerServicePopup } from "@/components/CustomerServicePopup";
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "wouter";
 import { useState } from "react";
+
+// 상품 섹션 스켈레톤
+function ProductSectionSkeleton({ title, subtitle }: { title: string; subtitle: string }) {
+  return (
+    <section className="py-5">
+      <div className="px-4 mb-4">
+        <h2 className="text-lg font-bold text-gray-900">{title}</h2>
+        <p className="text-sm text-gray-500 mt-0.5">{subtitle}</p>
+      </div>
+      <div className="flex gap-3 overflow-hidden px-4">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="flex-shrink-0 w-40">
+            <div className="w-full aspect-square bg-gray-200 rounded animate-pulse mb-2" />
+            <div className="h-4 bg-gray-200 rounded w-3/4 animate-pulse mb-2" />
+            <div className="h-4 bg-gray-200 rounded w-1/2 animate-pulse" />
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
 
 interface Product {
   id: number;
@@ -27,6 +47,9 @@ interface Product {
 }
 
 interface MainPageSettings {
+  heroImage: string | null;
+  heroLink: string | null;
+  heroEnabled: boolean;
   bestProductsCriteria: "sales" | "manual";
   bestProductsManualIds: number[];
   bestProductsLimit: number;
@@ -45,22 +68,28 @@ interface MainPageSettings {
 export default function Home() {
   const [showCustomerService, setShowCustomerService] = useState(false);
   
-  const { data: products = [] } = useQuery<Product[]>({
+  const { data: products = [], isLoading: productsLoading } = useQuery<Product[]>({
     queryKey: ["/api/products"],
     queryFn: async () => {
       const res = await fetch("/api/products");
       if (!res.ok) throw new Error("Failed to fetch products");
       return res.json();
     },
+    retry: 2,
+    retryDelay: 1000,
+    staleTime: 1000 * 60 * 5, // 5분간 캐시 유지
   });
 
-  const { data: settings } = useQuery<MainPageSettings>({
+  const { data: settings, isLoading: settingsLoading } = useQuery<MainPageSettings>({
     queryKey: ["/api/main-page-settings"],
     queryFn: async () => {
       const res = await fetch("/api/main-page-settings");
       if (!res.ok) throw new Error("Failed to fetch settings");
       return res.json();
     },
+    retry: 2,
+    retryDelay: 1000,
+    staleTime: 1000 * 60 * 5, // 5분간 캐시 유지
   });
 
   const activeProducts = products.filter(p => p.status === "active");
@@ -95,7 +124,7 @@ export default function Home() {
     name: p.name,
     price: p.price,
     originalPrice: p.originalPrice || undefined,
-    image: p.image || "/objects/public/d9f3ffe9-dc92-4270-a08d-699008125503",
+    image: p.image || "",
     rating: parseFloat(p.rating || "4.5"),
     reviewCount: p.reviewCount || 0,
     badge: i === 0 ? "베스트" : (i === 2 ? "인기" : undefined),
@@ -106,7 +135,7 @@ export default function Home() {
     name: p.name,
     price: p.price,
     originalPrice: p.originalPrice || undefined,
-    image: p.image || "/objects/public/d9f3ffe9-dc92-4270-a08d-699008125503",
+    image: p.image || "",
     rating: parseFloat(p.rating || "4.5"),
     reviewCount: p.reviewCount || 0,
     badge: i === 0 ? "NEW" : undefined,
@@ -117,7 +146,7 @@ export default function Home() {
     name: p.name,
     price: p.price,
     originalPrice: p.originalPrice || undefined,
-    image: p.image || "/objects/public/d9f3ffe9-dc92-4270-a08d-699008125503",
+    image: p.image || "",
     rating: parseFloat(p.rating || "4.5"),
     reviewCount: p.reviewCount || 0,
     badge: i === 0 ? "선물추천" : (i === 2 ? "인기" : undefined),
@@ -139,32 +168,55 @@ export default function Home() {
         <CategoryGrid />
         
         <div className="h-2 bg-gray-50" />
-        
-        <ProductSection 
-          title="베스트 상품" 
-          subtitle="가장 사랑받는 건강식품"
-          products={bestProducts}
-        />
-        
-        <SubscriptionBanner />
-        
-        <ProductSection 
-          title="신상품" 
-          subtitle="새롭게 출시된 건강식품"
-          products={newProducts}
-        />
-        
-        <div className="h-2 bg-gray-50" />
-        
-        <EventSection />
-        
-        <div className="h-2 bg-gray-50" />
-        
-        <ProductSection 
-          title="설 선물 추천" 
-          subtitle="부모님께 드리는 건강 선물"
-          products={giftProducts}
-        />
+
+        {productsLoading || settingsLoading ? (
+          <>
+            <ProductSectionSkeleton
+              title="베스트 상품"
+              subtitle="가장 사랑받는 건강식품"
+            />
+            <SubscriptionBanner />
+            <ProductSectionSkeleton
+              title="신상품"
+              subtitle="새롭게 출시된 건강식품"
+            />
+            <div className="h-2 bg-gray-50" />
+            <EventSection />
+            <div className="h-2 bg-gray-50" />
+            <ProductSectionSkeleton
+              title="설 선물 추천"
+              subtitle="부모님께 드리는 건강 선물"
+            />
+          </>
+        ) : (
+          <>
+            <ProductSection
+              title="베스트 상품"
+              subtitle="가장 사랑받는 건강식품"
+              products={bestProducts}
+            />
+
+            <SubscriptionBanner />
+
+            <ProductSection
+              title="신상품"
+              subtitle="새롭게 출시된 건강식품"
+              products={newProducts}
+            />
+
+            <div className="h-2 bg-gray-50" />
+
+            <EventSection />
+
+            <div className="h-2 bg-gray-50" />
+
+            <ProductSection 
+              title="설 선물 추천" 
+              subtitle="부모님께 드리는 건강 선물"
+              products={giftProducts}
+            />
+          </>
+        )}
         
         <div className="h-2 bg-gray-50" />
         

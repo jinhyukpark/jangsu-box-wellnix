@@ -220,6 +220,19 @@
   }
 }
 
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 1.5s infinite;
+}
+
 /* Sonner toast를 앱 컨테이너 내에 표시 */
 [data-sonner-toaster] {
   --width: 380px !important;
