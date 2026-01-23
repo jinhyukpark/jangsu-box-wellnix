@@ -77,8 +77,8 @@ export function HeroBanner() {
   return (
     <div className="relative overflow-hidden">
       {heroLink ? (
-        <Link href={heroLink}>
-          <a className="block cursor-pointer">{content}</a>
+        <Link href={heroLink} className="block cursor-pointer">
+          {content}
         </Link>
       ) : (
         content

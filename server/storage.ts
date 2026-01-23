@@ -435,13 +435,23 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAllSubscriptions(): Promise<any[]> {
-    const subs = await db.select().from(subscriptions).orderBy(desc(subscriptions.createdAt));
-    const enriched = await Promise.all(subs.map(async (sub) => {
-      const [member] = sub.memberId ? await db.select().from(members).where(eq(members.id, sub.memberId)) : [undefined];
-      const [plan] = sub.planId ? await db.select().from(subscriptionPlans).where(eq(subscriptionPlans.id, sub.planId)) : [undefined];
-      return { ...sub, member, plan };
+    // JOIN을 사용하여 N+1 쿼리 문제 해결
+    const result = await db
+      .select({
+        subscription: subscriptions,
+        member: members,
+        plan: subscriptionPlans,
+      })
+      .from(subscriptions)
+      .leftJoin(members, eq(subscriptions.memberId, members.id))
+      .leftJoin(subscriptionPlans, eq(subscriptions.planId, subscriptionPlans.id))
+      .orderBy(desc(subscriptions.createdAt));
+
+    return result.map(row => ({
+      ...row.subscription,
+      member: row.member || undefined,
+      plan: row.plan || undefined,
     }));
-    return enriched;
   }
 
   // Monthly Boxes
@@ -1044,15 +1054,20 @@ export class DatabaseStorage implements IStorage {
   async getPromotionWithProducts(id: number): Promise<{ promotion: Promotion; products: Product[] } | undefined> {
     const promotion = await this.getPromotion(id);
     if (!promotion) return undefined;
-    
-    const promoProducts = await this.getPromotionProducts(id);
-    const productList: Product[] = [];
-    
-    for (const pp of promoProducts) {
-      const [product] = await db.select().from(products).where(eq(products.id, pp.productId));
-      if (product) productList.push(product);
-    }
-    
+
+    // JOIN을 사용하여 N+1 쿼리 문제 해결
+    const result = await db
+      .select({
+        product: products,
+        displayOrder: promotionProducts.displayOrder,
+      })
+      .from(promotionProducts)
+      .innerJoin(products, eq(promotionProducts.productId, products.id))
+      .where(eq(promotionProducts.promotionId, id))
+      .orderBy(asc(promotionProducts.displayOrder));
+
+    const productList = result.map(row => row.product);
+
     return { promotion, products: productList };
   }
 

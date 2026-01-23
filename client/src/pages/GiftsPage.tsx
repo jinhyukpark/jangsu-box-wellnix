@@ -54,7 +54,7 @@ export default function GiftsPage() {
   const [location, setLocation] = useLocation();
   const scrollRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
-  const prevLocationRef = useRef<string | null>(null);
+  const lastProcessedUrl = useRef<string | null>(null);
 
   const [sortBy, setSortBy] = useState<SortOption>("popular");
   const [showSortDropdown, setShowSortDropdown] = useState(false);
@@ -108,21 +108,54 @@ export default function GiftsPage() {
     },
   });
 
+  // URL에서 카테고리 파라미터를 읽어 초기 선택 상태 설정
   useEffect(() => {
-    if (categories.length > 0 && location !== prevLocationRef.current) {
-      const queryIndex = location.indexOf("?");
-      const search = queryIndex >= 0 ? location.substring(queryIndex) : "";
-      const params = new URLSearchParams(search);
-      const categorySlug = params.get("category");
-      if (categorySlug) {
-        const category = categories.find(c => c.slug === categorySlug);
-        if (category) {
-          setSelectedCategory(category.id);
-        }
+    // categories가 로드되지 않았으면 대기
+    if (categories.length === 0) return;
+
+    // window.location.search 사용 (wouter의 location은 query string 미포함)
+    const fullUrl = location + window.location.search;
+
+    // 이미 처리한 URL이면 스킵
+    if (lastProcessedUrl.current === fullUrl) return;
+    lastProcessedUrl.current = fullUrl;
+
+    const params = new URLSearchParams(window.location.search);
+    const categorySlug = params.get("category");
+
+    console.log("URL category slug:", categorySlug);
+    console.log("Available categories:", categories.map(c => ({ id: c.id, name: c.name, slug: c.slug })));
+
+    if (categorySlug) {
+      const category = categories.find(c => c.slug === categorySlug);
+      console.log("Found category:", category);
+      if (category) {
+        setSelectedCategory(category.id);
+        // 선택된 카테고리로 스크롤
+        setTimeout(() => {
+          const element = document.querySelector(`[data-testid="gift-cat-${categorySlug}"]`);
+          if (element && scrollRef.current) {
+            element.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+          }
+        }, 100);
       }
-      prevLocationRef.current = location;
+    } else {
+      // URL에 category가 없으면 선택 해제
+      setSelectedCategory(null);
     }
   }, [categories, location]);
+
+  // 카테고리 선택 핸들러 - URL도 함께 업데이트
+  const handleCategorySelect = (cat: Category) => {
+    const isSelected = selectedCategory === cat.id;
+    if (isSelected) {
+      setSelectedCategory(null);
+      setLocation("/gifts");
+    } else {
+      setSelectedCategory(cat.id);
+      setLocation(`/gifts?category=${cat.slug}`);
+    }
+  };
 
   const handleWheel = (e: React.WheelEvent) => {
     if (scrollRef.current) {
@@ -224,7 +257,7 @@ export default function GiftsPage() {
               return (
                 <button
                   key={cat.id}
-                  onClick={() => setSelectedCategory(isSelected ? null : cat.id)}
+                  onClick={() => handleCategorySelect(cat)}
                   className={`flex flex-col items-center gap-2 min-w-[60px] transition-all ${
                     isSelected || selectedCategory === null ? "opacity-100" : "opacity-50 hover:opacity-80"
                   }`}
