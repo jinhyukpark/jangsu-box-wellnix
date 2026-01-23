@@ -129,6 +129,8 @@ export default function AdminProductFormPage() {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
   const initialFormRef = useRef<string>("");
+  const markdownImageInputRef = useRef<HTMLInputElement>(null);
+  const [isMarkdownImageUploading, setIsMarkdownImageUploading] = useState(false);
 
   const handleNavigate = (path: string) => {
     if (hasUnsavedChanges) {
@@ -322,6 +324,44 @@ export default function AdminProductFormPage() {
 
   const handleRemoveImage = (index: number) => {
     setProduct({ ...product, images: product.images.filter((_, i) => i !== index) });
+  };
+
+  const handleMarkdownImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    setIsMarkdownImageUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("folder", "product-details");
+      
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        throw new Error("업로드 실패");
+      }
+      
+      const data = await response.json();
+      const imageUrl = data.url;
+      
+      setProduct({
+        ...product,
+        descriptionMarkdown: (product.descriptionMarkdown || "") + `\n\n![이미지](${imageUrl})\n`
+      });
+      
+      toast({ title: "이미지가 추가되었습니다" });
+    } catch (error) {
+      toast({ title: "이미지 업로드 실패", variant: "destructive" });
+    } finally {
+      setIsMarkdownImageUploading(false);
+      if (markdownImageInputRef.current) {
+        markdownImageInputRef.current.value = "";
+      }
+    }
   };
 
   const handleReplySubmit = (reviewId: number) => {
@@ -713,16 +753,21 @@ export default function AdminProductFormPage() {
                 이미지, 동영상, 링크를 포함한 상세 설명을 작성하세요. 마크다운 문법을 지원합니다.
               </p>
               <div className="mb-3 flex gap-2 flex-wrap">
-                <Button variant="outline" size="sm" onClick={() => {
-                  const url = prompt("이미지 URL을 입력하세요:");
-                  if (url) {
-                    setProduct({
-                      ...product,
-                      descriptionMarkdown: (product.descriptionMarkdown || "") + `\n\n![이미지 설명](${url})\n`
-                    });
-                  }
-                }}>
-                  <Image className="w-4 h-4 mr-1" /> 이미지 추가
+                <input
+                  ref={markdownImageInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleMarkdownImageUpload}
+                  className="hidden"
+                />
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => markdownImageInputRef.current?.click()}
+                  disabled={isMarkdownImageUploading}
+                >
+                  <Image className="w-4 h-4 mr-1" /> 
+                  {isMarkdownImageUploading ? "업로드 중..." : "이미지 추가"}
                 </Button>
                 <Button variant="outline" size="sm" onClick={() => {
                   const url = prompt("동영상 URL을 입력하세요 (YouTube 등):");
