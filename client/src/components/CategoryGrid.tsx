@@ -3,16 +3,16 @@ import { useLocation } from "wouter";
 import { images } from "@/lib/images";
 
 const categories = [
-  { image: images.koreanRedGinsengRoots, label: "홍삼" },
-  { image: images.heartHealthSupplements, label: "혈압건강" },
-  { image: images.vitaminSupplementsPills, label: "영양제" },
-  { image: images.freshFruitGiftBasket, label: "과일선물" },
-  { image: images.luxuryCosmeticsSkincareSet, label: "화장품" },
-  { image: images.sleepHealthSupplements, label: "수면건강" },
-  { image: images.koreanTeaSet, label: "차/음료" },
-  { image: images.jointHealthSupplements, label: "관절건강" },
-  { image: images.cuteDogAndCatTogether, label: "반려동물" },
-  { image: images.dailyToiletriesProducts, label: "생활용품" },
+  { image: images.koreanRedGinsengRoots, label: "홍삼", slug: "hongsam" },
+  { image: images.heartHealthSupplements, label: "혈압건강", slug: "blood-pressure" },
+  { image: images.vitaminSupplementsPills, label: "영양제", slug: "supplements" },
+  { image: images.freshFruitGiftBasket, label: "과일선물", slug: "fruit-gift" },
+  { image: images.luxuryCosmeticsSkincareSet, label: "화장품", slug: "cosmetics" },
+  { image: images.sleepHealthSupplements, label: "수면건강", slug: "sleep-health" },
+  { image: images.koreanTeaSet, label: "차/음료", slug: "tea-drinks" },
+  { image: images.jointHealthSupplements, label: "관절건강", slug: "joint-health" },
+  { image: images.cuteDogAndCatTogether, label: "반려동물", slug: "pets" },
+  { image: images.dailyToiletriesProducts, label: "생활용품", slug: "living-goods" },
 ];
 
 // 개별 카테고리 아이템 컴포넌트 (각각 스켈레톤 처리)
@@ -51,8 +51,8 @@ function CategoryItem({ image, label, onClick }: { image: string; label: string;
 export function CategoryGrid() {
   const [, setLocation] = useLocation();
 
-  const handleCategoryClick = () => {
-    setLocation("/gifts");
+  const handleCategoryClick = (slug: string) => {
+    setLocation(`/gifts?category=${slug}`);
   };
 
   return (
@@ -63,7 +63,7 @@ export function CategoryGrid() {
             key={cat.label}
             image={cat.image}
             label={cat.label}
-            onClick={handleCategoryClick}
+            onClick={() => handleCategoryClick(cat.slug)}
           />
         ))}
       </div>

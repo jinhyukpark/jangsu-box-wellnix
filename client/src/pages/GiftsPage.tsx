@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Filter, ChevronDown, ArrowLeft, ShoppingCart, Check, Search, X } from "lucide-react";
 import { useLocation, Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
@@ -51,9 +51,10 @@ const sortOptions: { value: SortOption; label: string }[] = [
 
 export default function GiftsPage() {
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   const scrollRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
+  const prevLocationRef = useRef<string | null>(null);
 
   const [sortBy, setSortBy] = useState<SortOption>("popular");
   const [showSortDropdown, setShowSortDropdown] = useState(false);
@@ -106,6 +107,22 @@ export default function GiftsPage() {
       return res.json();
     },
   });
+
+  useEffect(() => {
+    if (categories.length > 0 && location !== prevLocationRef.current) {
+      const queryIndex = location.indexOf("?");
+      const search = queryIndex >= 0 ? location.substring(queryIndex) : "";
+      const params = new URLSearchParams(search);
+      const categorySlug = params.get("category");
+      if (categorySlug) {
+        const category = categories.find(c => c.slug === categorySlug);
+        if (category) {
+          setSelectedCategory(category.id);
+        }
+      }
+      prevLocationRef.current = location;
+    }
+  }, [categories, location]);
 
   const handleWheel = (e: React.WheelEvent) => {
     if (scrollRef.current) {
