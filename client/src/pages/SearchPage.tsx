@@ -1,5 +1,6 @@
-import { Search, X, TrendingUp, Clock } from "lucide-react";
+import { Search, X, TrendingUp, Clock, ArrowLeft } from "lucide-react";
 import { useState } from "react";
+import { useLocation } from "wouter";
 import { BottomNav } from "@/components/BottomNav";
 import { PromoSidebar } from "@/components/PromoSidebar";
 
@@ -8,6 +9,7 @@ const recentSearches = ["6년근 홍삼", "부모님 선물", "비타민D"];
 
 export default function SearchPage() {
   const [query, setQuery] = useState("");
+  const [, setLocation] = useLocation();
   
   return (
     <div className="min-h-screen bg-background flex justify-center">
@@ -16,6 +18,13 @@ export default function SearchPage() {
       <main className="w-full max-w-[430px] bg-white h-screen flex flex-col shadow-xl overflow-hidden">
         <div className="sticky top-0 z-50 bg-white border-b border-gray-100 p-4">
           <div className="flex items-center gap-3">
+            <button 
+              onClick={() => setLocation("/")}
+              className="p-1 hover:bg-gray-100 rounded-full"
+              data-testid="back-btn"
+            >
+              <ArrowLeft className="w-5 h-5 text-gray-600" />
+            </button>
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
