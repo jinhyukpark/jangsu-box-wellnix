@@ -9,14 +9,15 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 
 const categoryImageMap: Record<string, string> = {
-  "hongsam": images.koreanRedGinsengRoots,
-  "blood-pressure": images.heartHealthSupplements,
-  "supplements": images.vitaminSupplementsPills,
+  "ginseng": images.koreanRedGinsengRoots,
+  "blood": images.heartHealthSupplements,
+  "vitamins": images.vitaminSupplementsPills,
   "fruit-gift": images.freshFruitGiftBasket,
   "cosmetics": images.luxuryCosmeticsSkincareSet,
   "sleep-health": images.sleepHealthSupplements,
-  "tea-drinks": images.koreanTeaSet,
-  "joint-health": images.jointHealthSupplements,
+  "juice": images.koreanTeaSet,
+  "joint": images.jointHealthSupplements,
+  "probiotics": images.vitaminSupplementsPills,
   "pets": images.cuteDogAndCatTogether,
   "living-goods": images.dailyToiletriesProducts,
 };
