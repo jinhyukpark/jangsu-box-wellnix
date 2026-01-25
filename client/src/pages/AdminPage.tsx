@@ -635,6 +635,7 @@ export default function AdminPage() {
   const [productCategoryFilter, setProductCategoryFilter] = useState("all");
   const [productSortField, setProductSortField] = useState<string>("createdAt");
   const [productSortOrder, setProductSortOrder] = useState<"asc" | "desc">("desc");
+  const [selectedProductIds, setSelectedProductIds] = useState<Set<number>>(new Set());
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [productForm, setProductForm] = useState<ProductFormData>({
@@ -1377,13 +1378,14 @@ export default function AdminPage() {
         
         const getProductStatusLabel = (status: string | null | undefined) => {
           if (status === "active") return "판매중";
-          if (status === "pending") return "검수중";
-          if (status === "inactive") return "대기중";
+          if (status === "inactive") return "판매중지";
+          if (status === "soldout") return "품절";
           return status || "-";
         };
 
         const getProductStatusStyle = (status: string | null | undefined) => {
           if (status === "active") return "bg-green-100 text-green-700";
+          if (status === "soldout") return "bg-red-100 text-red-700";
           if (status === "pending") return "bg-yellow-100 text-yellow-700";
           if (status === "inactive") return "bg-gray-100 text-gray-600";
           return "bg-gray-100 text-gray-600";
@@ -1518,6 +1520,80 @@ export default function AdminPage() {
           }
         };
 
+        const handleSelectAll = (checked: boolean) => {
+          if (checked) {
+            setSelectedProductIds(new Set(filteredProducts.map(p => p.id)));
+          } else {
+            setSelectedProductIds(new Set());
+          }
+        };
+
+        const handleSelectProduct = (productId: number, checked: boolean) => {
+          const newSelected = new Set(selectedProductIds);
+          if (checked) {
+            newSelected.add(productId);
+          } else {
+            newSelected.delete(productId);
+          }
+          setSelectedProductIds(newSelected);
+        };
+
+        const handleBulkDelete = async () => {
+          if (selectedProductIds.size === 0) return;
+          if (!window.confirm(`선택한 ${selectedProductIds.size}개의 상품을 삭제하시겠습니까?`)) return;
+          
+          try {
+            const res = await fetch("/api/admin/products/bulk-delete", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              credentials: "include",
+              body: JSON.stringify({ ids: Array.from(selectedProductIds) }),
+            });
+            if (!res.ok) throw new Error("Failed to delete products");
+            
+            queryClient.invalidateQueries({ queryKey: ["admin", "products"] });
+            setSelectedProductIds(new Set());
+            toast({
+              title: "삭제 완료",
+              description: `${selectedProductIds.size}개의 상품이 삭제되었습니다.`,
+            });
+          } catch (error) {
+            toast({
+              variant: "destructive",
+              title: "삭제 실패",
+              description: "다시 시도해주세요.",
+            });
+          }
+        };
+
+        const handleBulkStatusChange = async (newStatus: string) => {
+          if (selectedProductIds.size === 0) return;
+          
+          try {
+            const res = await fetch("/api/admin/products/bulk-status", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              credentials: "include",
+              body: JSON.stringify({ ids: Array.from(selectedProductIds), status: newStatus }),
+            });
+            if (!res.ok) throw new Error("Failed to update products status");
+            
+            queryClient.invalidateQueries({ queryKey: ["admin", "products"] });
+            setSelectedProductIds(new Set());
+            const statusLabel = newStatus === "active" ? "판매중" : newStatus === "inactive" ? "판매중지" : "품절";
+            toast({
+              title: "상태 변경 완료",
+              description: `${selectedProductIds.size}개의 상품이 "${statusLabel}"(으)로 변경되었습니다.`,
+            });
+          } catch (error) {
+            toast({
+              variant: "destructive",
+              title: "상태 변경 실패",
+              description: "다시 시도해주세요.",
+            });
+          }
+        };
+
         const openEditModal = (product: Product) => {
           setEditingProduct(product);
           setProductForm({
@@ -1566,8 +1642,8 @@ export default function AdminPage() {
                       <SelectContent>
                         <SelectItem value="all">전체</SelectItem>
                         <SelectItem value="active">판매중</SelectItem>
-                        <SelectItem value="pending">검수중</SelectItem>
-                        <SelectItem value="inactive">대기중</SelectItem>
+                        <SelectItem value="inactive">판매중지</SelectItem>
+                        <SelectItem value="soldout">품절</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -1610,10 +1686,60 @@ export default function AdminPage() {
                   </div>
                 </div>
 
+                {selectedProductIds.size > 0 && (
+                  <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-center justify-between">
+                    <span className="text-sm text-blue-700 font-medium">
+                      {selectedProductIds.size}개 상품 선택됨
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="outline" size="sm" className="text-blue-700 border-blue-300 hover:bg-blue-100">
+                            상태 변경
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                          <DropdownMenuItem onClick={() => handleBulkStatusChange("active")} className="text-green-700">
+                            판매중
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleBulkStatusChange("inactive")} className="text-gray-600">
+                            판매중지
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleBulkStatusChange("soldout")} className="text-red-600">
+                            품절
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="text-red-600 border-red-300 hover:bg-red-50"
+                        onClick={handleBulkDelete}
+                      >
+                        삭제
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => setSelectedProductIds(new Set())}
+                      >
+                        선택 해제
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
                 <div className="bg-white rounded-lg border border-gray-200 overflow-hidden overflow-x-auto">
-                  <table className="w-full min-w-[900px]">
+                  <table className="w-full min-w-[950px]">
                     <thead className="bg-gray-50 border-b border-gray-200">
                       <tr>
+                        <th className="text-left px-3 py-3 text-sm font-medium text-gray-600 w-10">
+                          <Checkbox 
+                            checked={filteredProducts.length > 0 && selectedProductIds.size === filteredProducts.length}
+                            onCheckedChange={(checked) => handleSelectAll(!!checked)}
+                            data-testid="checkbox-select-all-products"
+                          />
+                        </th>
                         <th 
                           className="text-left px-4 py-3 text-sm font-medium text-gray-600 cursor-pointer hover:bg-gray-100 select-none"
                           onClick={() => handleProductSort("name")}
@@ -1679,7 +1805,14 @@ export default function AdminPage() {
                         const statusLabel = getProductStatusLabel(product.status);
                         const statusStyle = getProductStatusStyle(product.status);
                         return (
-                          <tr key={product.id} className="border-b border-gray-100 hover:bg-gray-50">
+                          <tr key={product.id} className={`border-b border-gray-100 hover:bg-gray-50 ${selectedProductIds.has(product.id) ? 'bg-blue-50' : ''}`}>
+                            <td className="px-3 py-3">
+                              <Checkbox 
+                                checked={selectedProductIds.has(product.id)}
+                                onCheckedChange={(checked) => handleSelectProduct(product.id, !!checked)}
+                                data-testid={`checkbox-product-${product.id}`}
+                              />
+                            </td>
                             <td className="px-4 py-3 text-sm text-gray-900">{product.name}</td>
                             <td className="px-4 py-3 text-sm text-gray-600">{getCategoryName(product.categoryId)}</td>
                             <td className="px-4 py-3 text-sm text-gray-900">{product.price.toLocaleString()}원</td>
@@ -1702,16 +1835,16 @@ export default function AdminPage() {
                                 판매중
                               </DropdownMenuItem>
                               <DropdownMenuItem 
-                                onClick={() => handleStatusChange(product.id, "pending")}
-                                className="text-yellow-700"
-                              >
-                                검수중
-                              </DropdownMenuItem>
-                              <DropdownMenuItem 
                                 onClick={() => handleStatusChange(product.id, "inactive")}
                                 className="text-gray-600"
                               >
-                                대기중
+                                판매중지
+                              </DropdownMenuItem>
+                              <DropdownMenuItem 
+                                onClick={() => handleStatusChange(product.id, "soldout")}
+                                className="text-red-600"
+                              >
+                                품절
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
@@ -1736,7 +1869,7 @@ export default function AdminPage() {
                   })}
                   {filteredProducts.length === 0 && (
                     <tr>
-                      <td colSpan={8} className="px-4 py-8 text-center text-gray-500">
+                      <td colSpan={9} className="px-4 py-8 text-center text-gray-500">
                         검색 결과가 없습니다.
                       </td>
                     </tr>
@@ -1836,8 +1969,8 @@ export default function AdminPage() {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="active">판매중</SelectItem>
-                          <SelectItem value="pending">검수중</SelectItem>
-                          <SelectItem value="inactive">대기중</SelectItem>
+                          <SelectItem value="inactive">판매중지</SelectItem>
+                          <SelectItem value="soldout">품절</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>

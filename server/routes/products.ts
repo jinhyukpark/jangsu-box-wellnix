@@ -97,4 +97,35 @@ router.delete("/api/admin/products/:id", requireAdmin, async (req: Request, res:
   res.json({ success: true });
 });
 
+router.post("/api/admin/products/bulk-delete", requireAdmin, async (req: Request, res: Response) => {
+  try {
+    const { ids } = req.body;
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ error: "삭제할 상품을 선택해주세요" });
+    }
+    await storage.deleteProductsBulk(ids);
+    res.json({ success: true, deletedCount: ids.length });
+  } catch (error) {
+    console.error("Bulk delete error:", error);
+    res.status(500).json({ error: "상품 삭제에 실패했습니다" });
+  }
+});
+
+router.post("/api/admin/products/bulk-status", requireAdmin, async (req: Request, res: Response) => {
+  try {
+    const { ids, status } = req.body;
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ error: "변경할 상품을 선택해주세요" });
+    }
+    if (!status || !["active", "inactive", "soldout"].includes(status)) {
+      return res.status(400).json({ error: "유효한 상태를 선택해주세요" });
+    }
+    await storage.updateProductsStatusBulk(ids, status);
+    res.json({ success: true, updatedCount: ids.length });
+  } catch (error) {
+    console.error("Bulk status update error:", error);
+    res.status(500).json({ error: "상품 상태 변경에 실패했습니다" });
+  }
+});
+
 export default router;

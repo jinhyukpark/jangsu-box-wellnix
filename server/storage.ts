@@ -1,5 +1,5 @@
 import { db } from "./db";
-import { eq, and, desc, asc, sql, ilike, gte, lte } from "drizzle-orm";
+import { eq, and, desc, asc, sql, ilike, gte, lte, inArray } from "drizzle-orm";
 import {
   type Member, type InsertMember, members,
   type Admin, type InsertAdmin, admins,
@@ -61,6 +61,8 @@ export interface IStorage {
   createProduct(product: InsertProduct): Promise<Product>;
   updateProduct(id: number, data: Partial<InsertProduct>): Promise<Product | undefined>;
   deleteProduct(id: number): Promise<boolean>;
+  deleteProductsBulk(ids: number[]): Promise<boolean>;
+  updateProductsStatusBulk(ids: number[], status: string): Promise<boolean>;
   getAllProducts(categoryId?: number): Promise<Product[]>;
   getAllProductsAdmin(categoryId?: number): Promise<Product[]>;
   searchProducts(query: string): Promise<Product[]>;
@@ -354,6 +356,20 @@ export class DatabaseStorage implements IStorage {
 
   async deleteProduct(id: number): Promise<boolean> {
     await db.delete(products).where(eq(products.id, id));
+    return true;
+  }
+
+  async deleteProductsBulk(ids: number[]): Promise<boolean> {
+    if (ids.length === 0) return true;
+    await db.delete(products).where(inArray(products.id, ids));
+    return true;
+  }
+
+  async updateProductsStatusBulk(ids: number[], status: string): Promise<boolean> {
+    if (ids.length === 0) return true;
+    await db.update(products)
+      .set({ status, updatedAt: new Date() })
+      .where(inArray(products.id, ids));
     return true;
   }
 
