@@ -102,7 +102,7 @@ export interface IStorage {
   updateEventParticipant(id: number, data: Partial<InsertEventParticipant>): Promise<EventParticipant | undefined>;
 
   // Cart
-  getCartItems(memberId: number): Promise<CartItem[]>;
+  getCartItems(memberId: number): Promise<(CartItem & { product: Product | null })[]>;
   addToCart(item: InsertCartItem): Promise<CartItem>;
   updateCartItem(id: number, quantity: number): Promise<CartItem | undefined>;
   removeFromCart(id: number): Promise<boolean>;
@@ -527,8 +527,23 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Cart
-  async getCartItems(memberId: number): Promise<CartItem[]> {
-    return db.select().from(cartItems).where(eq(cartItems.memberId, memberId)).orderBy(desc(cartItems.createdAt));
+  async getCartItems(memberId: number): Promise<(CartItem & { product: Product | null })[]> {
+    const items = await db
+      .select({
+        id: cartItems.id,
+        memberId: cartItems.memberId,
+        productId: cartItems.productId,
+        quantity: cartItems.quantity,
+        options: cartItems.options,
+        createdAt: cartItems.createdAt,
+        updatedAt: cartItems.updatedAt,
+        product: products,
+      })
+      .from(cartItems)
+      .leftJoin(products, eq(cartItems.productId, products.id))
+      .where(eq(cartItems.memberId, memberId))
+      .orderBy(desc(cartItems.createdAt));
+    return items;
   }
 
   async addToCart(item: InsertCartItem): Promise<CartItem> {
